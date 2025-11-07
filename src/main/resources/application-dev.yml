@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/aerotickets?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${DB_USER:root}
+    # 👇 fallback por si no se cargara la variable desde el .env (doble seguridad)
+    password: ${DB_PASSWORD:nomeselacontra}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  flyway:
+    enabled: false  # en dev lo desactivamos
+
+# JWT: valor por defecto robusto SOLO para dev (si faltara la var)
+jwt:
+  secret: ${JWT_SECRET:dev_secret_esta_es_una_clave_larga_solo_para_desarrollo_1234567890}
+  expiration-minutes: ${JWT_EXPIRATION_MINUTES:120}
+
+# CORS para frontend local
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}

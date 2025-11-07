@@ -23,11 +23,14 @@ import java.io.IOException;
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private JwtService jwtService;
+    private final JwtService jwtService;
+    private final CustomUserDetailsService userDetailsService;
 
     @Autowired
-    private CustomUserDetailsService userDetailsService;
+    public JwtAuthFilter(JwtService jwtService, CustomUserDetailsService userDetailsService) {
+        this.jwtService = jwtService;
+        this.userDetailsService = userDetailsService;
+    }
 
     @Override
     protected void doFilterInternal(
@@ -36,17 +39,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             @NonNull FilterChain chain
     ) throws ServletException, IOException {
 
-    	// Antes:
-    	// String path = request.getRequestURI();
+        String path = request.getServletPath();
 
-    	// Después:
-    	String path = request.getServletPath();
-
-    	// Y ajusta el if de rutas públicas:
-    	if (path.startsWith("/auth") || path.startsWith("/swagger") || path.startsWith("/v3/api-docs")) {
-    	    chain.doFilter(request, response);
-    	    return;
-    	}
+        // Allow unauthenticated routes
+        if (path.startsWith("/auth") || path.startsWith("/swagger") || path.startsWith("/v3/api-docs")) {
+            chain.doFilter(request, response);
+            return;
+        }
 
         final String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -60,15 +59,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         try {
             userEmail = jwtService.extractUsername(token);
         } catch (ExpiredJwtException ex) {
-            log.warn("JWT expirado: {}", ex.getMessage());
+            log.warn("Expired JWT: {}", ex.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         } catch (SignatureException ex) {
-            log.warn("Firma JWT inválida: {}", ex.getMessage());
+            log.warn("Invalid JWT signature: {}", ex.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         } catch (Exception ex) {
-            log.warn("Error parseando JWT: {}", ex.getMessage());
+            log.warn("Error parsing JWT: {}", ex.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }

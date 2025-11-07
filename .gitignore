@@ -1,1 +1,78 @@
-/target/
+# =========================
+# ☕ JAVA / MAVEN
+# =========================
+target/
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/timing.properties
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# =========================
+# 💻 IDEs (IntelliJ, Eclipse, VSCode)
+# =========================
+# IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# =========================
+# 🧩 DEPENDENCIAS / BINARIOS
+# =========================
+*.class
+*.jar
+*.war
+*.ear
+*.log
+*.tmp
+hs_err_pid*
+
+# =========================
+# 🧰 SISTEMA OPERATIVO
+# =========================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# =========================
+# 🧪 TESTS / BUILDS LOCALES
+# =========================
+out/
+bin/
+build/
+dist/
+logs/
+*.out
+*.gz
+nohup.out
+
+# =========================
+# 🔐 VARIABLES Y SECRETOS
+# =========================
+.env
+*.env.local
+*.env.*.local
+.env.dev.properties
+
+# =========================
+# 🐳 DOCKER (si llegas a usarlo)
+# =========================
+/docker-compose.override.yml
+/.env.docker
+
+# =========================
+# ⚙️ SPRING / TOOLS
+# =========================
+spring.log

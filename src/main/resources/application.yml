@@ -1,33 +1,40 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
   servlet:
     context-path: /api
 
 spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/aerotickets?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Bogota
-    username: root
-    password: nomeselacontra
-    driver-class-name: com.mysql.cj.jdbc.Driver
+  application:
+    name: Aerotickets
+
+  # 👇 IMPORTA variables desde archivos .env*.properties en la RAÍZ del proyecto
+  #    - Carga .env.dev.properties cuando el perfil activo es "dev"
+  #    - Carga .env.properties si existe (común para todos los perfiles)
+  config:
+    import: >
+      optional:file:.env.${spring.profiles.active}.properties,
+      optional:file:.env.properties
 
   jpa:
-    hibernate:
-      ddl-auto: update
     open-in-view: false
     show-sql: false
-    properties:
-      hibernate:
-        format_sql: true
 
-  flyway:
-    enabled: false
+# =========================
+# 🔐 JWT (lo lee JwtService)
+# =========================
+jwt:
+  secret: ${JWT_SECRET}
+  expiration-minutes: ${JWT_EXPIRATION_MINUTES:120}
 
-external:
-  apis:
-    airlabs:
-      base-url: "https://airlabs.co/api/v9"
-      api-key: "${AIRLABS_API_KEY}"
+# =========================
+# 🌐 CORS (lo usa SecurityConfig)
+# =========================
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
 
+# =========================
+# 📝 LOGGING
+# =========================
 logging:
   file:
     name: logs/aerotickets.log
@@ -41,16 +48,27 @@ logging:
     console: "%clr(%d{yyyy-MM-dd HH:mm:ss}){faint} | %clr(%-5level){cyan} | %clr(%logger{36}){blue} | %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} | %-5level | %logger{36} | %msg%n"
 
+# =========================
+# 📊 ACTUATOR (health)
+# =========================
 management:
   endpoints:
     web:
+      base-path: /actuator
       exposure:
         include: health,info
   endpoint:
     health:
       show-details: when_authorized
+  health:
+    defaults:
+      enabled: true
 
-vueler:
-  jwt:
-    secret: "ClaveUltraSeguraAeroticketsJWT_2025_Con32Caracteres_O_Mas"
-    expiration-minutes: 120
+# =========================
+# 📡 EXTERNAL APIs (opcional)
+# =========================
+external:
+  apis:
+    airlabs:
+      base-url: ${AIRLABS_BASE_URL:https://airlabs.co/api/v9}
+      api-key: ${AIRLABS_API_KEY:}

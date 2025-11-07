@@ -1,8 +1,8 @@
 package com.aerotickets;
 
-import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
@@ -10,26 +10,22 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class App {
 
     public static void main(String[] args) {
-        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+        var app = new SpringApplication(App.class);
+        var ctx = app.run(args);
 
-        String dbUrl = dotenv.get("DB_URL");
-        String environment = dotenv.get("APP_ENV", "development");
+        ConfigurableEnvironment env = (ConfigurableEnvironment) ctx.getEnvironment();
 
-        if (dbUrl != null) System.setProperty("DB_URL", dbUrl);
+        String appEnv = env.getProperty("SPRING_PROFILES_ACTIVE", "dev");
+        String dbUrl  = env.getProperty("DB_URL",
+                "jdbc:mysql://localhost:3306/aerotickets?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Bogota");
+        String port   = env.getProperty("PORT", "8080");
 
         System.out.println("\n==============================================");
-        System.out.println("Iniciando Aerotickets Backend");
-        System.out.println("Entorno: " + environment.toUpperCase());
-        System.out.println("Base de datos: " + (dbUrl != null ? dbUrl : "jdbc:mysql://localhost:3306/aerotickets?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"));
+        System.out.println(" Aerotickets Backend iniciado");
+        System.out.println(" Entorno: " + appEnv.toUpperCase());
+        System.out.println(" Puerto : " + port);
+        System.out.println(" DB URL : " + dbUrl);
+        System.out.println(" Logs   : logs/aerotickets.log");
         System.out.println("==============================================\n");
-
-        try {
-            SpringApplication.run(App.class, args);
-            System.out.println("Servidor iniciado en http://localhost:8080");
-            System.out.println("Logs activos en: logs/aerotickets.log\n");
-        } catch (Exception e) {
-            System.err.println("Error crítico al iniciar la aplicación:");
-            e.printStackTrace();
-        }
     }
 }

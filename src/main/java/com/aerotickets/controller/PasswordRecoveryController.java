@@ -23,24 +23,19 @@ public class PasswordRecoveryController {
         this.jwtUtil = jwtUtil;
     }
 
-    // 📧 Enviar enlace temporal de recuperación
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> body) {
         String email = body.get("email");
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("No existe un usuario con ese correo"));
+                .orElseThrow(() -> new IllegalArgumentException("User not found for that email"));
 
-        // Generar token de recuperación válido por 10 minutos
         String token = jwtUtil.generateTemporaryToken(user.getEmail(), 10);
+        System.out.println("Password reset link: http://localhost:5173/reset-password?token=" + token);
 
-        // En un sistema real aquí se enviaría un correo, por ahora imprimimos el enlace
-        System.out.println("🔗 Enlace de recuperación: http://localhost:5173/reset-password?token=" + token);
-
-        return ResponseEntity.ok("Se ha enviado un enlace de recuperación a tu correo electrónico.");
+        return ResponseEntity.ok("A recovery link has been sent to your email address.");
     }
 
-    // 🔒 Restablecer contraseña usando token temporal
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody Map<String, String> body) {
         String token = body.get("token");
@@ -49,11 +44,11 @@ public class PasswordRecoveryController {
         String email = jwtUtil.validateTemporaryToken(token);
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Token inválido o expirado"));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid or expired token"));
 
         user.setPasswordHash(encoder.encode(newPassword));
         userRepository.save(user);
 
-        return ResponseEntity.ok("Contraseña actualizada exitosamente.");
+        return ResponseEntity.ok("Password updated successfully.");
     }
 }
