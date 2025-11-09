@@ -9,6 +9,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+import java.util.Map;
+
 @SpringBootApplication
 @EnableScheduling
 public class App {
@@ -33,20 +35,20 @@ public class App {
     }
 
     /**
-     * ✅ Muestra todos los endpoints REST registrados en la aplicación
-     * (para confirmar que los controladores están activos).
+     * ✅ Muestra todos los endpoints REST registrados (sin romper por múltiples beans).
      */
     @Bean
     public CommandLineRunner logAllEndpoints(ApplicationContext ctx) {
         return args -> {
             System.out.println("========= ENDPOINTS REGISTRADOS =========");
             try {
-                // Usa específicamente el handler de controladores REST
-                RequestMappingHandlerMapping mapping =
-                        (RequestMappingHandlerMapping) ctx.getBean("requestMappingHandlerMapping");
+                Map<String, RequestMappingHandlerMapping> mappings =
+                        ctx.getBeansOfType(RequestMappingHandlerMapping.class);
 
-                mapping.getHandlerMethods().forEach((key, value) -> {
-                    System.out.println(key + " -> " + value);
+                mappings.forEach((name, mapping) -> {
+                    mapping.getHandlerMethods().forEach((key, value) -> {
+                        System.out.println("[" + name + "] " + key + " -> " + value);
+                    });
                 });
             } catch (Exception e) {
                 System.out.println("⚠️ No se pudo obtener la lista de endpoints: " + e.getMessage());
