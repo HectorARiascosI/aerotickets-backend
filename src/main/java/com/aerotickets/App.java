@@ -33,15 +33,18 @@ public class App {
     }
 
     /**
-     * ✅ Muestra todos los endpoints HTTP registrados al iniciar la aplicación.
-     * Esto es útil para confirmar que los controladores y rutas se cargaron correctamente.
+     * ✅ Muestra todos los endpoints REST registrados en la aplicación
+     * (para confirmar que los controladores están activos).
      */
     @Bean
     public CommandLineRunner logAllEndpoints(ApplicationContext ctx) {
         return args -> {
             System.out.println("========= ENDPOINTS REGISTRADOS =========");
             try {
-                RequestMappingHandlerMapping mapping = ctx.getBean(RequestMappingHandlerMapping.class);
+                // Usa específicamente el handler de controladores REST
+                RequestMappingHandlerMapping mapping =
+                        (RequestMappingHandlerMapping) ctx.getBean("requestMappingHandlerMapping");
+
                 mapping.getHandlerMethods().forEach((key, value) -> {
                     System.out.println(key + " -> " + value);
                 });
