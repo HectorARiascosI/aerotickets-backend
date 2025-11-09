@@ -2,16 +2,16 @@ package com.aerotickets.service;
 
 import com.aerotickets.entity.User;
 import com.aerotickets.repository.UserRepository;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder){
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -19,13 +19,15 @@ public class UserService {
     @Transactional
     public User register(String fullName, String email, String rawPassword) {
         if (userRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("El correo ya está registrado");
+            throw new IllegalArgumentException("Email is already registered");
         }
-        User u = User.builder()
+
+        User user = User.builder()
                 .fullName(fullName)
                 .email(email)
                 .passwordHash(passwordEncoder.encode(rawPassword))
                 .build();
-        return userRepository.save(u);
+
+        return userRepository.save(user);
     }
 }
