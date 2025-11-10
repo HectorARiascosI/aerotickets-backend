@@ -1,0 +1,76 @@
+name: Keep Backend Awake
+
+on:
+  schedule:
+    - cron: "*/17 * * * *"
+    - cron: "7-59/23 * * * *"
+    - cron: "13-59/29 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Random ping to Render
+        env:
+          BASE: https://aerotickets-api.onrender.com
+        run: |
+          jitter=$((RANDOM % 420))
+          sleep "$jitter"
+
+          urls=(
+            "$BASE/health"
+            "$BASE/api/catalog/airlines/co"
+            "$BASE/api/catalog/airports/co"
+            "$BASE/api/flights"
+            "$BASE/hola"
+            "$BASE/live/airports/search?q=bog"
+          )
+
+          n=$(( (RANDOM % 3) + 2 ))
+          selected=()
+          for _ in $(seq 1 $n); do
+            pick=${urls[$RANDOM % ${#urls[@]}]}
+            selected+=("$pick?ts=$(date +%s)&r=$RANDOM")
+          done
+
+          uaList=(
+            "Mozilla/5.0"
+            "curl/8.4.0"
+            "HealthCheck/1.0"
+          )
+          ua=${uaList[$RANDOM % ${#uaList[@]}]}
+
+          ok=0
+          for u in "${selected[@]}"; do
+            for method in GET HEAD; do
+              if curl -sS -A "$ua" \
+                   -H "Cache-Control: no-cache" \
+                   --http1.1 \
+                   --connect-timeout 8 \
+                   --max-time 20 \
+                   --retry 3 \
+                   --retry-delay 2 \
+                   --retry-all-errors \
+                   --fail -X "$method" "$u" > /dev/null; then
+                echo "ok $method $u"
+                ok=1
+              else
+                echo "fail $method $u"
+              fi
+            done
+          done
+
+          if [ "$ok" -eq 0 ]; then
+            for backoff in 5 10 20; do
+              u="${urls[$RANDOM % ${#urls[@]}]}?retry=$(date +%s)&r=$RANDOM"
+              if curl -sS -A "$ua" --http1.1 --connect-timeout 8 --max-time 20 --fail "$u" > /dev/null; then
+                echo "recovered $u"
+                ok=1; break
+              fi
+              sleep "$backoff"
+            done
+          fi
+
+          [ "$ok" -eq 1 ]
