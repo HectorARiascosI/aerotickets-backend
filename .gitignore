@@ -1,78 +1,28 @@
-# =========================
-# ☕ JAVA / MAVEN
-# =========================
+# Build / Java
 target/
-!.mvn/wrapper/maven-wrapper.jar
-.mvn/timing.properties
-pom.xml.tag
-pom.xml.releaseBackup
-pom.xml.versionsBackup
-pom.xml.next
-release.properties
+out/
+*.class
+*.log
+logs/
+hs_err_pid*.log
 
-# =========================
-# 💻 IDEs (IntelliJ, Eclipse, VSCode)
-# =========================
-# IntelliJ
+# IDEs
 .idea/
 *.iml
-*.ipr
-*.iws
-
-# Eclipse
-.classpath
 .project
+.classpath
+.factorypath
 .settings/
-
-# VS Code
 .vscode/
 
-# =========================
-# 🧩 DEPENDENCIAS / BINARIOS
-# =========================
-*.class
-*.jar
-*.war
-*.ear
-*.log
-*.tmp
-hs_err_pid*
-
-# =========================
-# 🧰 SISTEMA OPERATIVO
-# =========================
+# OS
 .DS_Store
 Thumbs.db
-*.swp
-*.swo
 
-# =========================
-# 🧪 TESTS / BUILDS LOCALES
-# =========================
-out/
-bin/
-build/
-dist/
-logs/
-*.out
-*.gz
-nohup.out
-
-# =========================
-# 🔐 VARIABLES Y SECRETOS
-# =========================
+# Env & secrets
 .env
-*.env.local
-*.env.*.local
-.env.dev.properties
+.env.*
+!*.example
 
-# =========================
-# 🐳 DOCKER (si llegas a usarlo)
-# =========================
-/docker-compose.override.yml
-/.env.docker
-
-# =========================
-# ⚙️ SPRING / TOOLS
-# =========================
-spring.log
+# Docker artifacts
+*.pid
