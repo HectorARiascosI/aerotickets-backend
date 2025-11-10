@@ -2,75 +2,54 @@ name: Keep Backend Awake
 
 on:
   schedule:
-    - cron: "*/17 * * * *"
-    - cron: "7-59/23 * * * *"
-    - cron: "13-59/29 * * * *"
-  workflow_dispatch:
+    - cron: "*/10 * * * *" # Cada 10 minutos aprox.
+  workflow_dispatch: # Permite ejecutarlo manualmente
+  push:
+    branches: [main]
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+
     steps:
-      - name: Random ping to Render
-        env:
-          BASE: https://aerotickets-api.onrender.com
+      - name: Set random delay (3–9 min)
+        id: jitter
         run: |
-          jitter=$((RANDOM % 420))
+          jitter=$((RANDOM % 360 + 180)) # 180s (3min) a 540s (9min)
+          echo "Esperando $jitter segundos antes del ping..."
           sleep "$jitter"
 
+      - name: Random ping to Aerotickets API
+        run: |
+          # Lista de endpoints públicos del backend
           urls=(
-            "$BASE/health"
-            "$BASE/api/catalog/airlines/co"
-            "$BASE/api/catalog/airports/co"
-            "$BASE/api/flights"
-            "$BASE/hola"
-            "$BASE/live/airports/search?q=bog"
+            "https://aerotickets-api.onrender.com/health"
+            "https://aerotickets-api.onrender.com/hola"
+            "https://aerotickets-api.onrender.com/api/catalog/airports/co"
           )
 
-          n=$(( (RANDOM % 3) + 2 ))
-          selected=()
-          for _ in $(seq 1 $n); do
-            pick=${urls[$RANDOM % ${#urls[@]}]}
-            selected+=("$pick?ts=$(date +%s)&r=$RANDOM")
+          # Elegir aleatoriamente uno
+          url=${urls[$RANDOM % ${#urls[@]}]}
+          echo "🌐 Ping aleatorio a: $url"
+
+          # Realizar 2 tipos de peticiones (HEAD y GET)
+          for i in {1..2}; do
+            echo "Intento $i → $url"
+            if curl -fsS -m 10 -o /dev/null -w "%{http_code}" "$url"; then
+              echo "✅ Éxito al mantener activo el backend."
+              exit 0
+            else
+              echo "⚠️ Fallo (reintentando)..."
+              sleep 5
+            fi
           done
 
-          uaList=(
-            "Mozilla/5.0"
-            "curl/8.4.0"
-            "HealthCheck/1.0"
-          )
-          ua=${uaList[$RANDOM % ${#uaList[@]}]}
+          echo "❌ Todos los intentos fallaron, Render podría estar dormido."
+          exit 1
 
-          ok=0
-          for u in "${selected[@]}"; do
-            for method in GET HEAD; do
-              if curl -sS -A "$ua" \
-                   -H "Cache-Control: no-cache" \
-                   --http1.1 \
-                   --connect-timeout 8 \
-                   --max-time 20 \
-                   --retry 3 \
-                   --retry-delay 2 \
-                   --retry-all-errors \
-                   --fail -X "$method" "$u" > /dev/null; then
-                echo "ok $method $u"
-                ok=1
-              else
-                echo "fail $method $u"
-              fi
-            done
-          done
-
-          if [ "$ok" -eq 0 ]; then
-            for backoff in 5 10 20; do
-              u="${urls[$RANDOM % ${#urls[@]}]}?retry=$(date +%s)&r=$RANDOM"
-              if curl -sS -A "$ua" --http1.1 --connect-timeout 8 --max-time 20 --fail "$u" > /dev/null; then
-                echo "recovered $u"
-                ok=1; break
-              fi
-              sleep "$backoff"
-            done
-          fi
-
-          [ "$ok" -eq 1 ]
+      - name: Espera aleatoria adicional (1–2 min)
+        run: |
+          extra=$((RANDOM % 60 + 60))
+          echo "Esperando $extra segundos para cerrar de forma natural..."
+          sleep "$extra"
