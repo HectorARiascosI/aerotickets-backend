@@ -8,16 +8,23 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/flights")
 public class FlightController {
+
     private final FlightService flightService;
-    public FlightController(FlightService flightService){ this.flightService = flightService; }
+
+    public FlightController(FlightService flightService){
+        this.flightService = flightService;
+    }
 
     @GetMapping
-    public List<Flight> listAll() { return flightService.listAll(); }
+    public List<Flight> listAll() {
+        return flightService.listAll();
+    }
 
     @PostMapping
     public ResponseEntity<?> create(@Valid @RequestBody FlightDTO dto) {
@@ -27,8 +34,9 @@ public class FlightController {
                 .destination(dto.getDestination())
                 .departureAt(dto.getDepartureAt())
                 .arriveAt(dto.getArriveAt())
-                .totalSeats(dto.getTotalSeats())
-                .price(dto.getPrice())
+                // Defaults seguros para evitar NPE/violaciones de BD
+                .totalSeats(dto.getTotalSeats() != null ? dto.getTotalSeats() : 0)
+                .price(dto.getPrice() != null ? dto.getPrice() : BigDecimal.ZERO)
                 .build();
         return ResponseEntity.ok(flightService.create(f));
     }
