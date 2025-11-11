@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 @RestController
@@ -28,14 +30,36 @@ public class FlightController {
 
     @PostMapping
     public ResponseEntity<?> create(@Valid @RequestBody FlightDTO dto) {
+        // Validación mínima de campos críticos
+        if (dto.getAirline() == null ||
+            dto.getOrigin() == null ||
+            dto.getDestination() == null ||
+            dto.getDepartureAt() == null) {
+            throw new IllegalArgumentException(
+                    "Campos obligatorios faltantes: airline, origin, destination, departureAt"
+            );
+        }
+
+        // Convertimos OffsetDateTime -> LocalDateTime en UTC (ajusta si prefieres otra zona)
+        LocalDateTime dep = dto.getDepartureAt()
+                .atZoneSameInstant(ZoneOffset.UTC)
+                .toLocalDateTime();
+
+        LocalDateTime arr = (dto.getArriveAt() != null)
+                ? dto.getArriveAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime()
+                : dep.plusHours(2); // fallback si no viene arriveAt
+
+        Integer seats = (dto.getTotalSeats() != null) ? dto.getTotalSeats() : 180;
+        BigDecimal price = (dto.getPrice() != null) ? dto.getPrice() : BigDecimal.ZERO;
+
         Flight f = Flight.builder()
                 .airline(dto.getAirline())
                 .origin(dto.getOrigin())
                 .destination(dto.getDestination())
-                .departureAt(dto.getDepartureAt())
-                .arriveAt(dto.getArriveAt())
-                .totalSeats(dto.getTotalSeats() != null ? dto.getTotalSeats() : 0)
-                .price(dto.getPrice() != null ? dto.getPrice() : BigDecimal.ZERO)
+                .departureAt(dep)
+                .arriveAt(arr)
+                .totalSeats(seats)
+                .price(price)
                 .build();
 
         return ResponseEntity.ok(flightService.create(f));
