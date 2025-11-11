@@ -14,7 +14,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/flights")
+@RequestMapping("/flights")
 public class FlightController {
 
     private final FlightService flightService;

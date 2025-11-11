@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/catalog")
+@RequestMapping("/catalog")
 public class AirCatalogController {
 
     @GetMapping("/airports/co")

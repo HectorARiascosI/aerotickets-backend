@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
  * Now returns a UserResponseDTO with the created user's id (no password).
  */
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
