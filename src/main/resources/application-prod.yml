@@ -1,8 +1,5 @@
 spring:
   datasource:
-    # En Render defines DB_URL, DB_USER, DB_PASSWORD
-    # Ejemplo Neon:
-    # jdbc:postgresql://ep-xxxxx.us-east-1.aws.neon.tech:5432/aerotickets?sslmode=require
     url: ${DB_URL}
     username: ${DB_USER}
     password: ${DB_PASSWORD}
@@ -13,16 +10,13 @@ spring:
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
-
   jpa:
     hibernate:
-      # En prod serio: validate/none + Flyway; en primer deploy puedes dejar update
       ddl-auto: update
     properties:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-# CORS controlado por variable (pondrás tu dominio de Vercel)
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS}
