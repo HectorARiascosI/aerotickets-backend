@@ -89,6 +89,7 @@ public class GlobalExceptionHandler {
                 JSON_HEADERS, HttpStatus.UNPROCESSABLE_ENTITY
         );
     }
+    
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {

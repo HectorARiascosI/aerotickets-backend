@@ -28,6 +28,7 @@ public class LiveFlightController {
         this.registry = registry;
     }
 
+    
     /** SSE: text/event-stream con CORS explícito y heartbeats. */
     @CrossOrigin(
         origins = {
