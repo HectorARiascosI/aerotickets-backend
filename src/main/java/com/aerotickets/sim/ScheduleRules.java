@@ -2,11 +2,10 @@ package com.aerotickets.sim;
 
 import java.time.LocalTime;
 
+/** Reglas de horario básicas (puntas operativas). */
 public final class ScheduleRules {
+    private ScheduleRules(){}
 
-    public static int congestionDelayMin(AirportCatalogCO.Airport ap, LocalTime local) {
-        int h = local.getHour();
-        boolean peak = h >= ap.peakStartLocal && h < ap.peakEndLocal;
-        return peak ? 10 : 2; // base minutos por congestión local
-    }
+    public static final LocalTime peakStartLocal = LocalTime.of(6, 0);
+    public static final LocalTime peakEndLocal   = LocalTime.of(21, 59);
 }
