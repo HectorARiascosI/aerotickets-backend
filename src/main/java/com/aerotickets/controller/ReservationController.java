@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 // IMPORTANTE: con server.servlet.context-path=/api, el base path aquí
 // NO debe volver a incluir /api. Déjalo en "/reservations".
-@RequestMapping("/reservations")
+@RequestMapping("/api/reservations")
 public class ReservationController {
 
     private final ReservationService service;
