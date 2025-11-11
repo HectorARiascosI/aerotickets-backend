@@ -30,24 +30,23 @@ public class FlightController {
 
     @PostMapping
     public ResponseEntity<?> create(@Valid @RequestBody FlightDTO dto) {
-        // Validación mínima de campos críticos
         if (dto.getAirline() == null ||
             dto.getOrigin() == null ||
             dto.getDestination() == null ||
             dto.getDepartureAt() == null) {
             throw new IllegalArgumentException(
-                    "Campos obligatorios faltantes: airline, origin, destination, departureAt"
+                "Campos obligatorios faltantes: airline, origin, destination, departureAt"
             );
         }
 
-        // Convertimos OffsetDateTime -> LocalDateTime en UTC (ajusta si prefieres otra zona)
+        // Convertimos OffsetDateTime -> LocalDateTime en UTC
         LocalDateTime dep = dto.getDepartureAt()
                 .atZoneSameInstant(ZoneOffset.UTC)
                 .toLocalDateTime();
 
         LocalDateTime arr = (dto.getArriveAt() != null)
                 ? dto.getArriveAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime()
-                : dep.plusHours(2); // fallback si no viene arriveAt
+                : dep.plusHours(2);
 
         Integer seats = (dto.getTotalSeats() != null) ? dto.getTotalSeats() : 180;
         BigDecimal price = (dto.getPrice() != null) ? dto.getPrice() : BigDecimal.ZERO;
