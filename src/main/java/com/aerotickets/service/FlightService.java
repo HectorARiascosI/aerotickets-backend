@@ -21,12 +21,14 @@ public class FlightService {
     public List<Flight> listAll() { return flightRepository.findAll(); }
 
     public List<Flight> searchOrSimulate(FlightSearchDTO dto) {
-        if (dto.getOrigin()==null || dto.getDestination()==null) return List.of();
+        if (dto == null || dto.getOrigin()==null || dto.getDestination()==null) return List.of();
         String dep = dto.getOrigin();
         String arr = dto.getDestination();
+
         LocalDate date = dto.getDate() != null ? dto.getDate() : LocalDate.now();
         LocalDateTime start = date.atStartOfDay();
         LocalDateTime end = start.plusDays(1);
+
         return flightRepository.findByOriginAndDestinationAndDepartureAtBetween(dep, arr, start, end);
     }
 }
