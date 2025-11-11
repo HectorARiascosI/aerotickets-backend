@@ -27,7 +27,6 @@ public class GlobalExceptionHandler {
         JSON_HEADERS.setContentType(MediaType.APPLICATION_JSON);
     }
 
-    // 401 - No autenticado
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Map<String, Object>> handleAuth(AuthenticationException ex) {
         return new ResponseEntity<>(
@@ -36,7 +35,6 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // 403 - Sin permisos
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Map<String, Object>> handleAccess(AccessDeniedException ex) {
         return new ResponseEntity<>(
@@ -45,7 +43,6 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // 404 - Recurso no encontrado (genérico)
     @ExceptionHandler({NoSuchElementException.class})
     public ResponseEntity<Map<String, Object>> handleNotFound(RuntimeException ex) {
         return new ResponseEntity<>(
@@ -54,7 +51,6 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // 400 - Petición inválida
     @ExceptionHandler({IllegalArgumentException.class, HttpMessageNotReadableException.class})
     public ResponseEntity<Map<String, Object>> handleBadRequest(Exception ex) {
         return new ResponseEntity<>(
@@ -63,7 +59,6 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // 409 - Violación de integridad (BD)
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, Object>> handleIntegrity(DataIntegrityViolationException ex) {
         String rootMsg = ex.getMostSpecificCause() != null
@@ -75,7 +70,6 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // 422 - Errores de validación (DTOs con @Valid)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
@@ -88,7 +82,6 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // 422 - Violaciones de constraints sueltas
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Map<String, Object>> handleConstraint(ConstraintViolationException ex) {
         return new ResponseEntity<>(
@@ -97,14 +90,11 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // 500 - Cualquier otro error inesperado
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
+        ex.printStackTrace(); // 👈 para ver la causa real en Render
         return new ResponseEntity<>(
-                Map.of(
-                        "message", "Error inesperado en el servidor",
-                        "type", ex.getClass().getSimpleName()
-                ),
+                Map.of("message", "Error inesperado en el servidor", "type", ex.getClass().getSimpleName()),
                 JSON_HEADERS, HttpStatus.INTERNAL_SERVER_ERROR
         );
     }
