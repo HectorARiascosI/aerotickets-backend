@@ -12,9 +12,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 @RestController
 @RequestMapping("/live") // context-path /api viene de application.yml
@@ -28,8 +26,6 @@ public class LiveFlightController {
         this.registry = registry;
     }
 
-    
-    /** SSE: text/event-stream con CORS explícito y heartbeats. */
     @CrossOrigin(
         origins = {
             "http://localhost:5173",
@@ -41,21 +37,14 @@ public class LiveFlightController {
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter stream() {
         SseEmitter emitter = registry.subscribe();
-
-        // Heartbeats cada 20s para evitar cortes por proxies/CDN
         ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
         exec.scheduleAtFixedRate(() -> {
-            try {
-                emitter.send(SseEmitter.event().name("ping").data("♥"));
-            } catch (Exception e) {
-                emitter.complete();
-                exec.shutdownNow();
-            }
+            try { emitter.send(SseEmitter.event().name("ping").data("♥")); }
+            catch (Exception e) { emitter.complete(); exec.shutdownNow(); }
         }, 20, 20, TimeUnit.SECONDS);
 
         emitter.onCompletion(exec::shutdownNow);
         emitter.onTimeout(() -> { emitter.complete(); exec.shutdownNow(); });
-
         return emitter;
     }
 
@@ -76,10 +65,7 @@ public class LiveFlightController {
 
     @GetMapping(value = "/airports/search", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Map<String, Object>>> airports(@RequestParam("query") String query) {
-        if (query == null || query.isBlank()) {
-            return ResponseEntity.ok(List.of());
-        }
-        List<Map<String, Object>> airports = liveService.autocompleteAirports(query);
-        return ResponseEntity.ok(airports);
+        if (query == null || query.isBlank()) return ResponseEntity.ok(List.of());
+        return ResponseEntity.ok(liveService.autocompleteAirports(query));
     }
 }

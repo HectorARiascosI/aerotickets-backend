@@ -10,9 +10,10 @@ import java.time.LocalDate;
 import java.util.*;
 
 /**
- * Servicio de búsqueda de vuelos en tiempo real.
- * Compatible con la simulación realista de aeropuertos (AirportCatalogCO).
- * Mantiene autocompletado y conversión natural → IATA.
+ * Servicio de búsqueda de vuelos en tiempo real (sim por ahora).
+ * - Convierte nombres humanos → IATA
+ * - Autocomplete basado en catálogo nacional
+ * - Delegación de simulación a FlightSimulatorService
  */
 @Service
 public class LiveFlightService {
@@ -23,34 +24,20 @@ public class LiveFlightService {
         this.simulator = simulator;
     }
 
-    /**
-     * Busca vuelos en vivo o simulados según los criterios del usuario.
-     * Acepta nombres humanos (“bogota”, “medellin”) y los traduce a códigos IATA.
-     */
     public List<LiveFlight> searchLive(String originRaw, String destinationRaw, String dateIso, String ignored) {
         String origin = smartToIata(originRaw);
         String destination = smartToIata(destinationRaw);
-
-        if (origin == null || destination == null || origin.equalsIgnoreCase(destination)) {
-            return List.of();
-        }
+        if (origin == null || destination == null || origin.equalsIgnoreCase(destination)) return List.of();
 
         FlightSearchDTO dto = new FlightSearchDTO();
         dto.setOrigin(origin);
         dto.setDestination(destination);
-
         if (dateIso != null && !dateIso.isBlank()) {
-            try {
-                dto.setDate(LocalDate.parse(dateIso));
-            } catch (Exception ignored2) {}
+            try { dto.setDate(LocalDate.parse(dateIso)); } catch (Exception ignored2) {}
         }
-
         return simulator.search(dto);
     }
 
-    /**
-     * Autocompletado de aeropuertos según texto parcial o nombre.
-     */
     public List<Map<String, Object>> autocompleteAirports(String query) {
         if (query == null || query.isBlank()) return List.of();
         query = IataResolver.normalize(query);
@@ -74,82 +61,46 @@ public class LiveFlightService {
         return results;
     }
 
-    /**
-     * Determina si una entrada de aeropuerto coincide parcialmente con la consulta del usuario.
-     */
     private boolean matches(AirportCatalogCO.Airport info, String query) {
         String city = IataResolver.normalize(info.city);
         String name = IataResolver.normalize(info.name);
         String iata = info.iata.toLowerCase(Locale.ROOT);
         String terrain = IataResolver.normalize(info.terrain);
-
-        return iata.contains(query)
-                || city.contains(query)
-                || name.contains(query)
-                || terrain.contains(query);
+        return iata.contains(query) || city.contains(query) || name.contains(query) || terrain.contains(query);
     }
 
-    /**
-     * Conversión flexible texto → código IATA:
-     * - Exacto (“BOG”)
-     * - Nombre completo (“Bogotá”)
-     * - Parcial (“bog”, “rio negro”)
-     */
     private String smartToIata(String input) {
         if (input == null || input.isBlank()) return null;
-
         String resolved = IataResolver.toIata(input);
         if (resolved != null) return resolved;
 
         String normalized = IataResolver.normalize(input);
-        String best = null;
-        int bestScore = Integer.MAX_VALUE;
-
+        String best = null; int bestScore = Integer.MAX_VALUE;
         for (String iata : AirportCatalogCO.keys()) {
-            AirportCatalogCO.Airport a = AirportCatalogCO.get(iata);
+            var a = AirportCatalogCO.get(iata);
             String city = IataResolver.normalize(a.city);
             String name = IataResolver.normalize(a.name);
-
-            if (normalized.equals(iata.toLowerCase(Locale.ROOT))
-                    || normalized.equals(city)
-                    || normalized.equals(name)) {
+            if (normalized.equals(iata.toLowerCase(Locale.ROOT)) || normalized.equals(city) || normalized.equals(name)) {
                 return iata;
             }
-
             int score = levenshtein(normalized, city);
-            if (score < bestScore) {
-                bestScore = score;
-                best = iata;
-            }
+            if (score < bestScore) { bestScore = score; best = iata; }
         }
-
         return bestScore <= Math.max(2, normalized.length() / 2) ? best : null;
     }
 
-    /**
-     * Distancia de Levenshtein (mínimo número de ediciones entre dos palabras).
-     */
     private int levenshtein(String a, String b) {
         int n = a.length(), m = b.length();
-        if (n == 0) return m;
-        if (m == 0) return n;
-
-        int[] prev = new int[m + 1];
-        int[] cur = new int[m + 1];
-
+        if (n == 0) return m; if (m == 0) return n;
+        int[] prev = new int[m + 1], cur = new int[m + 1];
         for (int j = 0; j <= m; j++) prev[j] = j;
         for (int i = 1; i <= n; i++) {
             cur[0] = i;
             for (int j = 1; j <= m; j++) {
-                int cost = (a.charAt(i - 1) == b.charAt(j - 1)) ? 0 : 1;
-                cur[j] = Math.min(
-                        Math.min(cur[j - 1] + 1, prev[j] + 1),
-                        prev[j - 1] + cost
-                );
+                int cost = (a.charAt(i-1) == b.charAt(j-1)) ? 0 : 1;
+                cur[j] = Math.min(Math.min(cur[j-1]+1, prev[j]+1), prev[j-1]+cost);
             }
-            int[] tmp = prev;
-            prev = cur;
-            cur = tmp;
+            int[] tmp = prev; prev = cur; cur = tmp;
         }
         return prev[m];
     }

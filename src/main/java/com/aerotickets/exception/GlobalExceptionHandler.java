@@ -89,11 +89,10 @@ public class GlobalExceptionHandler {
                 JSON_HEADERS, HttpStatus.UNPROCESSABLE_ENTITY
         );
     }
-    
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
-        ex.printStackTrace(); // 👈 para ver la causa real en Render
+        ex.printStackTrace(); // para ver la causa real en Render
         return new ResponseEntity<>(
                 Map.of("message", "Error inesperado en el servidor", "type", ex.getClass().getSimpleName()),
                 JSON_HEADERS, HttpStatus.INTERNAL_SERVER_ERROR

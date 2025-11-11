@@ -21,7 +21,7 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
-    baseline-on-migrate: false       # DB nueva => NO baselines
+    baseline-on-migrate: false       # DB NUEVA => no baseline
     table: flyway_schema_history
 
 cors:

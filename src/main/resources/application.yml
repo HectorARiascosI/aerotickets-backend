@@ -54,3 +54,7 @@ external:
     airlabs:
       base-url: ${AIRLABS_BASE_URL:https://airlabs.co/api/v9}
       api-key: ${AIRLABS_API_KEY:}
+
+# Si más adelante activas proveedores live reales, puedes agregar:
+# live:
+#   simulate-only: true
