@@ -34,10 +34,10 @@ public class FlightController {
                 .destination(dto.getDestination())
                 .departureAt(dto.getDepartureAt())
                 .arriveAt(dto.getArriveAt())
-                // Defaults seguros para evitar NPE/violaciones de BD
                 .totalSeats(dto.getTotalSeats() != null ? dto.getTotalSeats() : 0)
                 .price(dto.getPrice() != null ? dto.getPrice() : BigDecimal.ZERO)
                 .build();
+
         return ResponseEntity.ok(flightService.create(f));
     }
 
