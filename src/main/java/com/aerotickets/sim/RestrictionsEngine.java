@@ -1,55 +1,51 @@
 package com.aerotickets.sim;
 
 import java.time.LocalTime;
+import java.util.List;
 
 public final class RestrictionsEngine {
+    private RestrictionsEngine(){}
 
-    public static final class Decision {
-        public final boolean allowed;
-        public final String reason;
+    /** Verifica si un avión puede operar por pista/familias. */
+    public static boolean isAircraftAllowed(AirportCatalogCO.Airport ap, String aircraftFamily) {
+        if (ap == null || aircraftFamily == null) return false;
+        List<String> banned = ap.bannedFamilies;
+        if (banned != null && banned.contains(aircraftFamily)) return false;
 
-        public Decision(boolean allowed, String reason) {
-            this.allowed = allowed;
-            this.reason = reason;
-        }
-        public static Decision ok(){ return new Decision(true, "OK"); }
-        public static Decision no(String why){ return new Decision(false, why); }
+        // Reglas simples por longitud de pista (m)
+        int rwy = ap.runwayLenM;
+        return switch (aircraftFamily) {
+            case "B737-800","A321"    -> rwy >= 2200;
+            case "A320-200","A320neo" -> rwy >= 2000;
+            case "A319"                -> rwy >= 1800;
+            case "ATR 72-600"          -> rwy >= 1400;
+            case "ATR 42-600","ERJ-145"-> rwy >= 1200;
+            default -> rwy >= 1500;
+        };
     }
 
-    public static Decision canOperate(AirportCatalogCO.Airport ap, String family,
-                                      int tempC, WeatherProfileCatalog.Wx wx, LocalTime depLocal) {
-
-        // 1) Familia prohibida o no permitida
-        if (ap.bannedFamilies.contains(family)) return Decision.no("Tipo prohibido por aeropuerto");
-        if (!ap.allowedFamilies.contains(family)) return Decision.no("Tipo no listado como permitido");
-
-        // 2) Curfew
-        if (ap.hasCurfew) {
-            int h = depLocal.getHour();
-            boolean inCurfew = ap.curfewStartLocal <= ap.curfewEndLocal
-                    ? (h >= ap.curfewStartLocal && h < ap.curfewEndLocal)
-                    : (h >= ap.curfewStartLocal || h < ap.curfewEndLocal);
-            if (inCurfew) return Decision.no("Curfew activo");
+    /** Toque de queda local. Si hay curfew y la hora cae dentro, NO opera. */
+    public static boolean passesCurfew(AirportCatalogCO.Airport ap, LocalTime localTime) {
+        if (!ap.hasCurfew || ap.curfewStartLocal == null || ap.curfewEndLocal == null) return true;
+        LocalTime s = ap.curfewStartLocal;
+        LocalTime e = ap.curfewEndLocal;
+        // Intervalo puede cruzar medianoche
+        if (s.isBefore(e)) {
+            return localTime.isBefore(s) || localTime.isAfter(e);
+        } else {
+            // 22:00–06:00, por ejemplo
+            return localTime.isAfter(e) && localTime.isBefore(s);
         }
+    }
 
-        // 3) Viento cruzado
-        int limit = Math.min(ap.crosswindLimitKts, AircraftPerfCatalog.get(family).crosswindLimitKts);
-        if (wx.crosswindKts > limit) return Decision.no("Viento cruzado supera límite");
+    /** Límite de viento cruzado. Si no hay dato, se aprueba. */
+    public static boolean meetsCrosswindLimit(AirportCatalogCO.Airport ap, int crosswindKts) {
+        if (ap.crosswindLimitKts == null) return true;
+        return crosswindKts <= ap.crosswindLimitKts;
+    }
 
-        // 4) Performance pista con densidad
-        var perf = AircraftPerfCatalog.get(family);
-        if (perf == null) return Decision.no("Sin performance definida");
-
-        int deltaTemp = Math.max(0, tempC - 15); // ISA simplificado
-        int reqTora = AircraftPerfCatalog.correctedTora(family, perf.baseToraM, ap.elevationFt, deltaTemp);
-        int reqLda  = AircraftPerfCatalog.correctedLda(family, perf.baseLdaM, ap.elevationFt, deltaTemp);
-
-        if (ap.runwayLenM < reqTora) return Decision.no("TORA insuficiente");
-        if (ap.runwayLenM < reqLda)  return Decision.no("LDA insuficiente");
-
-        // 5) ILS/niebla mínima muy conservadora
-        if (wx.fog && !ap.ils) return Decision.no("Niebla sin ILS");
-
-        return Decision.ok();
+    /** ¿Cuenta con ILS? Útil para condiciones IMC. */
+    public static boolean hasIls(AirportCatalogCO.Airport ap) {
+        return ap.ils;
     }
 }
