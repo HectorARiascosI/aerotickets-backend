@@ -1,358 +1,114 @@
 package com.aerotickets.sim;
 
+import java.time.LocalTime;
 import java.util.*;
 
+/** Catálogo de aeropuertos Colombia con metadata usada por restricciones/UX. */
 public final class AirportCatalogCO {
+    private AirportCatalogCO() {}
 
     public static final class Airport {
         public final String iata;
         public final String icao;
-        public final String name;
         public final String city;
-        public final double lat;
-        public final double lon;
-
-        // Infraestructura/entorno
-        public final int runwayLenM;
-        public final int runwayWidthM;
+        public final String name;
+        public final String state;
+        public final double latitude;
+        public final double longitude;
         public final int elevationFt;
-        public final String surface;
-        public final boolean ils;
-        public final boolean rnpAr;
+        public final int runwayLenM;
         public final String terrain;
+        public final List<String> allowedFamilies;
 
-        // Operación
-        public final Set<String> allowedFamilies;
-        public final Set<String> bannedFamilies;
-        public final Set<String> allowedCarriers; // AV, LA, 9R, VE, P5 (sin Ultra/Viva)
-        public final boolean hasCurfew;
-        public final int curfewStartLocal; // hora local [0..23] inclusivo
-        public final int curfewEndLocal;   // hora local [0..23] exclusivo
-        public final int peakStartLocal;   // inicio hora pico
-        public final int peakEndLocal;     // fin hora pico
+        // ✅ Campos adicionales esperados por otras clases
+        public final List<String> bannedFamilies;     // p.ej. jets en EOH
+        public final boolean hasCurfew;               // ¿toque de queda?
+        public final LocalTime curfewStartLocal;      // hora local inicio
+        public final LocalTime curfewEndLocal;        // hora local fin
+        public final Integer crosswindLimitKts;       // límite típico de viento cruzado
+        public final boolean ils;                     // ¿tiene ILS?
 
-        // Clima (riesgos base relativos 0..100)
-        public final int crosswindLimitKts;
-        public final int fogRisk;
-        public final int convectiveRisk;
-        public final int heavyRainRisk;
-
-        private Airport(Builder b) {
-            this.iata = b.iata;
-            this.icao = b.icao;
-            this.name = b.name;
-            this.city = b.city;
-            this.lat = b.lat;
-            this.lon = b.lon;
-            this.runwayLenM = b.runwayLenM;
-            this.runwayWidthM = b.runwayWidthM;
-            this.elevationFt = b.elevationFt;
-            this.surface = b.surface;
-            this.ils = b.ils;
-            this.rnpAr = b.rnpAr;
-            this.terrain = b.terrain;
-            this.allowedFamilies = Set.copyOf(b.allowedFamilies);
-            this.bannedFamilies = Set.copyOf(b.bannedFamilies);
-            this.allowedCarriers = Set.copyOf(b.allowedCarriers);
-            this.hasCurfew = b.hasCurfew;
-            this.curfewStartLocal = b.curfewStartLocal;
-            this.curfewEndLocal = b.curfewEndLocal;
-            this.peakStartLocal = b.peakStartLocal;
-            this.peakEndLocal = b.peakEndLocal;
-            this.crosswindLimitKts = b.crosswindLimitKts;
-            this.fogRisk = b.fogRisk;
-            this.convectiveRisk = b.convectiveRisk;
-            this.heavyRainRisk = b.heavyRainRisk;
-        }
-
-        public static class Builder {
-            private String iata, icao, name, city, surface, terrain;
-            private double lat, lon;
-            private int runwayLenM, runwayWidthM, elevationFt;
-            private boolean ils, rnpAr;
-            private final Set<String> allowedFamilies = new LinkedHashSet<>();
-            private final Set<String> bannedFamilies = new LinkedHashSet<>();
-            private final Set<String> allowedCarriers = new LinkedHashSet<>();
-            private boolean hasCurfew;
-            private int curfewStartLocal, curfewEndLocal, peakStartLocal, peakEndLocal;
-            private int crosswindLimitKts = 25, fogRisk = 10, convectiveRisk = 20, heavyRainRisk = 20;
-
-            public Builder iata(String v){ this.iata=v; return this; }
-            public Builder icao(String v){ this.icao=v; return this; }
-            public Builder name(String v){ this.name=v; return this; }
-            public Builder city(String v){ this.city=v; return this; }
-            public Builder lat(double v){ this.lat=v; return this; }
-            public Builder lon(double v){ this.lon=v; return this; }
-            public Builder runwayLenM(int v){ this.runwayLenM=v; return this; }
-            public Builder runwayWidthM(int v){ this.runwayWidthM=v; return this; }
-            public Builder elevationFt(int v){ this.elevationFt=v; return this; }
-            public Builder surface(String v){ this.surface=v; return this; }
-            public Builder ils(boolean v){ this.ils=v; return this; }
-            public Builder rnpAr(boolean v){ this.rnpAr=v; return this; }
-            public Builder terrain(String v){ this.terrain=v; return this; }
-            public Builder allow(String... fam){ this.allowedFamilies.addAll(Arrays.asList(fam)); return this; }
-            public Builder ban(String... fam){ this.bannedFamilies.addAll(Arrays.asList(fam)); return this; }
-            public Builder carriers(String... carr){ this.allowedCarriers.addAll(Arrays.asList(carr)); return this; }
-            public Builder curfew(boolean has, int start, int end){ this.hasCurfew=has; this.curfewStartLocal=start; this.curfewEndLocal=end; return this; }
-            public Builder peaks(int start, int end){ this.peakStartLocal=start; this.peakEndLocal=end; return this; }
-            public Builder met(int crosswind, int fog, int conv, int rain){ this.crosswindLimitKts=crosswind; this.fogRisk=fog; this.convectiveRisk=conv; this.heavyRainRisk=rain; return this; }
-            public Airport build(){ return new Airport(this); }
+        public Airport(String iata, String icao, String city, String name, String state,
+                       double lat, double lon, int elevFt, int runwayM, String terrain, List<String> families,
+                       List<String> banned, boolean hasCurfew, LocalTime curfewStart, LocalTime curfewEnd,
+                       Integer crosswindLimitKts, boolean ils) {
+            this.iata = iata; this.icao = icao; this.city = city; this.name = name; this.state = state;
+            this.latitude = lat; this.longitude = lon; this.elevationFt = elevFt; this.runwayLenM = runwayM;
+            this.terrain = terrain; this.allowedFamilies = families;
+            this.bannedFamilies = banned != null ? List.copyOf(banned) : List.of();
+            this.hasCurfew = hasCurfew;
+            this.curfewStartLocal = curfewStart;
+            this.curfewEndLocal = curfewEnd;
+            this.crosswindLimitKts = crosswindLimitKts;
+            this.ils = ils;
         }
     }
 
-    private static final Map<String, Airport> DB = new LinkedHashMap<>();
+    private static final Map<String, Airport> A = new HashMap<>();
+
+    private static void put(String iata, String icao, String city, String name, String state,
+                            double lat, double lon, int elevFt, int runwayM, String terrain, List<String> fam,
+                            List<String> banned, boolean hasCurfew, LocalTime curfewStart, LocalTime curfewEnd,
+                            Integer crosswindLimitKts, boolean ils) {
+        A.put(iata, new Airport(iata, icao, city, name, state, lat, lon, elevFt, runwayM,
+                terrain, fam, banned, hasCurfew, curfewStart, curfewEnd, crosswindLimitKts, ils));
+    }
+
+    /** Sobrecarga con defaults seguros (sin toque de queda, ILS sí en grandes). */
+    private static void put(String iata, String icao, String city, String name, String state,
+                            double lat, double lon, int elevFt, int runwayM, String terrain, List<String> fam) {
+        boolean major = Set.of("BOG","MDE","CTG","BAQ","CLO","PEI","AXM","BGA","CUC","ADZ","LET").contains(iata);
+        int xwind = major ? 35 : 25;
+        boolean hasIls = major || Set.of("BAQ","CTG","CLO","MDE","BOG").contains(iata);
+        List<String> banned = List.of();
+        boolean curfew = false;
+        LocalTime start = null, end = null;
+
+        // Ejemplo: EOH con restricciones a jets + curfew nocturno
+        if ("EOH".equals(iata)) {
+            banned = List.of("A320-200","A320neo","A321","B737-800","B737");
+            xwind = 20;
+            hasIls = false;
+            curfew = true;
+            start = LocalTime.of(22, 0);
+            end   = LocalTime.of(6, 0);
+        }
+
+        put(iata, icao, city, name, state, lat, lon, elevFt, runwayM, terrain, fam, banned, curfew, start, end, xwind, hasIls);
+    }
 
     static {
-        // === HUBS PRINCIPALES ===
-        DB.put("BOG", new Airport.Builder()
-                .iata("BOG").icao("SKBO").name("El Dorado Intl.").city("Bogotá")
-                .lat(4.70159).lon(-74.1469)
-                .runwayLenM(3800).runwayWidthM(45).elevationFt(8361)
-                .surface("ASPHALT").ils(true).rnpAr(true).terrain("PLAINS")
-                .allow("A321","A320","A320neo","A319","B737-800","B737 MAX 8","E190","ATR 72-600")
-                .carriers("AV","LA","9R","VE","P5")
-                .curfew(false,0,0).peaks(6,10)
-                .met(28,10,30,40)
-                .build());
-
-        DB.put("MDE", new Airport.Builder()
-                .iata("MDE").icao("SKRG").name("José María Córdova Intl.").city("Rionegro/Medellín")
-                .lat(6.16454).lon(-75.4231)
-                .runwayLenM(3470).runwayWidthM(45).elevationFt(6950)
-                .surface("ASPHALT").ils(true).rnpAr(true).terrain("MOUNTAINOUS")
-                .allow("A321","A320","A320neo","A319","B737-800","B737 MAX 8","E190","ATR 72-600")
-                .carriers("AV","LA","9R","VE","P5")
-                .curfew(false,0,0).peaks(6,10)
-                .met(26,15,40,50)
-                .build());
-
-        DB.put("CLO", new Airport.Builder()
-                .iata("CLO").icao("SKCL").name("Alfonso Bonilla Aragón Intl.").city("Cali")
-                .lat(3.54322).lon(-76.3816)
-                .runwayLenM(3000).runwayWidthM(45).elevationFt(3162)
-                .surface("ASPHALT").ils(true).rnpAr(true).terrain("PLAINS")
-                .allow("A321","A320","A320neo","A319","B737-800","B737 MAX 8","E190","ATR 72-600")
-                .carriers("AV","LA","9R","VE","P5")
-                .curfew(false,0,0).peaks(6,10)
-                .met(28,10,35,45)
-                .build());
-
-        // === COSTA CARIBE / NORTE ===
-        DB.put("CTG", new Airport.Builder()
-                .iata("CTG").icao("SKCG").name("Rafael Núñez Intl.").city("Cartagena")
-                .lat(10.442).lon(-75.513)
-                .runwayLenM(2600).runwayWidthM(45).elevationFt(4)
-                .surface("ASPHALT").ils(true).rnpAr(true).terrain("COASTAL")
-                .allow("A320","A319","B737-800","B737 MAX 8","E190","ATR 72-600")
-                .carriers("AV","LA","VE","P5")
-                .curfew(false,0,0).peaks(7,11)
-                .met(28,5,30,50)
-                .build());
-
-        DB.put("SMR", new Airport.Builder()
-                .iata("SMR").icao("SKSM").name("Simón Bolívar Intl.").city("Santa Marta")
-                .lat(11.1196).lon(-74.2306)
-                .runwayLenM(1700).runwayWidthM(45).elevationFt(23)
-                .surface("ASPHALT").ils(false).rnpAr(true).terrain("COASTAL")
-                .allow("A319","A320","E190","ATR 72-600")
-                .carriers("AV","VE","P5")
-                .curfew(false,0,0).peaks(8,12)
-                .met(25,5,25,60)
-                .build());
-
-        DB.put("BAQ", new Airport.Builder()
-                .iata("BAQ").icao("SKBQ").name("Ernesto Cortissoz Intl.").city("Barranquilla")
-                .lat(10.8896).lon(-74.7808)
-                .runwayLenM(3000).runwayWidthM(45).elevationFt(98)
-                .surface("ASPHALT").ils(true).rnpAr(true).terrain("COASTAL")
-                .allow("A321","A320","A320neo","A319","B737-800","B737 MAX 8","E190")
-                .carriers("AV","LA","VE","P5")
-                .curfew(false,0,0).peaks(7,11)
-                .met(27,5,30,55)
-                .build());
-
-        DB.put("RCH", new Airport.Builder()
-                .iata("RCH").icao("SKRH").name("Almirante Padilla").city("Riohacha")
-                .lat(11.5262).lon(-72.9260)
-                .runwayLenM(2100).runwayWidthM(45).elevationFt(43)
-                .surface("ASPHALT").ils(false).rnpAr(true).terrain("COASTAL")
-                .allow("A320","A319","E190","ATR 72-600","B737-800")
-                .carriers("AV","VE","P5")
-                .curfew(false,0,0).peaks(8,12)
-                .met(24,5,25,55)
-                .build());
-
-        DB.put("ADZ", new Airport.Builder()
-                .iata("ADZ").icao("SKSP").name("Gustavo Rojas Pinilla Intl.").city("San Andrés")
-                .lat(12.5836).lon(-81.7112)
-                .runwayLenM(2380).runwayWidthM(45).elevationFt(19)
-                .surface("ASPHALT").ils(false).rnpAr(true).terrain("COASTAL")
-                .allow("A320","A319","E190","ATR 72-600","B737-800")
-                .ban("A321","B737 MAX 8")
-                .carriers("AV","LA","P5","VE")
-                .curfew(false,0,0).peaks(9,13)
-                .met(25,5,25,60)
-                .build());
-
-        // === ANDINA / ORIENTE ===
-        DB.put("BGA", new Airport.Builder()
-                .iata("BGA").icao("SKBG").name("Palonegro Intl.").city("Bucaramanga")
-                .lat(7.1265).lon(-73.1848)
-                .runwayLenM(2600).runwayWidthM(45).elevationFt(3900)
-                .surface("ASPHALT").ils(true).rnpAr(true).terrain("MOUNTAINOUS")
-                .allow("A320","A319","E190","ATR 72-600")
-                .carriers("AV","LA","9R","VE")
-                .curfew(false,0,0).peaks(6,9)
-                .met(25,15,35,50)
-                .build());
-
-        DB.put("CUC", new Airport.Builder()
-                .iata("CUC").icao("SKCC").name("Camilo Daza Intl.").city("Cúcuta")
-                .lat(7.92757).lon(-72.5115)
-                .runwayLenM(2100).runwayWidthM(45).elevationFt(1096)
-                .surface("ASPHALT").ils(true).rnpAr(true).terrain("VALLEY")
-                .allow("A319","A320","E190","ATR 72-600")
-                .carriers("AV","LA","9R","VE")
-                .curfew(false,0,0).peaks(7,10)
-                .met(24,10,30,45)
-                .build());
-
-        DB.put("LET", new Airport.Builder()
-                .iata("LET").icao("SKLT").name("Alfredo Vásquez Cobo Intl.").city("Leticia")
-                .lat(-4.19355).lon(-69.9432)
-                .runwayLenM(2100).runwayWidthM(45).elevationFt(277)
-                .surface("ASPHALT").ils(false).rnpAr(true).terrain("RAINFOREST")
-                .allow("A320","A319","E190","ATR 72-600")
-                .carriers("AV","9R")
-                .curfew(false,0,0).peaks(9,12)
-                .met(20,20,40,60)
-                .build());
-
-        // === PACÍFICO / SUROCCIDENTE (incluye Pasto que ya tenías) ===
-        DB.put("PSO", new Airport.Builder()
-                .iata("PSO").icao("SKPS").name("Antonio Nariño").city("Pasto")
-                .lat(1.39625).lon(-77.2915)
-                .runwayLenM(2300).runwayWidthM(45).elevationFt(5951)
-                .surface("ASPHALT").ils(false).rnpAr(true).terrain("MOUNTAINOUS")
-                .allow("A320","A319","E190","ATR 72-600")
-                .ban("A321","B737-800","B737 MAX 8")
-                .carriers("AV","LA","9R","VE")
-                .curfew(false,0,0).peaks(7,10)
-                .met(20,20,35,50)
-                .build());
-
-        DB.put("PPN", new Airport.Builder()
-                .iata("PPN").icao("SKPP").name("Guillermo León Valencia").city("Popayán")
-                .lat(2.4544).lon(-76.6093)
-                .runwayLenM(1850).runwayWidthM(30).elevationFt(5687)
-                .surface("ASPHALT").ils(false).rnpAr(true).terrain("MOUNTAINOUS")
-                .allow("ATR 72-600","E190")
-                .ban("A321","A320","A319","B737-800","B737 MAX 8")
-                .carriers("9R","VE","AV")
-                .curfew(false,0,0).peaks(7,10)
-                .met(22,20,30,50)
-                .build());
-
-        DB.put("NVA", new Airport.Builder()
-                .iata("NVA").icao("SKNV").name("Benito Salas").city("Neiva")
-                .lat(2.95015).lon(-75.2940)
-                .runwayLenM(1860).runwayWidthM(30).elevationFt(1467)
-                .surface("ASPHALT").ils(false).rnpAr(true).terrain("VALLEY")
-                .allow("A319","E190","ATR 72-600")
-                .ban("A321","A320","B737-800","B737 MAX 8")
-                .carriers("AV","9R","VE")
-                .curfew(false,0,0).peaks(7,10)
-                .met(24,10,30,45)
-                .build());
-
-        // === EJE CAFETERO ===
-        DB.put("PEI", new Airport.Builder()
-                .iata("PEI").icao("SKPE").name("Matecaña").city("Pereira")
-                .lat(4.81267).lon(-75.7395)
-                .runwayLenM(2040).runwayWidthM(45).elevationFt(4411)
-                .surface("ASPHALT").ils(true).rnpAr(true).terrain("MOUNTAINOUS")
-                .allow("A320","A319","E190","ATR 72-600","B737-800")
-                .ban("A321","B737 MAX 8")
-                .carriers("AV","LA","9R","VE")
-                .curfew(false,0,0).peaks(6,9)
-                .met(24,15,35,45)
-                .build());
-
-        DB.put("AXM", new Airport.Builder()
-                .iata("AXM").icao("SKAR").name("El Edén").city("Armenia")
-                .lat(4.45278).lon(-75.7664)
-                .runwayLenM(2100).runwayWidthM(45).elevationFt(3990)
-                .surface("ASPHALT").ils(true).rnpAr(true).terrain("MOUNTAINOUS")
-                .allow("A320","A319","E190","ATR 72-600")
-                .ban("A321","B737 MAX 8")
-                .carriers("AV","LA","9R","VE")
-                .curfew(false,0,0).peaks(6,9)
-                .met(24,15,35,45)
-                .build());
-
-        DB.put("MZL", new Airport.Builder()
-                .iata("MZL").icao("SKMZ").name("La Nubia").city("Manizales")
-                .lat(5.0296).lon(-75.4647)
-                .runwayLenM(1480).runwayWidthM(30).elevationFt(6890)
-                .surface("ASPHALT").ils(false).rnpAr(true).terrain("MOUNTAINOUS")
-                .allow("ATR 72-600") // históricamente turboprop; limita jets
-                .ban("E190","A319","A320","A321","B737-800","B737 MAX 8")
-                .carriers("9R","VE")
-                .curfew(false,0,0).peaks(7,10)
-                .met(20,25,35,50)
-                .build());
-
-        // === LLANOS / NORTE / CHOCÓ / CÓRDOBA ===
-        DB.put("VVC", new Airport.Builder()
-                .iata("VVC").icao("SKVV").name("Vanguardia").city("Villavicencio")
-                .lat(4.16787).lon(-73.6138)
-                .runwayLenM(2000).runwayWidthM(45).elevationFt(1394)
-                .surface("ASPHALT").ils(false).rnpAr(true).terrain("PLAINS")
-                .allow("E190","ATR 72-600") // comercial regional; también opera carga/legacy
-                .ban("A321","A320","A319","B737-800","B737 MAX 8")
-                .carriers("9R","VE")
-                .curfew(false,0,0).peaks(7,10)
-                .met(22,10,35,55)
-                .build());
-
-        DB.put("UIB", new Airport.Builder()
-                .iata("UIB").icao("SKUI").name("El Caraño").city("Quibdó")
-                .lat(5.69076).lon(-76.6412)
-                .runwayLenM(1800).runwayWidthM(30).elevationFt(204)
-                .surface("ASPHALT").ils(false).rnpAr(true).terrain("RAINFOREST")
-                .allow("ATR 72-600","E190")
-                .ban("A321","A320","A319","B737-800","B737 MAX 8")
-                .carriers("9R","VE","AV")
-                .curfew(false,0,0).peaks(8,11)
-                .met(22,15,45,70)
-                .build());
-
-        DB.put("MTR", new Airport.Builder()
-                .iata("MTR").icao("SKMR").name("Los Garzones").city("Montería")
-                .lat(8.8237).lon(-75.8258)
-                .runwayLenM(2400).runwayWidthM(45).elevationFt(36)
-                .surface("ASPHALT").ils(true).rnpAr(true).terrain("PLAINS")
-                .allow("A321","A320","A320neo","A319","E190","B737-800")
-                .ban("B737 MAX 8")
-                .carriers("AV","LA","VE","P5")
-                .curfew(false,0,0).peaks(7,10)
-                .met(26,8,35,60)
-                .build());
-
-        // === SECUNDARIO DE MEDELLÍN (SOLO REGIONAL/TURBOPROP) ===
-        DB.put("EOH", new Airport.Builder()
-                .iata("EOH").icao("SKMD").name("Olaya Herrera").city("Medellín")
-                .lat(6.21956).lon(-75.5906)
-                .runwayLenM(2500).runwayWidthM(45).elevationFt(4927)
-                .surface("ASPHALT").ils(false).rnpAr(true).terrain("MOUNTAINOUS")
-                .allow("ATR 72-600","E190") // operación principal regional
-                .ban("A321","A320","A319","B737-800","B737 MAX 8")
-                .carriers("9R","VE")
-                .curfew(false,0,0).peaks(7,10)
-                .met(22,15,35,45)
-                .build());
+        put("BOG","SKBO","Bogotá","El Dorado","Cundinamarca",4.7016,-74.1469,8361,3800,"Llano/Altiplano", List.of("A320-200","A320neo","A319","A321","B737-800","B787","A330"));
+        put("MDE","SKRG","Rionegro (Medellín)","José María Córdova","Antioquia",6.1645,-75.4231,6954,3500,"Montañoso", List.of("A320-200","A320neo","A319","A321","B737-800"));
+        put("EOH","SKMD","Medellín","Olaya Herrera","Antioquia",6.219,-75.589,4949,2500,"Urbano", List.of("ATR 72-600","ATR 42-600","ERJ-145"));
+        put("CTG","SKCG","Cartagena","Rafael Núñez","Bolívar",10.4424,-75.513,6,2600,"Costero", List.of("A320-200","A320neo","A319","B737-800"));
+        put("BAQ","SKBQ","Barranquilla","Ernesto Cortissoz","Atlántico",10.8896,-74.7808,94,3000,"Costero", List.of("A320-200","A320neo","A319","B737-800"));
+        put("SMR","SKSM","Santa Marta","Simón Bolívar","Magdalena",11.1196,-74.2306,22,1900,"Costero", List.of("A320-200","A320neo","B737-800","ATR 72-600"));
+        put("CLO","SKCL","Cali","Alfonso Bonilla Aragón","Valle del Cauca",3.543,-76.3802,3162,3000,"Valle", List.of("A320-200","A320neo","A321","B737-800"));
+        put("PEI","SKPE","Pereira","Matecaña","Risaralda",4.8132,-75.7395,4413,2080,"Ondulado", List.of("A320-200","A319","ATR 72-600"));
+        put("AXM","SKAR","Armenia","El Edén","Quindío",4.4528,-75.7664,3999,2050,"Ondulado", List.of("A320-200","A319","ATR 72-600"));
+        put("BGA","SKBG","Bucaramanga","Palonegro","Santander",7.1265,-73.1848,3897,3000,"Montañoso", List.of("A320-200","A319","B737-800"));
+        put("CUC","SKCC","Cúcuta","Camilo Daza","Norte de Santander",7.9286,-72.5115,1096,2300,"Valle", List.of("A320-200","A319","B737-800"));
+        put("ADZ","SKSP","San Andrés","Gustavo Rojas Pinilla","San Andrés",12.5836,-81.7112,19,2380,"Isla", List.of("A320-200","A320neo","B737-800"));
+        put("LET","SKLT","Leticia","Alfredo Vásquez Cobo","Amazonas",-4.1936,-69.9432,277,2500,"Selva", List.of("A320-200","A319","ATR 72-600"));
+        put("IBE","SKIB","Ibagué","Perales","Tolima",4.4216,-75.1333,2995,1800,"Montañoso", List.of("ATR 72-600","ERJ-145"));
+        put("RCH","SKRH","Riohacha","Almirante Padilla","La Guajira",11.5262,-72.926,43,2100,"Costero", List.of("A320-200","ATR 72-600"));
+        put("NVA","SKNV","Neiva","Benito Salas","Huila",2.9514,-75.2936,1460,1880,"Valle", List.of("ATR 72-600","ERJ-145"));
+        put("MZL","SKMZ","Manizales","La Nubia","Caldas",5.0296,-75.4647,6890,1480,"Montañoso", List.of("ATR 42-600","ERJ-145"));
+        put("VUP","SKVP","Valledupar","Alfonso López Pumarejo","Cesar",10.435,-73.2495,482,2100,"Valle", List.of("A320-200","ATR 72-600"));
+        put("UIB","SKUI","Quibdó","El Caraño","Chocó",5.6908,-76.6412,204,1800,"Selva", List.of("ATR 72-600","ERJ-145"));
+        put("PPN","SKPP","Popayán","Guillermo León Valencia","Cauca",2.4544,-76.6093,5689,1850,"Montañoso", List.of("ATR 72-600","ERJ-145"));
+        put("GPI","SKGP","Guapi","Juan Casiano Solís","Cauca",2.5712,-77.8986,164,1600,"Selva", List.of("ATR 42-600","ERJ-145"));
+        put("EYP","SKYP","Yopal","El Alcaraván","Casanare",5.3191,-72.384,1020,2300,"Llano", List.of("A320-200","ATR 72-600"));
+        put("MTR","SKMR","Montería","Los Garzones","Córdoba",8.8237,-75.8258,36,2300,"Valle", List.of("A320-200","A320neo","B737-800"));
+        put("VVC","SKVV","Villavicencio","La Vanguardia","Meta",4.168,-73.6138,1399,1800,"Llano", List.of("ATR 72-600","ERJ-145"));
+        put("CZU","SKCZ","Corozal (Sincelejo)","Las Brujas","Sucre",9.33275,-75.2856,512,1600,"Valle", List.of("ATR 72-600","ERJ-145"));
+        put("PSO","SKPS","Pasto","Antonio Nariño","Nariño",1.3962,-77.2915,5951,2300,"Montañoso", List.of("A320-200","ATR 72-600"));
+        put("RVE","SKSA","Saravena","Los Colonizadores","Arauca",6.9556,-71.8572,700,1800,"Llano", List.of("ATR 42-600","ERJ-145"));
+        put("APO","SKLC","Carepa (Apartadó)","Antonio Roldán Betancourt","Antioquia",7.81,-76.716,46,1800,"Selva", List.of("ATR 72-600","ERJ-145"));
     }
 
-    public static Set<String> keys(){ return DB.keySet(); }
-    public static Airport get(String iata){ return DB.get(iata); }
+    public static Airport get(String iata) { return A.get(iata); }
+    public static Set<String> keys() { return Collections.unmodifiableSet(A.keySet()); }
+    public static boolean isDomesticPair(String o, String d) { return A.containsKey(o) && A.containsKey(d) && !o.equals(d); }
 }
