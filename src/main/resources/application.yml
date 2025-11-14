@@ -16,8 +16,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${GMAIL_USER}           
-    password: ${GMAIL_APP_PASSWORD}   
+    username: ${GMAIL_USER}
+    password: ${GMAIL_APP_PASSWORD}
     properties:
       mail:
         smtp:
@@ -44,7 +44,7 @@ logging:
     org.hibernate.SQL: WARN
   pattern:
     console: "%clr(%d{yyyy-MM-dd HH:mm:ss}){faint} | %clr(%-5level){cyan} | %clr(%logger{36}){blue} | %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} | %-5level | %logger{36} | %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} | %logger{36} | %msg%n"
 
 management:
   endpoints:
@@ -67,12 +67,14 @@ external:
       base-url: ${AIRLABS_BASE_URL:https://airlabs.co/api/v9}
       api-key: ${AIRLABS_API_KEY:}
 
-
-
 app:
   mail:
-    
     from: ${APP_MAIL_FROM:Aerotickets <no-reply@aerotickets.com>}
   frontend:
-  
     base-url: ${APP_FRONTEND_BASE_URL:http://localhost:5173}
+
+email:
+  provider: ${EMAIL_PROVIDER:gmail}
+
+sendgrid:
+  api-key: ${SENDGRID_API_KEY:}
