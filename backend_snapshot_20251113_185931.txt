@@ -1,0 +1,4043 @@
+﻿### PROJECT TREE
+      .\Dockerfile
+      .\make_snapshot_backend.ps1
+      .\pom.xml
+      .\src\main\java\com\aerotickets\App.java
+      .\src\main\java\com\aerotickets\bootstrap\DataLoader.java
+      .\src\main\java\com\aerotickets\config\AppConfig.java
+      .\src\main\java\com\aerotickets\config\CacheConfig.java
+      .\src\main\java\com\aerotickets\config\CorsConfig.java
+      .\src\main\java\com\aerotickets\config\FlywayConfig.java
+      .\src\main\java\com\aerotickets\config\HttpDumpFilter.java
+      .\src\main\java\com\aerotickets\config\PerformanceLoggingFilter.java
+      .\src\main\java\com\aerotickets\config\RequestLoggingFilter.java
+      .\src\main\java\com\aerotickets\config\SecurityBeans.java
+      .\src\main\java\com\aerotickets\config\SecurityConfig.java
+      .\src\main\java\com\aerotickets\config\StartupLogChecker.java
+      .\src\main\java\com\aerotickets\controller\AirCatalogController.java
+      .\src\main\java\com\aerotickets\controller\AuthController.java
+      .\src\main\java\com\aerotickets\controller\FlightController.java
+      .\src\main\java\com\aerotickets\controller\HealthController.java
+      .\src\main\java\com\aerotickets\controller\LiveFlightController.java
+      .\src\main\java\com\aerotickets\controller\PasswordRecoveryController.java
+      .\src\main\java\com\aerotickets\controller\ReservationController.java
+      .\src\main\java\com\aerotickets\controller\TestController.java
+      .\src\main\java\com\aerotickets\controller\UserController.java
+      .\src\main\java\com\aerotickets\dto\AuthResponseDTO.java
+      .\src\main\java\com\aerotickets\dto\FlightDTO.java
+      .\src\main\java\com\aerotickets\dto\FlightSearchDTO.java
+      .\src\main\java\com\aerotickets\dto\LoginRequestDTO.java
+      .\src\main\java\com\aerotickets\dto\ReservationRequestDTO.java
+      .\src\main\java\com\aerotickets\dto\ReservationResponseDTO.java
+      .\src\main\java\com\aerotickets\dto\UserRegistrationDTO.java
+      .\src\main\java\com\aerotickets\dto\UserResponseDTO.java
+      .\src\main\java\com\aerotickets\entity\Flight.java
+      .\src\main\java\com\aerotickets\entity\Reservation.java
+      .\src\main\java\com\aerotickets\entity\ReservationStatus.java
+      .\src\main\java\com\aerotickets\entity\User.java
+      .\src\main\java\com\aerotickets\exception\ConflictException.java
+      .\src\main\java\com\aerotickets\exception\GlobalExceptionHandler.java
+      .\src\main\java\com\aerotickets\exception\NotFoundException.java
+      .\src\main\java\com\aerotickets\exception\RestExceptionHandler.java
+      .\src\main\java\com\aerotickets\model\AuthResponse.java
+      .\src\main\java\com\aerotickets\model\LiveFlight.java
+      .\src\main\java\com\aerotickets\model\LoginRequest.java
+      .\src\main\java\com\aerotickets\model\RegisterRequest.java
+      .\src\main\java\com\aerotickets\repository\FlightRepository.java
+      .\src\main\java\com\aerotickets\repository\ReservationRepository.java
+      .\src\main\java\com\aerotickets\repository\UserRepository.java
+      .\src\main\java\com\aerotickets\security\JwtAuthFilter.java
+      .\src\main\java\com\aerotickets\security\JwtService.java
+      .\src\main\java\com\aerotickets\security\JwtUtil.java
+      .\src\main\java\com\aerotickets\service\CustomUserDetailsService.java
+      .\src\main\java\com\aerotickets\service\FlightService.java
+      .\src\main\java\com\aerotickets\service\FlightSimulatorService.java
+      .\src\main\java\com\aerotickets\service\LiveFlightService.java
+      .\src\main\java\com\aerotickets\service\ReservationService.java
+      .\src\main\java\com\aerotickets\service\SimulationRegistry.java
+      .\src\main\java\com\aerotickets\service\UserService.java
+      .\src\main\java\com\aerotickets\sim\AircraftCatalog.java
+      .\src\main\java\com\aerotickets\sim\AircraftPerfCatalog.java
+      .\src\main\java\com\aerotickets\sim\AirportCatalogCO.java
+      .\src\main\java\com\aerotickets\sim\DisruptionEngine.java
+      .\src\main\java\com\aerotickets\sim\RestrictionsEngine.java
+      .\src\main\java\com\aerotickets\sim\ScheduleRules.java
+      .\src\main\java\com\aerotickets\sim\WeatherProfileCatalog.java
+      .\src\main\java\com\aerotickets\util\GeoUtil.java
+      .\src\main\java\com\aerotickets\util\IataResolver.java
+      .\src\main\resources\application.yml
+      .\src\main\resources\application-dev.yml
+      .\src\main\resources\application-prod.yml
+      .\src\main\resources\db\migration\V1__init.sql
+      .\src\main\resources\db\migration\V2__seed_flights_co.sql
+      .\src\main\resources\db\migration\V3__airports_co.sql
+      .\src\main\resources\logback-spring.xml
+      .dockerignore
+      .env.example
+      .gitignore
+
+
+### FILE CONTENTS
+
+
+===== FILE: .dockerignore =====
+target/
+.git/
+.gitignore
+README.md
+logs/
+*.log
+
+
+===== FILE: .env.example =====
+VITE_API_URL=https://aerotickets-api.onrender.com
+
+
+===== FILE: .gitignore =====
+# Build / Java
+target/
+out/
+*.class
+*.log
+logs/
+hs_err_pid*.log
+
+# IDEs
+.idea/
+*.iml
+.project
+.classpath
+.factorypath
+.settings/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env & secrets
+.env
+.env.*
+!*.example
+
+# Docker artifacts
+*.pid
+
+
+===== FILE: .\Dockerfile =====
+# syntax=docker/dockerfile:1
+
+# ---- Build stage ----
+FROM maven:3.9.9-eclipse-temurin-21 AS build
+WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn -DskipTests package
+
+# ---- Runtime stage ----
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+
+# El JAR final según tu pom.xml (<finalName>aerotickets-backend</finalName>)
+COPY --from=build /app/target/aerotickets-backend.jar app.jar
+
+EXPOSE 8080
+ENV JAVA_OPTS=""
+CMD ["sh","-c","java $JAVA_OPTS -Dserver.port=${PORT:-8080} -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-prod} -jar app.jar"]
+
+
+===== FILE: .\make_snapshot_backend.ps1 =====
+# === Snapshot solo con archivos versionados por Git, evitando bloqueos ===
+$ErrorActionPreference = 'Stop'
+
+# 1) Archivo de salida en %TEMP%
+$stamp = (Get-Date).ToString('yyyyMMdd_HHmmss')
+$tmpOut = Join-Path $env:TEMP "backend_snapshot_$stamp.txt"
+
+# 2) Extensiones binarias a omitir
+$binaryExt = @(
+  '.png','.jpg','.jpeg','.gif','.webp','.ico','.svg',
+  '.woff','.woff2','.ttf','.eot',
+  '.zip','.gz','.br','.7z','.rar',
+  '.pdf','.mp4','.mp3','.webm','.mov',
+  '.class'
+)
+
+# 3) Obtener lista de archivos versionados por Git
+#    (si el repo no es Git, cae al modo filesystem)
+function Get-VersionedFiles {
+  try {
+    git rev-parse --is-inside-work-tree *> $null
+    $files = git ls-files
+    if (-not $files) { throw "No files from git." }
+    return $files
+  } catch {
+    # Fallback: recorre disco, excluyendo rutas típicas
+    $exclude = '(\\(node_modules|dist|build|coverage|logs|target|out|\.git|\.idea|\.vscode|\.settings)(\\|$))|(\\\.env($|\\|\.))'
+    return Get-ChildItem -Recurse -File -Force `
+      | Where-Object { $_.FullName -notmatch $exclude } `
+      | ForEach-Object { $_.FullName }
+  }
+}
+
+$files = Get-VersionedFiles
+
+# 4) Encabezado: árbol simple
+"### PROJECT TREE" | Set-Content $tmpOut -Encoding UTF8
+$files `
+| ForEach-Object {
+    # Normaliza a ruta relativa si se puede
+    try {
+      $rel = Resolve-Path -LiteralPath $_ -Relative
+    } catch { $rel = $_ }
+    "      $rel"
+  } `
+| Sort-Object `
+| Add-Content $tmpOut -Encoding UTF8
+
+# 5) Contenido de archivos
+"`n`n### FILE CONTENTS" | Add-Content $tmpOut -Encoding UTF8
+
+foreach($f in $files) {
+  try {
+    $ext = [IO.Path]::GetExtension($f)
+    if ($ext) { $ext = $ext.ToLower() } else { $ext = '' }
+    if ($binaryExt -contains $ext) { continue }
+
+    try { $rel = Resolve-Path -LiteralPath $f -Relative } catch { $rel = $f }
+
+    "`n`n===== FILE: $rel =====" | Add-Content $tmpOut -Encoding UTF8
+    Get-Content -Raw -LiteralPath $f -Encoding UTF8 `
+      | Add-Content $tmpOut -Encoding UTF8
+  }
+  catch {
+    "`n`n===== FILE: $f =====" | Add-Content $tmpOut -Encoding UTF8
+    "[[WARN]] No se pudo leer este archivo: $($_.Exception.Message)" `
+      | Add-Content $tmpOut -Encoding UTF8
+  }
+}
+
+# 6) Copiamos el resultado al repo con nombre único (evita locks)
+$finalName = "backend_snapshot_$stamp.txt"
+Copy-Item -LiteralPath $tmpOut -Destination $finalName -Force
+
+Write-Host "OK: $finalName"
+
+
+===== FILE: .\pom.xml =====
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <!-- ============================= -->
+  <!-- 📦 PROPIEDADES DEL PROYECTO -->
+  <!-- ============================= -->
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.3.2</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>com.aerotickets</groupId>
+  <artifactId>aerotickets-backend</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>Aerotickets</name>
+  <description>Backend de Aerotickets - Spring Boot 3, MySQL (dev) y PostgreSQL (prod)</description>
+
+  <properties>
+    <java.version>21</java.version>
+    <maven.compiler.release>21</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <jjwt.version>0.11.5</jjwt.version>
+  </properties>
+
+  <!-- ============================= -->
+  <!-- ⚙️ DEPENDENCIAS -->
+  <!-- ============================= -->
+  <dependencies>
+    <!-- 📊 Spring Boot Actuator -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
+    <!-- 🌐 Web MVC (REST API + SSE) -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <!-- 🔐 Seguridad con Spring Security -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+
+    <!-- ✅ Validación con Jakarta Validation -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+
+    <!-- 💾 JPA / Hibernate -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+
+    <!-- 🗄️ Drivers de BD -->
+    <!-- MySQL (entorno local - dev) -->
+    <dependency>
+      <groupId>com.mysql</groupId>
+      <artifactId>mysql-connector-j</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <!-- PostgreSQL (entorno de producción - Neon / Render) -->
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <!-- 🚀 Migraciones de base de datos (Flyway) -->
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-database-postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <!-- 🔑 JSON Web Tokens (JWT) -->
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-api</artifactId>
+      <version>${jjwt.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-impl</artifactId>
+      <version>${jjwt.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-jackson</artifactId>
+      <version>${jjwt.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <!-- 🧩 Lombok (para reducir boilerplate) -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <optional>true</optional>
+    </dependency>
+
+    <!-- ⚡ Cache con Caffeine -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-cache</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.github.ben-manes.caffeine</groupId>
+      <artifactId>caffeine</artifactId>
+    </dependency>
+
+    <!-- 🧠 Procesador de configuración (autocompletado y metadatos para IDEs) -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+      <optional>true</optional>
+    </dependency>
+
+    <!-- 🧪 Pruebas -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- (Opcional) Testcontainers para integración futura -->
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <!-- ============================= -->
+  <!-- ⚙️ BUILD / COMPILACIÓN -->
+  <!-- ============================= -->
+  <build>
+    <finalName>aerotickets-backend</finalName>
+    <plugins>
+      <!-- 🔧 Compilador de Java -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <release>${maven.compiler.release}</release>
+        </configuration>
+      </plugin>
+
+      <!-- 🚀 Plugin de Spring Boot -->
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <layers>
+            <enabled>true</enabled>
+          </layers>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
+
+
+===== FILE: .\src\main\java\com\aerotickets\App.java =====
+package com.aerotickets;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+
+import java.util.Map;
+
+@SpringBootApplication
+@EnableScheduling
+public class App {
+
+    public static void main(String[] args) {
+        var app = new SpringApplication(App.class);
+        var ctx = app.run(args);
+
+        ConfigurableEnvironment env = (ConfigurableEnvironment) ctx.getEnvironment();
+
+        String appEnv = env.getProperty("SPRING_PROFILES_ACTIVE", "dev");
+        String dbUrl  = env.getProperty("DB_URL", "jdbc:postgresql://localhost:5432/aerotickets");
+        String port   = env.getProperty("PORT", "8080");
+
+        System.out.println("\n==============================================");
+        System.out.println(" Aerotickets Backend iniciado");
+        System.out.println(" Entorno: " + appEnv.toUpperCase());
+        System.out.println(" Puerto : " + port);
+        System.out.println(" DB URL : " + maskDbUrl(dbUrl));
+        System.out.println(" Logs   : logs/aerotickets.log");
+        System.out.println("==============================================\n");
+    }
+
+    /**
+     * ✅ Muestra todos los endpoints REST registrados (sin romper por múltiples beans).
+     */
+    @Bean
+    public CommandLineRunner logAllEndpoints(ApplicationContext ctx) {
+        return args -> {
+            System.out.println("========= ENDPOINTS REGISTRADOS =========");
+            try {
+                Map<String, RequestMappingHandlerMapping> mappings =
+                        ctx.getBeansOfType(RequestMappingHandlerMapping.class);
+
+                mappings.forEach((name, mapping) -> {
+                    mapping.getHandlerMethods().forEach((key, value) -> {
+                        System.out.println("[" + name + "] " + key + " -> " + value);
+                    });
+                });
+            } catch (Exception e) {
+                System.out.println("⚠️ No se pudo obtener la lista de endpoints: " + e.getMessage());
+            }
+            System.out.println("=========================================");
+        };
+    }
+
+    /**
+     * Oculta cualquier contraseña presente en la URL JDBC para evitar exponer credenciales en logs.
+     */
+    private static String maskDbUrl(String url) {
+        if (url == null) return "N/A";
+        return url.replaceAll("(?i)(password=)[^&]+", "$1********");
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\bootstrap\DataLoader.java =====
+package com.aerotickets.bootstrap;
+
+import com.aerotickets.entity.Flight;
+import com.aerotickets.repository.FlightRepository;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.*;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Configuration
+public class DataLoader {
+
+    @Bean
+    CommandLineRunner initFlights(FlightRepository flightRepository) {
+        return args -> {
+            if (flightRepository.count() == 0) {
+                flightRepository.save(Flight.builder()
+                        .airline("Aerolíneas Demo")
+                        .origin("BOG")
+                        .destination("MDE")
+                        .departureAt(LocalDateTime.now().plusDays(3).withHour(8).withMinute(0))
+                        .arriveAt(LocalDateTime.now().plusDays(3).withHour(9).withMinute(15))
+                        .totalSeats(150)
+                        .price(new BigDecimal("220000"))
+                        .build());
+
+                flightRepository.save(Flight.builder()
+                        .airline("Demo Air")
+                        .origin("CLO")
+                        .destination("CTG")
+                        .departureAt(LocalDateTime.now().plusDays(7).withHour(10).withMinute(30))
+                        .arriveAt(LocalDateTime.now().plusDays(7).withHour(12).withMinute(0))
+                        .totalSeats(120)
+                        .price(new BigDecimal("380000"))
+                        .build());
+            }
+        };
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\config\AppConfig.java =====
+package com.aerotickets.config;
+
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class AppConfig {
+    // Aquí puedes tener otras configuraciones generales, pero
+    // ❌ no pongas otro @Bean passwordEncoder
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\config\CacheConfig.java =====
+package com.aerotickets.config;
+
+import com.github.benmanes.caffeine.cache.Caffeine;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.concurrent.TimeUnit;
+
+@Configuration
+public class CacheConfig {
+
+    @Bean
+    public Caffeine<Object, Object> caffeineConfig() {
+        return Caffeine.newBuilder()
+                .expireAfterWrite(3, TimeUnit.MINUTES)
+                .maximumSize(500);
+    }
+
+    @Bean
+    public CacheManager cacheManager(Caffeine<Object, Object> caffeine) {
+        CaffeineCacheManager m = new CaffeineCacheManager("liveFlights");
+        m.setCaffeine(caffeine);
+        return m;
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\config\CorsConfig.java =====
+package com.aerotickets.config;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.Arrays;
+
+@Configuration
+public class CorsConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addCorsMappings(@NonNull CorsRegistry registry) {
+        // Permitir configurar orígenes por ENV en Render:
+        // CORS_ALLOWED_ORIGINS = http://localhost:5173,https://aerotickets-frontend.vercel.app,https://*.vercel.app
+        String defaults =
+                "http://localhost:5173," +
+                "http://127.0.0.1:5173," +
+                "https://aerotickets-frontend.vercel.app," +
+                "https://aerotickets-frontend-git-main-hector-riascos-projects.vercel.app," +
+                "https://*.vercel.app";
+
+        String env = System.getenv().getOrDefault("CORS_ALLOWED_ORIGINS", defaults);
+
+        String[] patterns = Arrays.stream(env.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toArray(String[]::new);
+
+        registry.addMapping("/**")
+                // 👇 Usa patrones para soportar wildcard (*.vercel.app)
+                .allowedOriginPatterns(patterns)
+                // Métodos permitidos (incluye OPTIONS y PATCH)
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
+                // Cabeceras típicas
+                .allowedHeaders("*")
+                .exposedHeaders("Authorization", "Content-Type")
+                // Si manejas cookies o Authorization en fetch, debe ser true
+                .allowCredentials(true)
+                // Cachea el preflight por 1 hora
+                .maxAge(3600);
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\config\FlywayConfig.java =====
+package com.aerotickets.config;
+
+import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.MigrationInfoService;
+import org.flywaydb.core.api.exception.FlywayValidateException;
+import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class FlywayConfig {
+
+    @Bean
+    public FlywayMigrationStrategy baselineIfNeededThenMigrate() {
+        return (Flyway flyway) -> {
+            try {
+                // Si no hay tabla de metadatos, info() sigue funcionando y pending() > 0
+                MigrationInfoService info = flyway.info();
+
+                boolean hasApplied = info != null && info.applied() != null && info.applied().length > 0;
+                boolean hasPending = info != null && info.pending() != null && info.pending().length > 0;
+
+                // Si no hay aplicadas pero sí pendientes, probablemente la BD tiene tablas “huérfanas”
+                // y Flyway aún no está inicializado: hacemos baseline a la versión 1.
+                if (!hasApplied && hasPending) {
+                    flyway.baseline();
+                }
+
+                flyway.migrate();
+            } catch (FlywayValidateException ex) {
+                // Si hay un desajuste, intenta “baseline” y luego migrate
+                flyway.baseline();
+                flyway.migrate();
+            }
+        };
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\config\HttpDumpFilter.java =====
+package com.aerotickets.config;
+
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger; import org.slf4j.LoggerFactory;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.Collections;
+
+@Component
+@Order(Ordered.HIGHEST_PRECEDENCE + 1) // muy arriba, después de CORS si lo tuvieras
+public class HttpDumpFilter implements Filter {
+  private static final Logger log = LoggerFactory.getLogger(HttpDumpFilter.class);
+
+  @Override public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+      throws IOException, ServletException {
+    HttpServletRequest req = (HttpServletRequest) request;
+    StringBuilder sb = new StringBuilder();
+    sb.append("⟶ ").append(req.getMethod()).append(" ").append(req.getRequestURI());
+
+    Collections.list(req.getHeaderNames()).forEach(h -> {
+      sb.append("\n    ").append(h).append(": ").append(Collections.list(req.getHeaders(h)));
+    });
+
+    log.info(sb.toString());
+    chain.doFilter(request, response);
+  }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\config\PerformanceLoggingFilter.java =====
+package com.aerotickets.config;
+
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+
+/**
+ * Filtro que mide el tiempo de ejecución de cada petición HTTP
+ * y registra errores y tiempos lentos con alertas visuales.
+ */
+@Component
+public class PerformanceLoggingFilter implements Filter {
+
+    private static final Logger logger = LoggerFactory.getLogger(PerformanceLoggingFilter.class);
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
+
+        long startTime = System.currentTimeMillis();
+        HttpServletRequest req = (HttpServletRequest) request;
+
+        chain.doFilter(request, response);
+
+        long duration = System.currentTimeMillis() - startTime;
+        HttpServletResponse res = (HttpServletResponse) response;
+
+        int status = res.getStatus();
+        String method = req.getMethod();
+        String uri = req.getRequestURI();
+
+        // Colores ANSI para visibilidad
+        final String RESET = "\033[0m";
+        final String RED = "\033[0;31m";
+        final String GREEN = "\033[0;32m";
+        final String YELLOW = "\033[0;33m";
+
+        String color;
+        if (status >= 500) color = RED; // Error interno
+        else if (status >= 400) color = YELLOW; // Error cliente
+        else color = GREEN; // OK
+
+        String msg = String.format("%s➡️ %s %s - %d (%d ms)%s",
+                color, method, uri, status, duration, RESET);
+
+        if (status >= 500) {
+            logger.error(msg);
+        } else if (status >= 400) {
+            logger.warn(msg);
+        } else if (duration > 1000) { // Más de 1 segundo = lento
+            logger.warn("⚠️ Petición lenta detectada: {} {} ({} ms)", method, uri, duration);
+        } else {
+            logger.info(msg);
+        }
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\config\RequestLoggingFilter.java =====
+package com.aerotickets.config;
+
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+
+@Component
+public class RequestLoggingFilter implements Filter {
+
+    private static final Logger logger = LoggerFactory.getLogger(RequestLoggingFilter.class);
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
+
+        long startTime = System.currentTimeMillis();
+        HttpServletRequest req = (HttpServletRequest) request;
+        String method = req.getMethod();
+        String uri = req.getRequestURI();
+
+        chain.doFilter(request, response);
+
+        long duration = System.currentTimeMillis() - startTime;
+
+        logger.info("➡️ {} {} completado en {} ms", method, uri, duration);
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\config\SecurityBeans.java =====
+package com.aerotickets.config;
+
+import org.springframework.context.annotation.*;
+
+@Configuration
+public class SecurityBeans {
+
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\config\SecurityConfig.java =====
+package com.aerotickets.config;
+
+import com.aerotickets.security.JwtAuthFilter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Configuration
+@RequiredArgsConstructor
+public class SecurityConfig {
+
+    private final JwtAuthFilter jwtAuthFilter;
+
+    @Value("${cors.allowed-origins:http://localhost:5173,https://aerotickets-frontend.vercel.app,https://aerotickets-frontend-git-main-hector-riascos-projects.vercel.app,https://*.vercel.app}")
+    private String allowedOriginsProp;
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(org.springframework.security.config.annotation.web.builders.HttpSecurity http) throws Exception {
+        return http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/health", "/hola", "/actuator/health").permitAll()
+                        .requestMatchers("/auth/**", "/api/auth/**").permitAll()
+                        .requestMatchers("/live/**", "/api/live/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/catalog/**", "/api/catalog/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/flights/**", "/api/flights/**").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        List<String> allowed = Arrays.stream(allowedOriginsProp.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .distinct()
+                .collect(Collectors.toList());
+        List<String> patterns = allowed.stream().filter(s -> s.contains("*")).collect(Collectors.toList());
+        List<String> exact = allowed.stream().filter(s -> !s.contains("*")).collect(Collectors.toList());
+
+        CorsConfiguration cfg = new CorsConfiguration();
+        if (!exact.isEmpty()) cfg.setAllowedOrigins(exact);
+        if (!patterns.isEmpty()) cfg.setAllowedOriginPatterns(patterns);
+        cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        cfg.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
+        cfg.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        cfg.setAllowCredentials(true);
+        cfg.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", cfg);
+        return source;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration cfg) throws Exception {
+        return cfg.getAuthenticationManager();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\config\StartupLogChecker.java =====
+package com.aerotickets.config;
+
+import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.util.List;
+
+/**
+ * Verifica si existen errores previos en el último log al iniciar la app.
+ * Muestra una alerta visual en consola al arrancar.
+ */
+@Component
+public class StartupLogChecker {
+
+    private static final Logger logger = LoggerFactory.getLogger(StartupLogChecker.class);
+    private static final String LOG_DIR = "logs";
+    private static final String ERROR_FILE_PREFIX = "errors-Aerotickets";
+
+    @PostConstruct
+    public void checkPreviousErrors() {
+        try {
+            File logDir = new File(LOG_DIR);
+            if (!logDir.exists()) return;
+
+            File[] logs = logDir.listFiles((dir, name) -> name.startsWith(ERROR_FILE_PREFIX) && name.endsWith(".log"));
+            if (logs == null || logs.length == 0) {
+                System.out.println("\033[0;32m✅ No se detectaron errores previos en los registros.\033[0m");
+                return;
+            }
+
+            File latest = null;
+            for (File f : logs) {
+                if (latest == null || f.lastModified() > latest.lastModified()) {
+                    latest = f;
+                }
+            }
+
+            if (latest != null && latest.exists()) {
+                List<String> lines = Files.readAllLines(latest.toPath());
+                if (!lines.isEmpty()) {
+                    System.out.println("\033[0;33m⚠️  Se detectaron errores previos en: " + latest.getName() + "\033[0m");
+                    System.out.println("\033[0;31mÚltimo error:\033[0m");
+                    System.out.println(lines.get(lines.size() - 1));
+                } else {
+                    System.out.println("\033[0;32m✅ No se detectaron errores previos en los registros.\033[0m");
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("No se pudo verificar los logs anteriores: {}", e.getMessage());
+        }
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\controller\AirCatalogController.java =====
+package com.aerotickets.controller;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
+
+@RestController
+@RequestMapping("/catalog")
+public class AirCatalogController {
+
+    @GetMapping("/airports/co")
+    public ResponseEntity<List<Map<String, String>>> airportsColombia() {
+        List<Map<String,String>> list = new ArrayList<>();
+        add(list, "BOG", "El Dorado", "Bogotá");
+        add(list, "MDE", "J. M. Córdova", "Medellín");
+        add(list, "EOH", "Olaya Herrera", "Medellín");
+        add(list, "CLO", "Alfonso Bonilla Aragón", "Cali");
+        add(list, "CTG", "Rafael Núñez", "Cartagena");
+        add(list, "SMR", "Simón Bolívar", "Santa Marta");
+        add(list, "BAQ", "Ernesto Cortissoz", "Barranquilla");
+        add(list, "PEI", "Matecaña", "Pereira");
+        add(list, "CUC", "Camilo Daza", "Cúcuta");
+        add(list, "ADZ", "G. O. y G. S. A. Newball", "San Andrés");
+        add(list, "BGA", "Palo Negro", "Bucaramanga");
+        add(list, "PSO", "Antonio Nariño", "Pasto");
+        add(list, "LET", "Alfredo V. Cobo", "Leticia");
+        add(list, "AXM", "El Edén", "Armenia");
+        add(list, "MZL", "La Nubia", "Manizales");
+        add(list, "NVA", "Benito Salas", "Neiva");
+        add(list, "PPN", "G. L. Valencia", "Popayán");
+        add(list, "UIB", "El Caraño", "Quibdó");
+        add(list, "MTR", "Los Garzones", "Montería");
+        add(list, "VVC", "Vanguardia", "Villavicencio");
+        add(list, "RCH", "Almirante Padilla", "Riohacha");
+        return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/airlines/co")
+    public ResponseEntity<List<Map<String, String>>> airlinesColombia() {
+        List<Map<String,String>> list = new ArrayList<>();
+        list.add(Map.of("code","AV","name","Avianca"));
+        list.add(Map.of("code","LA","name","LATAM Airlines"));
+        list.add(Map.of("code","9R","name","SATENA"));
+        list.add(Map.of("code","UL","name","Ultra Air (sim)"));
+        list.add(Map.of("code","VH","name","Viva (sim)"));
+        return ResponseEntity.ok(list);
+    }
+
+    private void add(List<Map<String,String>> list, String iata, String name, String city) {
+        list.add(Map.of("iata", iata, "name", name, "city", city, "country", "Colombia"));
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\controller\AuthController.java =====
+package com.aerotickets.controller;
+
+import com.aerotickets.entity.User;
+import com.aerotickets.model.AuthResponse;
+import com.aerotickets.model.LoginRequest;
+import com.aerotickets.model.RegisterRequest;
+import com.aerotickets.repository.UserRepository;
+import com.aerotickets.security.JwtService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+
+/**
+ * Controlador para registro y autenticación de usuarios.
+ * Proporciona endpoints públicos:
+ *  - POST /api/auth/register
+ *  - POST /api/auth/login
+ */
+@RestController
+@RequestMapping("/auth")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+@RequiredArgsConstructor
+public class AuthController {
+
+    private final AuthenticationManager authManager;
+    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final JwtService jwtService;
+
+    /**
+     * Registro de un nuevo usuario.
+     */
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest req) {
+        if (userRepository.findByEmail(req.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body("El correo ya está registrado.");
+        }
+
+        User user = new User();
+        user.setFullName(req.getFullName());
+        user.setEmail(req.getEmail());
+        user.setPasswordHash(passwordEncoder.encode(req.getPassword()));
+        userRepository.save(user);
+
+        return ResponseEntity.ok("Usuario registrado exitosamente");
+    }
+
+    /**
+     * Inicio de sesión con generación de JWT.
+     */
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest req) {
+        // Autenticar credenciales del usuario
+        authManager.authenticate(
+                new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword())
+        );
+
+        User user = userRepository.findByEmail(req.getEmail())
+                .orElseThrow(() -> new BadCredentialsException("Usuario no encontrado"));
+
+        String token = jwtService.generateToken(user);
+        return ResponseEntity.ok(new AuthResponse(token, user));
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\controller\FlightController.java =====
+package com.aerotickets.controller;
+
+import com.aerotickets.dto.FlightDTO;
+import com.aerotickets.dto.FlightSearchDTO;
+import com.aerotickets.entity.Flight;
+import com.aerotickets.service.FlightService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+
+@RestController
+@RequestMapping("/flights")
+public class FlightController {
+
+    private final FlightService flightService;
+
+    public FlightController(FlightService flightService){
+        this.flightService = flightService;
+    }
+
+    @GetMapping
+    public List<Flight> listAll() {
+        return flightService.listAll();
+    }
+
+    @PostMapping
+    public ResponseEntity<?> create(@Valid @RequestBody FlightDTO dto) {
+        if (dto.getAirline() == null ||
+            dto.getOrigin() == null ||
+            dto.getDestination() == null ||
+            dto.getDepartureAt() == null) {
+            throw new IllegalArgumentException(
+                "Campos obligatorios faltantes: airline, origin, destination, departureAt"
+            );
+        }
+
+        // Convertimos OffsetDateTime -> LocalDateTime en UTC
+        LocalDateTime dep = dto.getDepartureAt()
+                .atZoneSameInstant(ZoneOffset.UTC)
+                .toLocalDateTime();
+
+        LocalDateTime arr = (dto.getArriveAt() != null)
+                ? dto.getArriveAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime()
+                : dep.plusHours(2);
+
+        Integer seats = (dto.getTotalSeats() != null) ? dto.getTotalSeats() : 180;
+        BigDecimal price = (dto.getPrice() != null) ? dto.getPrice() : BigDecimal.ZERO;
+
+        Flight f = Flight.builder()
+                .airline(dto.getAirline())
+                .origin(dto.getOrigin())
+                .destination(dto.getDestination())
+                .departureAt(dep)
+                .arriveAt(arr)
+                .totalSeats(seats)
+                .price(price)
+                .build();
+
+        return ResponseEntity.ok(flightService.create(f));
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<List<Flight>> search(@RequestBody FlightSearchDTO dto) {
+        return ResponseEntity.ok(flightService.searchOrSimulate(dto));
+    }
+}
+
+
+
+===== FILE: .\src\main\java\com\aerotickets\controller\HealthController.java =====
+package com.aerotickets.controller;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@RestController
+public class HealthController {
+
+    @GetMapping("/health")
+    public ResponseEntity<?> health() {
+        return ResponseEntity.ok(Map.of(
+                "status", "UP",
+                "service", "aerotickets-backend"
+        ));
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\controller\LiveFlightController.java =====
+package com.aerotickets.controller;
+
+import com.aerotickets.dto.FlightSearchDTO;
+import com.aerotickets.model.LiveFlight;
+import com.aerotickets.service.LiveFlightService;
+import com.aerotickets.service.SimulationRegistry;
+import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.*;
+
+@RestController
+@RequestMapping("/live") // context-path /api viene de application.yml
+public class LiveFlightController {
+
+    private final LiveFlightService liveService;
+    private final SimulationRegistry registry;
+
+    public LiveFlightController(LiveFlightService liveService, SimulationRegistry registry) {
+        this.liveService = liveService;
+        this.registry = registry;
+    }
+
+    @CrossOrigin(
+        origins = {
+            "http://localhost:5173",
+            "https://aerotickets-frontend.vercel.app",
+            "https://*.vercel.app"
+        },
+        allowCredentials = "true"
+    )
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter stream() {
+        SseEmitter emitter = registry.subscribe();
+        ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
+        exec.scheduleAtFixedRate(() -> {
+            try { emitter.send(SseEmitter.event().name("ping").data("♥")); }
+            catch (Exception e) { emitter.complete(); exec.shutdownNow(); }
+        }, 20, 20, TimeUnit.SECONDS);
+
+        emitter.onCompletion(exec::shutdownNow);
+        emitter.onTimeout(() -> { emitter.complete(); exec.shutdownNow(); });
+        return emitter;
+    }
+
+    @PostMapping(value = "/flights/search", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<LiveFlight>> search(@Valid @RequestBody FlightSearchDTO dto) {
+        if (dto.getOrigin() == null || dto.getDestination() == null
+                || dto.getOrigin().isBlank() || dto.getDestination().isBlank()) {
+            return ResponseEntity.unprocessableEntity().build();
+        }
+        List<LiveFlight> results = liveService.searchLive(
+                dto.getOrigin(),
+                dto.getDestination(),
+                dto.getDate() != null ? dto.getDate().toString() : null,
+                null
+        );
+        return ResponseEntity.ok(results);
+    }
+
+    @GetMapping(value = "/airports/search", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Map<String, Object>>> airports(@RequestParam("query") String query) {
+        if (query == null || query.isBlank()) return ResponseEntity.ok(List.of());
+        return ResponseEntity.ok(liveService.autocompleteAirports(query));
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\controller\PasswordRecoveryController.java =====
+package com.aerotickets.controller;
+
+import com.aerotickets.entity.User;
+import com.aerotickets.repository.UserRepository;
+import com.aerotickets.security.JwtUtil;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/auth")
+public class PasswordRecoveryController {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder encoder;
+    private final JwtUtil jwtUtil;
+
+    public PasswordRecoveryController(
+            UserRepository userRepository,
+            PasswordEncoder encoder,
+            JwtUtil jwtUtil
+    ) {
+        this.userRepository = userRepository;
+        this.encoder = encoder;
+        this.jwtUtil = jwtUtil;
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Email requerido");
+        }
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado para ese email"));
+
+        String token = jwtUtil.generateTemporaryToken(user.getEmail(), 10);
+
+        // Imprime ambas variantes de URL para comodidad (tu front usa path param)
+        System.out.println("Password reset (path): http://localhost:5173/reset-password/" + token);
+        System.out.println("Password reset (query): http://localhost:5173/reset-password?token=" + token);
+
+        return ResponseEntity.ok("Hemos enviado un enlace de recuperación a tu correo.");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody Map<String, String> body) {
+        String token = body.get("token");
+        String newPassword = body.get("password"); // compat con front actual
+        if (newPassword == null) {
+            newPassword = body.get("newPassword"); // compat si el cliente manda 'newPassword'
+        }
+
+        if (token == null || token.isBlank() || newPassword == null || newPassword.isBlank()) {
+            throw new IllegalArgumentException("Token y nueva contraseña son requeridos");
+        }
+
+        String email = jwtUtil.validateTemporaryToken(token);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Token inválido o expirado"));
+
+        user.setPasswordHash(encoder.encode(newPassword));
+        userRepository.save(user);
+
+        return ResponseEntity.ok("Contraseña actualizada correctamente.");
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\controller\ReservationController.java =====
+package com.aerotickets.controller;
+
+import com.aerotickets.dto.ReservationRequestDTO;
+import com.aerotickets.dto.ReservationResponseDTO;
+import com.aerotickets.service.ReservationService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+// IMPORTANTE: con server.servlet.context-path=/api, el base path aquí
+// NO debe volver a incluir /api. Déjalo en "/reservations".
+@RequestMapping("/reservations")
+public class ReservationController {
+
+    private final ReservationService service;
+
+    public ReservationController(ReservationService service) {
+        this.service = service;
+    }
+
+    @PostMapping
+    public ResponseEntity<ReservationResponseDTO> create(Authentication auth,
+                                                         @Valid @RequestBody ReservationRequestDTO dto) {
+        String email = (auth != null) ? auth.getName() : null;
+        if (email == null || email.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(service.create(email, dto));
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<List<ReservationResponseDTO>> myReservations(Authentication auth) {
+        String email = (auth != null) ? auth.getName() : null;
+        if (email == null || email.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(service.listMine(email));
+    }
+
+    // Alias opcional
+    @GetMapping("/me")
+    public ResponseEntity<List<ReservationResponseDTO>> myReservationsAlias(Authentication auth) {
+        String email = (auth != null) ? auth.getName() : null;
+        if (email == null || email.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(service.listMine(email));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> cancel(Authentication auth, @PathVariable Long id) {
+        String email = (auth != null) ? auth.getName() : null;
+        if (email == null || email.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        service.cancel(email, id);
+        return ResponseEntity.noContent().build();
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\controller\TestController.java =====
+package com.aerotickets.controller;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class TestController {
+
+    @GetMapping("/hola")
+    public String hola() {
+        return "¡Hola, Aerotickets Backend está funcionando!";
+    }
+}
+
+
+
+===== FILE: .\src\main\java\com\aerotickets\controller\UserController.java =====
+package com.aerotickets.controller;
+
+import com.aerotickets.dto.UserRegistrationDTO;
+import com.aerotickets.dto.UserResponseDTO;
+import com.aerotickets.entity.User;
+import com.aerotickets.service.UserService;
+
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+/**
+ * REST Controller for managing user registration.
+ * Now returns a UserResponseDTO with the created user's id (no password).
+ */
+@RestController
+@RequestMapping("/users")
+public class UserController {
+
+    private final UserService userService;
+
+    // Constructor-based dependency injection
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    /**
+     * Registers a new user and returns a safe DTO with user id and basic info.
+     * @param dto User registration data
+     * @return ResponseEntity<UserResponseDTO>
+     */
+    @PostMapping("/register")
+    public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody UserRegistrationDTO dto) {
+        User u = userService.register(dto.getFullName(), dto.getEmail(), dto.getPassword());
+
+        UserResponseDTO resp = UserResponseDTO.builder()
+                .id(u.getId())
+                .fullName(u.getFullName())
+                .email(u.getEmail())
+                .role(u.getRole())
+                .enabled(u.isEnabled())
+                .createdAt(u.getCreatedAt())
+                .build();
+
+        return ResponseEntity.ok(resp);
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\dto\AuthResponseDTO.java =====
+package com.aerotickets.dto;
+
+public class AuthResponseDTO {
+  private String token;
+  private String fullName;
+  private String email;
+
+  public AuthResponseDTO(String token, String fullName, String email) {
+    this.token = token;
+    this.fullName = fullName;
+    this.email = email;
+  }
+
+  public String getToken() { return token; }
+  public String getFullName() { return fullName; }
+  public String getEmail() { return email; }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\dto\FlightDTO.java =====
+package com.aerotickets.dto;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.*;
+
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class FlightDTO {
+    private Long id;
+
+    private String airline;
+    private String origin;
+    private String destination;
+
+    // Acepta ISO-8601 con zona horaria (e.g. ...Z)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss[.SSS]XXX")
+    private OffsetDateTime departureAt;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss[.SSS]XXX")
+    private OffsetDateTime arriveAt;
+
+    // Pueden venir null; el controller aplica defaults
+    private Integer totalSeats;
+    private BigDecimal price;
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\dto\FlightSearchDTO.java =====
+package com.aerotickets.dto;
+
+import java.time.LocalDate;
+
+public class FlightSearchDTO {
+    private String origin;        // Código o nombre de aeropuerto de origen
+    private String destination;   // Código o nombre de aeropuerto de destino
+    private LocalDate date;       // Fecha del vuelo (si no se envía, se asume hoy)
+
+    public FlightSearchDTO() {}
+
+    public FlightSearchDTO(String origin, String destination, LocalDate date) {
+        this.origin = origin;
+        this.destination = destination;
+        this.date = date;
+    }
+
+    public String getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin(String origin) {
+        this.origin = origin;
+    }
+
+    public String getDestination() {
+        return destination;
+    }
+
+    public void setDestination(String destination) {
+        this.destination = destination;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    @Override
+    public String toString() {
+        return "FlightSearchDTO{" +
+                "origin='" + origin + '\'' +
+                ", destination='" + destination + '\'' +
+                ", date=" + date +
+                '}';
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\dto\LoginRequestDTO.java =====
+package com.aerotickets.dto;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
+public class LoginRequestDTO {
+
+  @NotBlank @Email
+  private String email;
+
+  @NotBlank
+  private String password;
+
+  // getters/setters
+  public String getEmail() { return email; }
+  public void setEmail(String email) { this.email = email; }
+  public String getPassword() { return password; }
+  public void setPassword(String password) { this.password = password; }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\dto\ReservationRequestDTO.java =====
+package com.aerotickets.dto;
+
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
+public class ReservationRequestDTO {
+    @NotNull
+    private Long flightId;
+
+    @Positive(message = "El asiento debe ser positivo")
+    private Integer seatNumber; // opcional
+
+    public Long getFlightId() { return flightId; }
+    public void setFlightId(Long flightId) { this.flightId = flightId; }
+    public Integer getSeatNumber() { return seatNumber; }
+    public void setSeatNumber(Integer seatNumber) { this.seatNumber = seatNumber; }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\dto\ReservationResponseDTO.java =====
+package com.aerotickets.dto;
+
+import com.aerotickets.entity.ReservationStatus;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDateTime;
+
+public class ReservationResponseDTO {
+
+    private Long id;
+    private Integer seatNumber;
+    private ReservationStatus status;
+    private Instant createdAt;
+
+    private Long flightId;
+    private String airline;
+    private String origin;
+    private String destination;
+    private LocalDateTime departureAt;
+    private LocalDateTime arriveAt;
+    private BigDecimal price;
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public Integer getSeatNumber() { return seatNumber; }
+    public void setSeatNumber(Integer seatNumber) { this.seatNumber = seatNumber; }
+    public ReservationStatus getStatus() { return status; }
+    public void setStatus(ReservationStatus status) { this.status = status; }
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+    public Long getFlightId() { return flightId; }
+    public void setFlightId(Long flightId) { this.flightId = flightId; }
+    public String getAirline() { return airline; }
+    public void setAirline(String airline) { this.airline = airline; }
+    public String getOrigin() { return origin; }
+    public void setOrigin(String origin) { this.origin = origin; }
+    public String getDestination() { return destination; }
+    public void setDestination(String destination) { this.destination = destination; }
+    public LocalDateTime getDepartureAt() { return departureAt; }
+    public void setDepartureAt(LocalDateTime departureAt) { this.departureAt = departureAt; }
+    public LocalDateTime getArriveAt() { return arriveAt; }
+    public void setArriveAt(LocalDateTime arriveAt) { this.arriveAt = arriveAt; }
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\dto\UserRegistrationDTO.java =====
+package com.aerotickets.dto;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public class UserRegistrationDTO {
+
+  @NotBlank @Size(min = 3, max = 80)
+  private String fullName;
+
+  @NotBlank @Email
+  private String email;
+
+  @NotBlank @Size(min = 8, max = 120)
+  private String password;
+
+  // getters/setters
+  public String getFullName() { return fullName; }
+  public void setFullName(String fullName) { this.fullName = fullName; }
+  public String getEmail() { return email; }
+  public void setEmail(String email) { this.email = email; }
+  public String getPassword() { return password; }
+  public void setPassword(String password) { this.password = password; }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\dto\UserResponseDTO.java =====
+package com.aerotickets.dto;
+
+import lombok.*;
+import java.time.Instant;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class UserResponseDTO {
+    private Long id;
+    private String fullName;
+    private String email;
+    private String role;
+    private boolean enabled;
+    private Instant createdAt;
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\entity\Flight.java =====
+package com.aerotickets.entity;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "flights")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+public class Flight {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String airline;
+
+    @Column(nullable = false)
+    private String origin;
+
+    @Column(nullable = false)
+    private String destination;
+
+    @Column(nullable = false)
+    private LocalDateTime departureAt;
+
+    @Column(nullable = false)
+    private LocalDateTime arriveAt;
+
+    @Column(nullable = false)
+    private Integer totalSeats;
+
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal price;
+
+    @Version
+    private Integer version;
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\entity\Reservation.java =====
+package com.aerotickets.entity;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.Instant;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@ToString(exclude = {"user", "flight"})
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@Entity
+@Table(
+        name = "reservations",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_res_flight_seat_active",
+                        columnNames = {"flight_id", "seat_number", "status"}
+                ),
+                @UniqueConstraint(
+                        name = "uk_res_flight_user_active",
+                        columnNames = {"flight_id", "user_id", "status"}
+                )
+        },
+        indexes = {
+                @Index(name = "idx_res_user", columnList = "user_id"),
+                @Index(name = "idx_res_flight", columnList = "flight_id"),
+                @Index(name = "idx_res_status", columnList = "status"),
+                @Index(name = "idx_res_created_at", columnList = "created_at")
+        }
+)
+public class Reservation {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_res_user"))
+    private User user;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "flight_id", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_res_flight"))
+    private Flight flight;
+
+    @Column(name = "seat_number")
+    private Integer seatNumber;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 16)
+    private ReservationStatus status = ReservationStatus.ACTIVE;
+
+    @Builder.Default
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt = Instant.now();
+
+    @Version
+    private Integer version;
+
+    @PrePersist
+    void prePersist() {
+        if (createdAt == null) createdAt = Instant.now();
+        if (status == null) status = ReservationStatus.ACTIVE;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Reservation that)) return false;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return 31;
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\entity\ReservationStatus.java =====
+package com.aerotickets.entity;
+
+public enum ReservationStatus {
+    ACTIVE,
+    CANCELLED
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\entity\User.java =====
+package com.aerotickets.entity;
+
+import jakarta.persistence.*;
+import java.time.Instant;
+import lombok.*;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Entity
+@Table(name = "users", uniqueConstraints = {
+    @UniqueConstraint(name = "uk_users_email", columnNames = "email")
+})
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String fullName;
+
+    @Column(nullable = false, length = 120, unique = true)
+    private String email;
+
+    @Column(nullable = false, length = 120)
+    private String passwordHash;
+    
+    @Builder.Default
+    @Column(nullable = false)
+    private Instant createdAt = Instant.now();
+
+    // ✅ Campos necesarios para autenticación
+    @Builder.Default
+    @Column(nullable = false)
+    private String role = "USER"; // puedes cambiar por "ADMIN" o lo que necesites
+    
+    
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean enabled = true; // indica si la cuenta está activa
+
+    // ✅ Getters y Setters (redundantes pero seguros para Eclipse)
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getFullName() { return fullName; }
+    public void setFullName(String fullName) { this.fullName = fullName; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getPasswordHash() { return passwordHash; }
+    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+
+    public boolean isEnabled() { return enabled; }
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\exception\ConflictException.java =====
+package com.aerotickets.exception;
+
+public class ConflictException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+
+    public ConflictException(String message) {
+        super(message);
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\exception\GlobalExceptionHandler.java =====
+package com.aerotickets.exception;
+
+import jakarta.validation.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.NoSuchElementException;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    private static final HttpHeaders JSON_HEADERS;
+    static {
+        JSON_HEADERS = new HttpHeaders();
+        JSON_HEADERS.setContentType(MediaType.APPLICATION_JSON);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<Map<String, Object>> handleAuth(AuthenticationException ex) {
+        return new ResponseEntity<>(
+                Map.of("message", "No autenticado", "type", ex.getClass().getSimpleName()),
+                JSON_HEADERS, HttpStatus.UNAUTHORIZED
+        );
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccess(AccessDeniedException ex) {
+        return new ResponseEntity<>(
+                Map.of("message", "Acceso denegado", "type", ex.getClass().getSimpleName()),
+                JSON_HEADERS, HttpStatus.FORBIDDEN
+        );
+    }
+
+    @ExceptionHandler({NoSuchElementException.class})
+    public ResponseEntity<Map<String, Object>> handleNotFound(RuntimeException ex) {
+        return new ResponseEntity<>(
+                Map.of("message", ex.getMessage() != null ? ex.getMessage() : "Recurso no encontrado"),
+                JSON_HEADERS, HttpStatus.NOT_FOUND
+        );
+    }
+
+    @ExceptionHandler({IllegalArgumentException.class, HttpMessageNotReadableException.class})
+    public ResponseEntity<Map<String, Object>> handleBadRequest(Exception ex) {
+        return new ResponseEntity<>(
+                Map.of("message", ex.getMessage() != null ? ex.getMessage() : "Petición inválida"),
+                JSON_HEADERS, HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleIntegrity(DataIntegrityViolationException ex) {
+        String rootMsg = ex.getMostSpecificCause() != null
+                ? ex.getMostSpecificCause().getMessage()
+                : ex.getMessage();
+        return new ResponseEntity<>(
+                Map.of("message", "Conflicto de datos. " + rootMsg),
+                JSON_HEADERS, HttpStatus.CONFLICT
+        );
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        for (FieldError err : ex.getBindingResult().getFieldErrors()) {
+            errors.put(err.getField(), err.getDefaultMessage());
+        }
+        return new ResponseEntity<>(
+                Map.of("message", "Error de validación de campos", "errors", errors),
+                JSON_HEADERS, HttpStatus.UNPROCESSABLE_ENTITY
+        );
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleConstraint(ConstraintViolationException ex) {
+        return new ResponseEntity<>(
+                Map.of("message", "Violación de restricciones", "errors", ex.getMessage()),
+                JSON_HEADERS, HttpStatus.UNPROCESSABLE_ENTITY
+        );
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
+        ex.printStackTrace(); // para ver la causa real en Render
+        return new ResponseEntity<>(
+                Map.of("message", "Error inesperado en el servidor", "type", ex.getClass().getSimpleName()),
+                JSON_HEADERS, HttpStatus.INTERNAL_SERVER_ERROR
+        );
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\exception\NotFoundException.java =====
+package com.aerotickets.exception;
+
+public class NotFoundException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+
+    public NotFoundException(String message) {
+        super(message);
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\exception\RestExceptionHandler.java =====
+package com.aerotickets.exception;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@ControllerAdvice
+public class RestExceptionHandler {
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<?> handleBadRequest(IllegalArgumentException ex){
+        return ResponseEntity.badRequest().body("Solicitud inválida: " + ex.getMessage());
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<?> handleConflict(IllegalStateException ex){
+        return ResponseEntity.status(409).body("Conflicto: " + ex.getMessage());
+    }
+
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<?> handleUnauthorized(SecurityException ex){
+        return ResponseEntity.status(403).body("No autorizado: " + ex.getMessage());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<?> handleAll(Exception ex){
+        // log ex
+        return ResponseEntity.internalServerError().body("Error interno del servidor: " + ex.getMessage());
+    }
+}
+
+
+
+===== FILE: .\src\main\java\com\aerotickets\model\AuthResponse.java =====
+package com.aerotickets.model;
+
+import com.aerotickets.entity.User;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
+public class AuthResponse {
+    private String token;
+    private User user;
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\model\LiveFlight.java =====
+package com.aerotickets.model;
+import java.util.Objects;
+/**
+ * Representa un vuelo simulado o en vivo en el sistema Aerotickets.
+ * Contiene información de la aerolínea, horarios, estado, aeronave y carga.
+ * Preparado para integración con el simulador de vuelos realista.
+ */
+public class LiveFlight {
+
+    private String provider;
+    private String airline;
+    private String airlineCode;   // AV, LA, VE, etc.
+    private String flightNumber;
+    private String originIata;
+    private String destinationIata;
+    private String departureAt;   // ISO local datetime (America/Bogota)
+    private String arrivalAt;     // ISO local datetime
+    private String status;        // SCHEDULED, BOARDING, EN-ROUTE, DELAYED, LANDED, DIVERTED, CANCELLED
+
+    private String aircraftType;  // A320, B737-800, ATR 72-600...
+    private String terminal;      // T1, T2
+    private String gate;          // A12
+    private String baggageBelt;   // 5
+    private Integer delayMinutes; // null si no hay
+    private boolean diverted;
+    private boolean emergency;
+    private int totalSeats;
+    private int occupiedSeats;
+    private int cargoKg;
+    private String boardingStartAt;
+    private String boardingEndAt;
+
+    public LiveFlight() {}
+
+    public LiveFlight(String provider, String airline, String flightNumber,
+                      String originIata, String destinationIata,
+                      String departureAt, String arrivalAt, String status) {
+        this.provider = provider;
+        this.airline = airline;
+        this.flightNumber = flightNumber;
+        this.originIata = originIata;
+        this.destinationIata = destinationIata;
+        this.departureAt = departureAt;
+        this.arrivalAt = arrivalAt;
+        this.status = status;
+    }
+
+    // ==== Getters y Setters ====
+    public String getProvider() { return provider; }
+    public void setProvider(String provider) { this.provider = provider; }
+    public String getAirline() { return airline; }
+    public void setAirline(String airline) { this.airline = airline; }
+    public String getAirlineCode() { return airlineCode; }
+    public void setAirlineCode(String airlineCode) { this.airlineCode = airlineCode; }
+    public String getFlightNumber() { return flightNumber; }
+    public void setFlightNumber(String flightNumber) { this.flightNumber = flightNumber; }
+    public String getOriginIata() { return originIata; }
+    public void setOriginIata(String originIata) { this.originIata = originIata; }
+    public String getDestinationIata() { return destinationIata; }
+    public void setDestinationIata(String destinationIata) { this.destinationIata = destinationIata; }
+    public String getDepartureAt() { return departureAt; }
+    public void setDepartureAt(String departureAt) { this.departureAt = departureAt; }
+    public String getArrivalAt() { return arrivalAt; }
+    public void setArrivalAt(String arrivalAt) { this.arrivalAt = arrivalAt; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+    public String getAircraftType() { return aircraftType; }
+    public void setAircraftType(String aircraftType) { this.aircraftType = aircraftType; }
+    public String getTerminal() { return terminal; }
+    public void setTerminal(String terminal) { this.terminal = terminal; }
+    public String getGate() { return gate; }
+    public void setGate(String gate) { this.gate = gate; }
+    public String getBaggageBelt() { return baggageBelt; }
+    public void setBaggageBelt(String baggageBelt) { this.baggageBelt = baggageBelt; }
+    public Integer getDelayMinutes() { return delayMinutes; }
+    public void setDelayMinutes(Integer delayMinutes) { this.delayMinutes = delayMinutes; }
+    public boolean isDiverted() { return diverted; }
+    public void setDiverted(boolean diverted) { this.diverted = diverted; }
+    public boolean isEmergency() { return emergency; }
+    public void setEmergency(boolean emergency) { this.emergency = emergency; }
+    public int getTotalSeats() { return totalSeats; }
+    public void setTotalSeats(int totalSeats) { this.totalSeats = totalSeats; }
+    public int getOccupiedSeats() { return occupiedSeats; }
+    public void setOccupiedSeats(int occupiedSeats) { this.occupiedSeats = occupiedSeats; }
+    public int getCargoKg() { return cargoKg; }
+    public void setCargoKg(int cargoKg) { this.cargoKg = cargoKg; }
+    public String getBoardingStartAt() { return boardingStartAt; }
+    public void setBoardingStartAt(String boardingStartAt) { this.boardingStartAt = boardingStartAt; }
+    public String getBoardingEndAt() { return boardingEndAt; }
+    public void setBoardingEndAt(String boardingEndAt) { this.boardingEndAt = boardingEndAt; }
+
+    /** Porcentaje de ocupación (0.0–1.0) */
+    public double getOccupancyRate() {
+        if (totalSeats == 0) return 0;
+        return (double) occupiedSeats / totalSeats;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s (%s → %s) %s [%s]",
+                airline, flightNumber, originIata, destinationIata, status, aircraftType);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof LiveFlight lf)) return false;
+        return Objects.equals(flightNumber, lf.flightNumber)
+                && Objects.equals(originIata, lf.originIata)
+                && Objects.equals(destinationIata, lf.destinationIata)
+                && Objects.equals(departureAt, lf.departureAt);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(flightNumber, originIata, destinationIata, departureAt);
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\model\LoginRequest.java =====
+package com.aerotickets.model;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+@Data
+public class LoginRequest {
+    @Email @NotBlank
+    private String email;
+
+    @NotBlank
+    private String password;
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\model\RegisterRequest.java =====
+package com.aerotickets.model;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+@Data
+public class RegisterRequest {
+    @NotBlank
+    private String fullName;
+
+    @Email @NotBlank
+    private String email;
+
+    @NotBlank
+    private String password;
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\repository\FlightRepository.java =====
+package com.aerotickets.repository;
+
+import com.aerotickets.entity.Flight;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+public interface FlightRepository extends JpaRepository<Flight, Long> {
+    List<Flight> findByOriginAndDestinationAndDepartureAtBetween(
+            String origin, String destination, LocalDateTime from, LocalDateTime to);
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\repository\ReservationRepository.java =====
+package com.aerotickets.repository;
+
+import com.aerotickets.entity.Reservation;
+import com.aerotickets.entity.ReservationStatus;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+
+    long countByFlight_IdAndStatus(Long flightId, ReservationStatus status);
+
+    boolean existsByFlight_IdAndSeatNumberAndStatus(Long flightId, Integer seatNumber, ReservationStatus status);
+
+    @EntityGraph(attributePaths = {"flight"})
+    List<Reservation> findByUser_EmailOrderByCreatedAtDesc(String email);
+
+    @EntityGraph(attributePaths = {"flight"})
+    Optional<Reservation> findByIdAndUser_Email(Long id, String email);
+
+    // ✅ Agregados para ReservationService
+    List<Reservation> findByUser_EmailAndFlight_IdAndStatus(String email, Long flightId, ReservationStatus status);
+
+    Optional<Reservation> findFirstByUser_EmailAndFlight_IdAndSeatNumberAndStatus(
+            String email, Long flightId, Integer seatNumber, ReservationStatus status
+    );
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\repository\UserRepository.java =====
+package com.aerotickets.repository;
+
+import com.aerotickets.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.Optional;
+
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+
+    Optional<User> findByEmail(String email);
+
+    boolean existsByEmail(String email); // 👈 AGREGA ESTA LÍNEA
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\security\JwtAuthFilter.java =====
+package com.aerotickets.security;
+
+import com.aerotickets.service.CustomUserDetailsService;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.security.SignatureException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+
+@Slf4j
+@Component
+public class JwtAuthFilter extends OncePerRequestFilter {
+
+    private final JwtService jwtService;
+    private final CustomUserDetailsService userDetailsService;
+
+    @Autowired
+    public JwtAuthFilter(JwtService jwtService, CustomUserDetailsService userDetailsService) {
+        this.jwtService = jwtService;
+        this.userDetailsService = userDetailsService;
+    }
+
+    @Override
+    protected void doFilterInternal(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain chain
+    ) throws ServletException, IOException {
+
+        String path = request.getServletPath();
+
+        // Allow unauthenticated routes
+        if (path.startsWith("/auth") || path.startsWith("/swagger") || path.startsWith("/v3/api-docs")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        final String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        final String token = authHeader.substring(7);
+        String userEmail;
+
+        try {
+            userEmail = jwtService.extractUsername(token);
+        } catch (ExpiredJwtException ex) {
+            log.warn("Expired JWT: {}", ex.getMessage());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        } catch (SignatureException ex) {
+            log.warn("Invalid JWT signature: {}", ex.getMessage());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        } catch (Exception ex) {
+            log.warn("Error parsing JWT: {}", ex.getMessage());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails user = userDetailsService.loadUserByUsername(userEmail);
+
+            if (jwtService.isTokenValid(token, user)) {
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            } else {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+        }
+
+        chain.doFilter(request, response);
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\security\JwtService.java =====
+package com.aerotickets.security;
+
+import com.aerotickets.entity.User;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
+import java.util.Date;
+
+/**
+ * Service used for authentication tokens (user login, API access, etc).
+ */
+@Service
+public class JwtService {
+
+    @Value("${jwt.secret}")
+    private String secretValue;
+
+    @Value("${jwt.expiration-minutes:120}")
+    private long expirationMinutes;
+
+    private Key getSigningKey() {
+        byte[] keyBytes = secretValue.getBytes(StandardCharsets.UTF_8);
+        if (keyBytes.length < 32) {
+            throw new IllegalStateException(
+                    "JWT secret must be at least 32 characters (256 bits). Current length: " + keyBytes.length
+            );
+        }
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    /** Generate an access token for a given user. */
+    public String generateToken(User user) {
+        long expirationMs = expirationMinutes * 60 * 1000;
+        return Jwts.builder()
+                .setSubject(user.getEmail())
+                .claim("name", user.getFullName())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    /** Extract the user email (subject) from the token. */
+    public String extractEmail(String token) {
+        return parseClaims(token).getSubject();
+    }
+
+    public String extractUsername(String token) {
+        return extractEmail(token);
+    }
+
+    /** Validate if the token matches the given user details and is not expired. */
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        try {
+            final String email = extractEmail(token);
+            return (email.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    private boolean isTokenExpired(String token) {
+        return parseClaims(token).getExpiration().before(new Date());
+    }
+
+    private Claims parseClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\security\JwtUtil.java =====
+package com.aerotickets.security;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.Date;
+
+/**
+ * Utility class for generating and validating temporary JWTs
+ * (for example password recovery or email confirmation links).
+ */
+@Component
+public class JwtUtil {
+
+    private final SecretKey key;
+    private final long expirationMs;
+
+    public JwtUtil(
+            @Value("${jwt.secret}") String secret,
+            @Value("${jwt.expiration-minutes:120}") long expirationMinutes
+    ) {
+        byte[] bytes = secret.getBytes(StandardCharsets.UTF_8);
+        if (bytes.length < 32) {
+            throw new IllegalStateException(
+                    "JWT secret must be at least 32 characters (256 bits). Current length: " + bytes.length
+            );
+        }
+        this.key = Keys.hmacShaKeyFor(bytes);
+        this.expirationMs = expirationMinutes * 60_000;
+    }
+
+    /** Generate a general-purpose token for a given subject. */
+    public String generate(String subject) {
+        Instant now = Instant.now();
+        return Jwts.builder()
+                .setSubject(subject)
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(now.plusMillis(expirationMs)))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    /** Generate a short-lived temporary token (e.g. password reset). */
+    public String generateTemporaryToken(String subject, int minutes) {
+        Instant now = Instant.now();
+        return Jwts.builder()
+                .setSubject(subject)
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(now.plusSeconds(minutes * 60L)))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    /** Validate a temporary token and return the subject if valid. */
+    public String validateTemporaryToken(String token) {
+        try {
+            return parseClaims(token).getSubject();
+        } catch (JwtException e) {
+            throw new IllegalArgumentException("Invalid or expired token");
+        }
+    }
+
+    /** Extract the subject from any valid token. */
+    public String getSubject(String token) {
+        return parseClaims(token).getSubject();
+    }
+
+    /** Check if a token is valid and correctly signed. */
+    public boolean isValid(String token) {
+        try {
+            parseClaims(token);
+            return true;
+        } catch (JwtException e) {
+            System.out.println("⚠️ Invalid token: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private Claims parseClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\service\CustomUserDetailsService.java =====
+package com.aerotickets.service;
+
+import com.aerotickets.entity.User;
+import com.aerotickets.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Primary;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.*;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@Primary
+@RequiredArgsConstructor
+public class CustomUserDetailsService implements UserDetailsService {
+
+    private final UserRepository users;
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User u = users.findByEmail(email)
+            .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + email));
+
+        return new org.springframework.security.core.userdetails.User(
+                u.getEmail(),
+                u.getPasswordHash(),
+                u.isEnabled(),
+                true, true, true,
+                List.of(new SimpleGrantedAuthority("ROLE_" + u.getRole()))
+        );
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\service\FlightService.java =====
+package com.aerotickets.service;
+
+import com.aerotickets.dto.FlightSearchDTO;
+import com.aerotickets.entity.Flight;
+import com.aerotickets.repository.FlightRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.*;
+import java.util.List;
+
+@Service
+public class FlightService {
+    private final FlightRepository flightRepository;
+
+    public FlightService(FlightRepository flightRepository){ this.flightRepository = flightRepository; }
+
+    @Transactional
+    public Flight create(Flight f) { return flightRepository.save(f); }
+
+    public List<Flight> listAll() { return flightRepository.findAll(); }
+
+    public List<Flight> searchOrSimulate(FlightSearchDTO dto) {
+        if (dto == null || dto.getOrigin()==null || dto.getDestination()==null) return List.of();
+        String dep = dto.getOrigin();
+        String arr = dto.getDestination();
+
+        LocalDate date = dto.getDate() != null ? dto.getDate() : LocalDate.now();
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = start.plusDays(1);
+
+        return flightRepository.findByOriginAndDestinationAndDepartureAtBetween(dep, arr, start, end);
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\service\FlightSimulatorService.java =====
+package com.aerotickets.service;
+
+import com.aerotickets.dto.FlightSearchDTO;
+import com.aerotickets.model.LiveFlight;
+import com.aerotickets.sim.AirportCatalogCO;
+
+import org.springframework.stereotype.Service;
+
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
+
+@Service
+public class FlightSimulatorService {
+
+    private static final ZoneId ZONE = ZoneId.of("America/Bogota");
+    private static final DateTimeFormatter ISO_LOCAL = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
+    private static final Map<String, List<String>> AIRLINE_FLEET = Map.of(
+        "Avianca", List.of("A320-200","A320neo","A319","A321"),
+        "LATAM Colombia", List.of("A320-200","A320neo"),
+        "Wingo", List.of("B737-800"),
+        "Satena", List.of("ERJ-145","ATR 42-600"),
+        "Clic", List.of("ATR 72-600")
+    );
+
+    private static final Map<String,String> AIRLINE_CODE = Map.of(
+        "Avianca","AV","LATAM Colombia","LA","Wingo","P5","Satena","9R","Clic","VE"
+    );
+
+    private static final Map<String, Integer> TYPICAL_MINS = Map.ofEntries(
+        Map.entry("BOG-MDE", 65), Map.entry("MDE-BOG", 65),
+        Map.entry("BOG-CTG", 80), Map.entry("CTG-BOG", 80),
+        Map.entry("BOG-BAQ", 85), Map.entry("BAQ-BOG", 85),
+        Map.entry("BOG-SMR", 85), Map.entry("SMR-BOG", 85),
+        Map.entry("BOG-CLO", 65), Map.entry("CLO-BOG", 65),
+        Map.entry("BOG-PEI", 45), Map.entry("PEI-BOG", 45),
+        Map.entry("BOG-AXM", 45), Map.entry("AXM-BOG", 45),
+        Map.entry("BOG-BGA", 55), Map.entry("BGA-BOG", 55),
+        Map.entry("BOG-CUC", 75), Map.entry("CUC-BOG", 75),
+        Map.entry("MDE-CTG", 55), Map.entry("CTG-MDE", 55),
+        Map.entry("MDE-SMR", 60), Map.entry("SMR-MDE", 60),
+        Map.entry("MDE-BAQ", 60), Map.entry("BAQ-MDE", 60),
+        Map.entry("CLO-CTG", 95), Map.entry("CTG-CLO", 95)
+    );
+
+    public List<LiveFlight> search(FlightSearchDTO dto) {
+        String o = dto.getOrigin();
+        String d = dto.getDestination();
+        if (!AirportCatalogCO.isDomesticPair(o, d)) return List.of();
+
+        LocalDate date = dto.getDate() != null ? dto.getDate() : LocalDate.now(ZONE);
+
+        // # vuelos entre 3 y 7
+        int count = ThreadLocalRandom.current().nextInt(3, 8);
+        List<String> airlines = new ArrayList<>(AIRLINE_FLEET.keySet());
+
+        int typical = TYPICAL_MINS.getOrDefault(o + "-" + d,
+                ThreadLocalRandom.current().nextInt(60, 121));
+
+        List<LiveFlight> out = new ArrayList<>();
+        LocalTime first = LocalTime.of(6, 0);
+        int step = Math.max(60, typical);
+
+        for (int i = 0; i < count; i++) {
+            String airline = airlines.get(ThreadLocalRandom.current().nextInt(airlines.size()));
+            String code = AIRLINE_CODE.getOrDefault(airline, "XX");
+            List<String> fleet = AIRLINE_FLEET.get(airline);
+            String aircraft = fleet.get(ThreadLocalRandom.current().nextInt(fleet.size()));
+            int seats = seatsFor(aircraft);
+
+            LocalDateTime dep = LocalDateTime.of(date, first.plusMinutes((long) i * step));
+            dep = dep.plusMinutes(ThreadLocalRandom.current().nextLong(-10, 16));
+            LocalDateTime arr = dep.plusMinutes(typical + ThreadLocalRandom.current().nextInt(-5, 11));
+
+            String depS = dep.format(ISO_LOCAL);
+            String arrS = arr.format(ISO_LOCAL);
+
+            String status = pickStatus();
+            Integer delay = "DELAYED".equals(status) ? ThreadLocalRandom.current().nextInt(5, 41) : null;
+
+            LiveFlight lf = new LiveFlight();
+            lf.setProvider("sim");
+            lf.setAirline(airline);
+            lf.setAirlineCode(code);
+            lf.setFlightNumber(code + ThreadLocalRandom.current().nextInt(10, 9999));
+            lf.setOriginIata(o);
+            lf.setDestinationIata(d);
+            lf.setDepartureAt(depS);
+            lf.setArrivalAt(arrS);
+            lf.setStatus(status);
+            lf.setDelayMinutes(delay);
+            lf.setAircraftType(aircraft);
+            lf.setTerminal(terminalFor(o));
+            lf.setGate(randomGate());
+            lf.setBaggageBelt(null);
+            lf.setTotalSeats(seats);
+            lf.setOccupiedSeats((int) (seats * (0.6 + ThreadLocalRandom.current().nextDouble() * 0.35)));
+            lf.setCargoKg(ThreadLocalRandom.current().nextInt(500, 4000));
+            // Boarding (20–35 min antes)
+            lf.setBoardingStartAt(dep.minusMinutes(ThreadLocalRandom.current().nextInt(25, 36)).format(ISO_LOCAL));
+            lf.setBoardingEndAt(dep.minusMinutes(10).format(ISO_LOCAL));
+            out.add(lf);
+        }
+
+        out.sort(Comparator.comparing(LiveFlight::getDepartureAt));
+        return out;
+    }
+
+    private int seatsFor(String aircraft) {
+        return switch (aircraft) {
+            case "B737-800" -> 186;
+            case "A321" -> 220;
+            case "A320neo" -> 186;
+            case "A320-200" -> 180;
+            case "A319" -> 132;
+            case "ATR 72-600" -> 70;
+            case "ATR 42-600" -> 48;
+            case "ERJ-145" -> 50;
+            default -> 160;
+        };
+    }
+
+    private String terminalFor(String iata) {
+        if ("BOG".equals(iata)) return "T1";
+        if (Set.of("MDE","CTG","BAQ","SMR").contains(iata)) return "T2";
+        return null;
+    }
+
+    private String randomGate() {
+        char letter = (char) ('A' + ThreadLocalRandom.current().nextInt(0, 3));
+        int num = ThreadLocalRandom.current().nextInt(1, 30);
+        return letter + String.valueOf(num);
+    }
+
+    private String pickStatus() {
+        int r = ThreadLocalRandom.current().nextInt(100);
+        if (r < 70) return "SCHEDULED";
+        if (r < 85) return "EN-ROUTE";
+        if (r < 93) return "DELAYED";
+        if (r < 98) return "LANDED";
+        return "CANCELLED";
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\service\LiveFlightService.java =====
+package com.aerotickets.service;
+
+import com.aerotickets.dto.FlightSearchDTO;
+import com.aerotickets.model.LiveFlight;
+import com.aerotickets.sim.AirportCatalogCO;
+import com.aerotickets.util.IataResolver;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.*;
+
+/**
+ * Servicio de búsqueda de vuelos en tiempo real (sim por ahora).
+ * - Convierte nombres humanos → IATA
+ * - Autocomplete basado en catálogo nacional
+ * - Delegación de simulación a FlightSimulatorService
+ */
+@Service
+public class LiveFlightService {
+
+    private final FlightSimulatorService simulator;
+
+    public LiveFlightService(FlightSimulatorService simulator) {
+        this.simulator = simulator;
+    }
+
+    public List<LiveFlight> searchLive(String originRaw, String destinationRaw, String dateIso, String ignored) {
+        String origin = smartToIata(originRaw);
+        String destination = smartToIata(destinationRaw);
+        if (origin == null || destination == null || origin.equalsIgnoreCase(destination)) return List.of();
+
+        FlightSearchDTO dto = new FlightSearchDTO();
+        dto.setOrigin(origin);
+        dto.setDestination(destination);
+        if (dateIso != null && !dateIso.isBlank()) {
+            try { dto.setDate(LocalDate.parse(dateIso)); } catch (Exception ignored2) {}
+        }
+        return simulator.search(dto);
+    }
+
+    public List<Map<String, Object>> autocompleteAirports(String query) {
+        if (query == null || query.isBlank()) return List.of();
+        query = IataResolver.normalize(query);
+
+        List<Map<String, Object>> results = new ArrayList<>();
+        for (String iata : AirportCatalogCO.keys()) {
+            AirportCatalogCO.Airport info = AirportCatalogCO.get(iata);
+            if (matches(info, query)) {
+                Map<String, Object> item = new HashMap<>();
+                item.put("iata", info.iata);
+                item.put("city", info.city);
+                item.put("airport", info.name);
+                item.put("terrain", info.terrain);
+                item.put("runway_m", info.runwayLenM);
+                item.put("elevation_ft", info.elevationFt);
+                item.put("allowed_families", info.allowedFamilies);
+                results.add(item);
+            }
+        }
+        results.sort(Comparator.comparing(m -> ((String) m.get("city"))));
+        return results;
+    }
+
+    private boolean matches(AirportCatalogCO.Airport info, String query) {
+        String city = IataResolver.normalize(info.city);
+        String name = IataResolver.normalize(info.name);
+        String iata = info.iata.toLowerCase(Locale.ROOT);
+        String terrain = IataResolver.normalize(info.terrain);
+        return iata.contains(query) || city.contains(query) || name.contains(query) || terrain.contains(query);
+    }
+
+    private String smartToIata(String input) {
+        if (input == null || input.isBlank()) return null;
+        String resolved = IataResolver.toIata(input);
+        if (resolved != null) return resolved;
+
+        String normalized = IataResolver.normalize(input);
+        String best = null; int bestScore = Integer.MAX_VALUE;
+        for (String iata : AirportCatalogCO.keys()) {
+            var a = AirportCatalogCO.get(iata);
+            String city = IataResolver.normalize(a.city);
+            String name = IataResolver.normalize(a.name);
+            if (normalized.equals(iata.toLowerCase(Locale.ROOT)) || normalized.equals(city) || normalized.equals(name)) {
+                return iata;
+            }
+            int score = levenshtein(normalized, city);
+            if (score < bestScore) { bestScore = score; best = iata; }
+        }
+        return bestScore <= Math.max(2, normalized.length() / 2) ? best : null;
+    }
+
+    private int levenshtein(String a, String b) {
+        int n = a.length(), m = b.length();
+        if (n == 0) return m; if (m == 0) return n;
+        int[] prev = new int[m + 1], cur = new int[m + 1];
+        for (int j = 0; j <= m; j++) prev[j] = j;
+        for (int i = 1; i <= n; i++) {
+            cur[0] = i;
+            for (int j = 1; j <= m; j++) {
+                int cost = (a.charAt(i-1) == b.charAt(j-1)) ? 0 : 1;
+                cur[j] = Math.min(Math.min(cur[j-1]+1, prev[j]+1), prev[j-1]+cost);
+            }
+            int[] tmp = prev; prev = cur; cur = tmp;
+        }
+        return prev[m];
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\service\ReservationService.java =====
+package com.aerotickets.service;
+
+import com.aerotickets.dto.ReservationRequestDTO;
+import com.aerotickets.dto.ReservationResponseDTO;
+import com.aerotickets.entity.Flight;
+import com.aerotickets.entity.Reservation;
+import com.aerotickets.entity.ReservationStatus;
+import com.aerotickets.entity.User;
+import com.aerotickets.exception.ConflictException;
+import com.aerotickets.exception.NotFoundException;
+import com.aerotickets.repository.FlightRepository;
+import com.aerotickets.repository.ReservationRepository;
+import com.aerotickets.repository.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class ReservationService {
+
+    private final ReservationRepository reservationRepository;
+    private final FlightRepository flightRepository;
+    private final UserRepository userRepository;
+
+    public ReservationService(ReservationRepository reservationRepository,
+                              FlightRepository flightRepository,
+                              UserRepository userRepository) {
+        this.reservationRepository = reservationRepository;
+        this.flightRepository = flightRepository;
+        this.userRepository = userRepository;
+    }
+
+    @Transactional
+    public ReservationResponseDTO create(String userEmail, ReservationRequestDTO dto) {
+        if (userEmail == null || userEmail.isBlank()) {
+            throw new IllegalArgumentException("User email is required");
+        }
+        if (dto == null || dto.getFlightId() == null) {
+            throw new IllegalArgumentException("Flight id is required");
+        }
+
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        Flight flight = flightRepository.findById(dto.getFlightId())
+                .orElseThrow(() -> new NotFoundException("Flight not found"));
+
+        long activeCount = reservationRepository.countByFlight_IdAndStatus(flight.getId(), ReservationStatus.ACTIVE);
+        if (activeCount >= flight.getTotalSeats()) {
+            throw new ConflictException("No seats available for this flight");
+        }
+
+        Integer seat = dto.getSeatNumber();
+        if (seat != null) {
+            if (seat < 1 || seat > flight.getTotalSeats()) {
+                throw new IllegalArgumentException("Seat number out of range");
+            }
+            boolean seatTaken = reservationRepository.existsByFlight_IdAndSeatNumberAndStatus(
+                    flight.getId(), seat, ReservationStatus.ACTIVE
+            );
+            if (seatTaken) {
+                throw new ConflictException("Selected seat is already reserved");
+            }
+        }
+
+        try {
+            Reservation r = Reservation.builder()
+                    .user(user)
+                    .flight(flight)
+                    .seatNumber(seat)
+                    .status(ReservationStatus.ACTIVE)
+                    .build();
+
+            Reservation saved = reservationRepository.save(r);
+            return toDto(saved);
+
+        } catch (DataIntegrityViolationException ex) {
+            throw new ConflictException("You already have an ACTIVE reservation for this flight or the seat is taken");
+        }
+    }
+
+    @Transactional
+    public void cancel(String userEmail, Long reservationId) {
+        if (userEmail == null || userEmail.isBlank()) {
+            throw new IllegalArgumentException("User email is required");
+        }
+        if (reservationId == null) {
+            throw new IllegalArgumentException("Reservation id is required");
+        }
+
+        Reservation r = reservationRepository.findByIdAndUser_Email(reservationId, userEmail)
+                .orElseThrow(() -> new NotFoundException("Reservation not found"));
+
+        if (r.getStatus() == ReservationStatus.CANCELLED) {
+            return;
+        }
+
+        r.setStatus(ReservationStatus.CANCELLED);
+        reservationRepository.save(r);
+    }
+
+    @Transactional
+    public void cancelAllActiveByFlightForUser(String userEmail, Long flightId) {
+        if (userEmail == null || userEmail.isBlank() || flightId == null) {
+            throw new IllegalArgumentException("User email and flight id are required");
+        }
+        List<Reservation> active = reservationRepository
+                .findByUser_EmailAndFlight_IdAndStatus(userEmail, flightId, ReservationStatus.ACTIVE);
+        if (active.isEmpty()) return;
+        for (Reservation r : active) {
+            r.setStatus(ReservationStatus.CANCELLED);
+        }
+        reservationRepository.saveAll(active);
+    }
+
+    @Transactional
+    public void cancelSeatIfActive(String userEmail, Long flightId, Integer seatNumber) {
+        if (userEmail == null || userEmail.isBlank() || flightId == null || seatNumber == null) {
+            throw new IllegalArgumentException("User email, flight id and seat number are required");
+        }
+        Reservation r = reservationRepository
+                .findFirstByUser_EmailAndFlight_IdAndSeatNumberAndStatus(
+                        userEmail, flightId, seatNumber, ReservationStatus.ACTIVE
+                )
+                .orElseThrow(() -> new NotFoundException("Active reservation for that seat not found"));
+        r.setStatus(ReservationStatus.CANCELLED);
+        reservationRepository.save(r);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReservationResponseDTO> listMine(String userEmail) {
+        if (userEmail == null || userEmail.isBlank()) {
+            throw new IllegalArgumentException("User email is required");
+        }
+        return reservationRepository.findByUser_EmailOrderByCreatedAtDesc(userEmail)
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    private ReservationResponseDTO toDto(Reservation r) {
+        ReservationResponseDTO dto = new ReservationResponseDTO();
+        dto.setId(r.getId());
+        dto.setSeatNumber(r.getSeatNumber());
+        dto.setStatus(r.getStatus());
+        dto.setCreatedAt(r.getCreatedAt());
+        dto.setFlightId(r.getFlight().getId());
+        dto.setAirline(r.getFlight().getAirline());
+        dto.setOrigin(r.getFlight().getOrigin());
+        dto.setDestination(r.getFlight().getDestination());
+        dto.setDepartureAt(r.getFlight().getDepartureAt());
+        dto.setArriveAt(r.getFlight().getArriveAt());
+        dto.setPrice(r.getFlight().getPrice());
+        return dto;
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\service\SimulationRegistry.java =====
+package com.aerotickets.service;
+
+import com.aerotickets.model.LiveFlight;
+import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+@Component
+public class SimulationRegistry {
+
+    // flightNumber -> LiveFlight
+    private final Map<String, LiveFlight> live = new ConcurrentHashMap<>();
+    private final List<SseEmitter> subscribers = new CopyOnWriteArrayList<>();
+
+    public void putAll(List<LiveFlight> flights) {
+        for (LiveFlight f : flights) {
+            live.put(f.getFlightNumber(), f);
+        }
+        broadcastSnapshot();
+    }
+
+    public List<LiveFlight> list() { return new ArrayList<>(live.values()); }
+
+    public Optional<LiveFlight> get(String flightNumber) {
+        return Optional.ofNullable(live.get(flightNumber));
+    }
+
+    public void update(LiveFlight f) { live.put(f.getFlightNumber(), f); }
+
+    public void clear() {
+        live.clear();
+        broadcastSnapshot();
+    }
+
+    // Actualiza estados cada 30s (zona Bogotá)
+    @Scheduled(fixedRate = 30000, initialDelay = 10000)
+    public void tick() {
+        ZoneId tz = ZoneId.of("America/Bogota");
+        LocalDateTime now = LocalDateTime.now(tz);
+
+        for (LiveFlight f : live.values()) {
+            // Si por cualquier razón viene null o formato inválido, lo ignoramos
+            try {
+                LocalDateTime dep = LocalDateTime.parse(f.getDepartureAt());
+                LocalDateTime arr = LocalDateTime.parse(f.getArrivalAt());
+
+                if ("CANCELLED".equals(f.getStatus()) || "DIVERTED".equals(f.getStatus())) continue;
+
+                boolean delayed = f.getDelayMinutes() != null && f.getDelayMinutes() > 10;
+                if (now.isBefore(dep.minusMinutes(60))) {
+                    f.setStatus("SCHEDULED");
+                } else if (!now.isAfter(dep) && now.isAfter(dep.minusMinutes(60))) {
+                    f.setStatus(delayed ? "DELAYED" : "BOARDING");
+                } else if (now.isAfter(dep) && now.isBefore(arr)) {
+                    f.setStatus(delayed ? "DELAYED" : "EN-ROUTE");
+                } else {
+                    f.setStatus("LANDED");
+                }
+            } catch (Exception ignore) {
+                // Evita que una entrada malformada rompa todo el tick
+            }
+        }
+        broadcastSnapshot();
+    }
+
+    // SSE
+    public SseEmitter subscribe() {
+        // 0L = sin timeout (Tomcat no cerrará por timeout). El front seguirá recibiendo eventos.
+        SseEmitter emitter = new SseEmitter(0L);
+        subscribers.add(emitter);
+
+        emitter.onCompletion(() -> subscribers.remove(emitter));
+        emitter.onTimeout(() -> subscribers.remove(emitter));
+        emitter.onError((ex) -> subscribers.remove(emitter));
+
+        // Enviar snapshot inicial y un "ping" para asegurar la apertura del stream
+        try {
+            emitter.send(SseEmitter.event()
+                    .name("snapshot")
+                    .data(list(), MediaType.APPLICATION_JSON));
+            emitter.send(SseEmitter.event()
+                    .name("ping")
+                    .data("ok"));
+        } catch (IOException ignored) {
+            subscribers.remove(emitter);
+        }
+        return emitter;
+    }
+
+    private void broadcastSnapshot() {
+        List<LiveFlight> snapshot = list();
+        for (SseEmitter em : new ArrayList<>(subscribers)) {
+            try {
+                em.send(SseEmitter.event()
+                        .name("snapshot")
+                        .data(snapshot, MediaType.APPLICATION_JSON));
+            } catch (IOException e) {
+                subscribers.remove(em);
+            }
+        }
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\service\UserService.java =====
+package com.aerotickets.service;
+
+import com.aerotickets.entity.User;
+import com.aerotickets.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class UserService {
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Transactional
+    public User register(String fullName, String email, String rawPassword) {
+        if (userRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("Email is already registered");
+        }
+
+        User user = User.builder()
+                .fullName(fullName)
+                .email(email)
+                .passwordHash(passwordEncoder.encode(rawPassword))
+                .build();
+
+        return userRepository.save(user);
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\sim\AircraftCatalog.java =====
+package com.aerotickets.sim;
+
+import java.util.Map;
+
+public class AircraftCatalog {
+
+    public static class Aircraft {
+        public final String code;
+        public final int capacity;       // asientos
+        public final int cruiseKmh;      // velocidad crucero promedio
+        public Aircraft(String code, int capacity, int cruiseKmh) {
+            this.code = code; this.capacity = capacity; this.cruiseKmh = cruiseKmh;
+        }
+    }
+
+    public static final Map<String, Aircraft> DATA = Map.of(
+            "A321", new Aircraft("A321", 220, 840),
+            "A320", new Aircraft("A320", 180, 830),
+            "A320neo", new Aircraft("A320neo", 186, 840),
+            "B737-800", new Aircraft("B737-800", 186, 842),
+            "B737 MAX 8", new Aircraft("B737 MAX 8", 186, 839),
+            "E190", new Aircraft("E190", 104, 820),
+            "ATR 72-600", new Aircraft("ATR 72-600", 70, 510)
+    );
+
+    public static Aircraft any(String code) { return DATA.get(code); }
+    public static String[] types() { return DATA.keySet().toArray(new String[0]); }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\sim\AircraftPerfCatalog.java =====
+package com.aerotickets.sim;
+
+import java.util.*;
+
+public final class AircraftPerfCatalog {
+
+    public static final class Perf {
+        public final String family;          // "A320", "A319", "E190", "ATR 72-600", ...
+        public final int baseToraM;          // Requerimiento TORA a nivel del mar, ISA, MTOW (m) — conservador
+        public final int baseLdaM;           // Requerimiento LDA a nivel del mar (m)
+        public final int crosswindLimitKts;  // límite típico de operación
+        public final int cat;                // 1=regional/turboprop, 2=narrow, 3=wide  (para reglas rápidas)
+
+        public Perf(String family, int baseToraM, int baseLdaM, int crosswindLimitKts, int cat) {
+            this.family = family;
+            this.baseToraM = baseToraM;
+            this.baseLdaM = baseLdaM;
+            this.crosswindLimitKts = crosswindLimitKts;
+            this.cat = cat;
+        }
+    }
+
+    private static final Map<String, Perf> DB = new HashMap<>();
+
+    static {
+        DB.put("ATR 72-600", new Perf("ATR 72-600", 1300, 1100, 30, 1));
+        DB.put("E190",       new Perf("E190",       1800, 1500, 33, 1));
+        DB.put("E195",       new Perf("E195",       1900, 1600, 33, 1));
+        DB.put("A319",       new Perf("A319",       2000, 1600, 35, 2));
+        DB.put("A320",       new Perf("A320",       2200, 1700, 35, 2));
+        DB.put("A320neo",    new Perf("A320neo",    2100, 1650, 35, 2));
+        DB.put("A321",       new Perf("A321",       2400, 1800, 35, 2));
+        DB.put("B737-800",   new Perf("B737-800",   2300, 1750, 35, 2));
+        DB.put("B737 MAX 8", new Perf("B737 MAX 8", 2250, 1700, 35, 2));
+        // Añade más si los necesitas
+    }
+
+    public static Perf get(String family){ return DB.get(family); }
+    public static Set<String> families(){ return DB.keySet(); }
+
+    // Corrección por densidad: +7% TORA por cada 1000 m de elevación aprox (conservador);
+    // +1% por cada 10°C por encima de ISA.
+    public static int correctedTora(String family, int toraBaseM, int elevationFt, int deltaTempC) {
+        double elevM = elevationFt * 0.3048;
+        double factorElev = 1.0 + (elevM/1000.0)*0.07;
+        double factorTemp = 1.0 + Math.max(0, deltaTempC)*0.01;
+        return (int)Math.ceil(toraBaseM * factorElev * factorTemp);
+    }
+
+    public static int correctedLda(String family, int ldaBaseM, int elevationFt, int deltaTempC) {
+        double elevM = elevationFt * 0.3048;
+        double factorElev = 1.0 + (elevM/1000.0)*0.05;
+        double factorTemp = 1.0 + Math.max(0, deltaTempC)*0.005;
+        return (int)Math.ceil(ldaBaseM * factorElev * factorTemp);
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\sim\AirportCatalogCO.java =====
+package com.aerotickets.sim;
+
+import java.time.LocalTime;
+import java.util.*;
+
+/** Catálogo de aeropuertos Colombia con metadata usada por restricciones/UX. */
+public final class AirportCatalogCO {
+    private AirportCatalogCO() {}
+
+    public static final class Airport {
+        public final String iata;
+        public final String icao;
+        public final String city;
+        public final String name;
+        public final String state;
+        public final double latitude;
+        public final double longitude;
+        public final int elevationFt;
+        public final int runwayLenM;
+        public final String terrain;
+        public final List<String> allowedFamilies;
+
+        // ✅ Campos adicionales esperados por otras clases
+        public final List<String> bannedFamilies;     // p.ej. jets en EOH
+        public final boolean hasCurfew;               // ¿toque de queda?
+        public final LocalTime curfewStartLocal;      // hora local inicio
+        public final LocalTime curfewEndLocal;        // hora local fin
+        public final Integer crosswindLimitKts;       // límite típico de viento cruzado
+        public final boolean ils;                     // ¿tiene ILS?
+
+        public Airport(String iata, String icao, String city, String name, String state,
+                       double lat, double lon, int elevFt, int runwayM, String terrain, List<String> families,
+                       List<String> banned, boolean hasCurfew, LocalTime curfewStart, LocalTime curfewEnd,
+                       Integer crosswindLimitKts, boolean ils) {
+            this.iata = iata; this.icao = icao; this.city = city; this.name = name; this.state = state;
+            this.latitude = lat; this.longitude = lon; this.elevationFt = elevFt; this.runwayLenM = runwayM;
+            this.terrain = terrain; this.allowedFamilies = families;
+            this.bannedFamilies = banned != null ? List.copyOf(banned) : List.of();
+            this.hasCurfew = hasCurfew;
+            this.curfewStartLocal = curfewStart;
+            this.curfewEndLocal = curfewEnd;
+            this.crosswindLimitKts = crosswindLimitKts;
+            this.ils = ils;
+        }
+    }
+
+    private static final Map<String, Airport> A = new HashMap<>();
+
+    private static void put(String iata, String icao, String city, String name, String state,
+                            double lat, double lon, int elevFt, int runwayM, String terrain, List<String> fam,
+                            List<String> banned, boolean hasCurfew, LocalTime curfewStart, LocalTime curfewEnd,
+                            Integer crosswindLimitKts, boolean ils) {
+        A.put(iata, new Airport(iata, icao, city, name, state, lat, lon, elevFt, runwayM,
+                terrain, fam, banned, hasCurfew, curfewStart, curfewEnd, crosswindLimitKts, ils));
+    }
+
+    /** Sobrecarga con defaults seguros (sin toque de queda, ILS sí en grandes). */
+    private static void put(String iata, String icao, String city, String name, String state,
+                            double lat, double lon, int elevFt, int runwayM, String terrain, List<String> fam) {
+        boolean major = Set.of("BOG","MDE","CTG","BAQ","CLO","PEI","AXM","BGA","CUC","ADZ","LET").contains(iata);
+        int xwind = major ? 35 : 25;
+        boolean hasIls = major || Set.of("BAQ","CTG","CLO","MDE","BOG").contains(iata);
+        List<String> banned = List.of();
+        boolean curfew = false;
+        LocalTime start = null, end = null;
+
+        // Ejemplo: EOH con restricciones a jets + curfew nocturno
+        if ("EOH".equals(iata)) {
+            banned = List.of("A320-200","A320neo","A321","B737-800","B737");
+            xwind = 20;
+            hasIls = false;
+            curfew = true;
+            start = LocalTime.of(22, 0);
+            end   = LocalTime.of(6, 0);
+        }
+
+        put(iata, icao, city, name, state, lat, lon, elevFt, runwayM, terrain, fam, banned, curfew, start, end, xwind, hasIls);
+    }
+
+    static {
+        put("BOG","SKBO","Bogotá","El Dorado","Cundinamarca",4.7016,-74.1469,8361,3800,"Llano/Altiplano", List.of("A320-200","A320neo","A319","A321","B737-800","B787","A330"));
+        put("MDE","SKRG","Rionegro (Medellín)","José María Córdova","Antioquia",6.1645,-75.4231,6954,3500,"Montañoso", List.of("A320-200","A320neo","A319","A321","B737-800"));
+        put("EOH","SKMD","Medellín","Olaya Herrera","Antioquia",6.219,-75.589,4949,2500,"Urbano", List.of("ATR 72-600","ATR 42-600","ERJ-145"));
+        put("CTG","SKCG","Cartagena","Rafael Núñez","Bolívar",10.4424,-75.513,6,2600,"Costero", List.of("A320-200","A320neo","A319","B737-800"));
+        put("BAQ","SKBQ","Barranquilla","Ernesto Cortissoz","Atlántico",10.8896,-74.7808,94,3000,"Costero", List.of("A320-200","A320neo","A319","B737-800"));
+        put("SMR","SKSM","Santa Marta","Simón Bolívar","Magdalena",11.1196,-74.2306,22,1900,"Costero", List.of("A320-200","A320neo","B737-800","ATR 72-600"));
+        put("CLO","SKCL","Cali","Alfonso Bonilla Aragón","Valle del Cauca",3.543,-76.3802,3162,3000,"Valle", List.of("A320-200","A320neo","A321","B737-800"));
+        put("PEI","SKPE","Pereira","Matecaña","Risaralda",4.8132,-75.7395,4413,2080,"Ondulado", List.of("A320-200","A319","ATR 72-600"));
+        put("AXM","SKAR","Armenia","El Edén","Quindío",4.4528,-75.7664,3999,2050,"Ondulado", List.of("A320-200","A319","ATR 72-600"));
+        put("BGA","SKBG","Bucaramanga","Palonegro","Santander",7.1265,-73.1848,3897,3000,"Montañoso", List.of("A320-200","A319","B737-800"));
+        put("CUC","SKCC","Cúcuta","Camilo Daza","Norte de Santander",7.9286,-72.5115,1096,2300,"Valle", List.of("A320-200","A319","B737-800"));
+        put("ADZ","SKSP","San Andrés","Gustavo Rojas Pinilla","San Andrés",12.5836,-81.7112,19,2380,"Isla", List.of("A320-200","A320neo","B737-800"));
+        put("LET","SKLT","Leticia","Alfredo Vásquez Cobo","Amazonas",-4.1936,-69.9432,277,2500,"Selva", List.of("A320-200","A319","ATR 72-600"));
+        put("IBE","SKIB","Ibagué","Perales","Tolima",4.4216,-75.1333,2995,1800,"Montañoso", List.of("ATR 72-600","ERJ-145"));
+        put("RCH","SKRH","Riohacha","Almirante Padilla","La Guajira",11.5262,-72.926,43,2100,"Costero", List.of("A320-200","ATR 72-600"));
+        put("NVA","SKNV","Neiva","Benito Salas","Huila",2.9514,-75.2936,1460,1880,"Valle", List.of("ATR 72-600","ERJ-145"));
+        put("MZL","SKMZ","Manizales","La Nubia","Caldas",5.0296,-75.4647,6890,1480,"Montañoso", List.of("ATR 42-600","ERJ-145"));
+        put("VUP","SKVP","Valledupar","Alfonso López Pumarejo","Cesar",10.435,-73.2495,482,2100,"Valle", List.of("A320-200","ATR 72-600"));
+        put("UIB","SKUI","Quibdó","El Caraño","Chocó",5.6908,-76.6412,204,1800,"Selva", List.of("ATR 72-600","ERJ-145"));
+        put("PPN","SKPP","Popayán","Guillermo León Valencia","Cauca",2.4544,-76.6093,5689,1850,"Montañoso", List.of("ATR 72-600","ERJ-145"));
+        put("GPI","SKGP","Guapi","Juan Casiano Solís","Cauca",2.5712,-77.8986,164,1600,"Selva", List.of("ATR 42-600","ERJ-145"));
+        put("EYP","SKYP","Yopal","El Alcaraván","Casanare",5.3191,-72.384,1020,2300,"Llano", List.of("A320-200","ATR 72-600"));
+        put("MTR","SKMR","Montería","Los Garzones","Córdoba",8.8237,-75.8258,36,2300,"Valle", List.of("A320-200","A320neo","B737-800"));
+        put("VVC","SKVV","Villavicencio","La Vanguardia","Meta",4.168,-73.6138,1399,1800,"Llano", List.of("ATR 72-600","ERJ-145"));
+        put("CZU","SKCZ","Corozal (Sincelejo)","Las Brujas","Sucre",9.33275,-75.2856,512,1600,"Valle", List.of("ATR 72-600","ERJ-145"));
+        put("PSO","SKPS","Pasto","Antonio Nariño","Nariño",1.3962,-77.2915,5951,2300,"Montañoso", List.of("A320-200","ATR 72-600"));
+        put("RVE","SKSA","Saravena","Los Colonizadores","Arauca",6.9556,-71.8572,700,1800,"Llano", List.of("ATR 42-600","ERJ-145"));
+        put("APO","SKLC","Carepa (Apartadó)","Antonio Roldán Betancourt","Antioquia",7.81,-76.716,46,1800,"Selva", List.of("ATR 72-600","ERJ-145"));
+    }
+
+    public static Airport get(String iata) { return A.get(iata); }
+    public static Set<String> keys() { return Collections.unmodifiableSet(A.keySet()); }
+    public static boolean isDomesticPair(String o, String d) { return A.containsKey(o) && A.containsKey(d) && !o.equals(d); }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\sim\DisruptionEngine.java =====
+package com.aerotickets.sim;
+
+import java.time.LocalTime;
+import java.util.Random;
+
+public class DisruptionEngine {
+
+    public static class Disruption {
+        public final boolean diverted;
+        public final boolean emergency;
+        public final Integer extraDelay;
+        public Disruption(boolean d, boolean e, Integer x) {
+            this.diverted = d; this.emergency = e; this.extraDelay = x;
+        }
+    }
+
+    public Disruption compute(LocalTime depTime, int weatherDelay, String aircraftType, int distanceKm, int baseDelaySeed) {
+        Random rnd = new Random(baseDelaySeed);
+
+        boolean peak = (depTime.getHour() >= 6 && depTime.getHour() <= 9)
+                || (depTime.getHour() >= 17 && depTime.getHour() <= 20);
+        int congestion = peak ? (2 + rnd.nextInt(6)) : rnd.nextInt(3); // antes hasta 12 / 5
+
+        int typeBias = (aircraftType.startsWith("ATR") ? 1 : 0);
+        int distBias = distanceKm > 900 ? 2 : (distanceKm > 500 ? 1 : 0);
+
+        int extra = congestion + typeBias + distBias;
+
+        boolean diverted = rnd.nextDouble() < (0.005 + weatherDelay / 800.0);
+        boolean emergency = rnd.nextDouble() < 0.0015;
+
+        return new Disruption(diverted, emergency, extra);
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\sim\RestrictionsEngine.java =====
+package com.aerotickets.sim;
+
+import java.time.LocalTime;
+import java.util.List;
+
+public final class RestrictionsEngine {
+    private RestrictionsEngine(){}
+
+    /** Verifica si un avión puede operar por pista/familias. */
+    public static boolean isAircraftAllowed(AirportCatalogCO.Airport ap, String aircraftFamily) {
+        if (ap == null || aircraftFamily == null) return false;
+        List<String> banned = ap.bannedFamilies;
+        if (banned != null && banned.contains(aircraftFamily)) return false;
+
+        // Reglas simples por longitud de pista (m)
+        int rwy = ap.runwayLenM;
+        return switch (aircraftFamily) {
+            case "B737-800","A321"    -> rwy >= 2200;
+            case "A320-200","A320neo" -> rwy >= 2000;
+            case "A319"                -> rwy >= 1800;
+            case "ATR 72-600"          -> rwy >= 1400;
+            case "ATR 42-600","ERJ-145"-> rwy >= 1200;
+            default -> rwy >= 1500;
+        };
+    }
+
+    /** Toque de queda local. Si hay curfew y la hora cae dentro, NO opera. */
+    public static boolean passesCurfew(AirportCatalogCO.Airport ap, LocalTime localTime) {
+        if (!ap.hasCurfew || ap.curfewStartLocal == null || ap.curfewEndLocal == null) return true;
+        LocalTime s = ap.curfewStartLocal;
+        LocalTime e = ap.curfewEndLocal;
+        // Intervalo puede cruzar medianoche
+        if (s.isBefore(e)) {
+            return localTime.isBefore(s) || localTime.isAfter(e);
+        } else {
+            // 22:00–06:00, por ejemplo
+            return localTime.isAfter(e) && localTime.isBefore(s);
+        }
+    }
+
+    /** Límite de viento cruzado. Si no hay dato, se aprueba. */
+    public static boolean meetsCrosswindLimit(AirportCatalogCO.Airport ap, int crosswindKts) {
+        if (ap.crosswindLimitKts == null) return true;
+        return crosswindKts <= ap.crosswindLimitKts;
+    }
+
+    /** ¿Cuenta con ILS? Útil para condiciones IMC. */
+    public static boolean hasIls(AirportCatalogCO.Airport ap) {
+        return ap.ils;
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\sim\ScheduleRules.java =====
+package com.aerotickets.sim;
+
+import java.time.LocalTime;
+
+/** Reglas de horario básicas (puntas operativas). */
+public final class ScheduleRules {
+    private ScheduleRules(){}
+
+    public static final LocalTime peakStartLocal = LocalTime.of(6, 0);
+    public static final LocalTime peakEndLocal   = LocalTime.of(21, 59);
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\sim\WeatherProfileCatalog.java =====
+package com.aerotickets.sim;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/** Perfiles meteorológicos simplificados por aeropuerto. */
+public final class WeatherProfileCatalog {
+    private WeatherProfileCatalog(){}
+
+    public enum Risk { LOW, MEDIUM, HIGH }
+
+    public static final class WeatherProfile {
+        public final Risk fogRisk;
+        public final Risk heavyRainRisk;
+        public final Risk convectiveRisk;
+
+        public WeatherProfile(Risk fog, Risk rain, Risk conv) {
+            this.fogRisk = fog;
+            this.heavyRainRisk = rain;
+            this.convectiveRisk = conv;
+        }
+    }
+
+    private static final Map<String, WeatherProfile> P = new HashMap<>();
+    static {
+        // Valores plausibles: costa (lluvia convectiva media), altiplano (niebla media), selva (lluvia alta), etc.
+        put("BOG", Risk.MEDIUM, Risk.MEDIUM, Risk.MEDIUM);
+        put("MDE", Risk.MEDIUM, Risk.MEDIUM, Risk.MEDIUM);
+        put("CTG", Risk.LOW,    Risk.MEDIUM, Risk.MEDIUM);
+        put("BAQ", Risk.LOW,    Risk.MEDIUM, Risk.MEDIUM);
+        put("SMR", Risk.LOW,    Risk.MEDIUM, Risk.MEDIUM);
+        put("CLO", Risk.MEDIUM, Risk.MEDIUM, Risk.MEDIUM);
+        put("ADZ", Risk.LOW,    Risk.MEDIUM, Risk.MEDIUM);
+        put("LET", Risk.LOW,    Risk.HIGH,   Risk.MEDIUM);
+        put("EOH", Risk.MEDIUM, Risk.MEDIUM, Risk.MEDIUM);
+        // default para los demás
+    }
+
+    private static void put(String iata, Risk fog, Risk rain, Risk conv) {
+        P.put(iata, new WeatherProfile(fog, rain, conv));
+    }
+
+    public static WeatherProfile profileOf(String iata) {
+        return P.getOrDefault(iata, new WeatherProfile(Risk.MEDIUM, Risk.MEDIUM, Risk.MEDIUM));
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\util\GeoUtil.java =====
+package com.aerotickets.util;
+
+public class GeoUtil {
+    private static final double EARTH_RADIUS_KM = 6371.0088;
+
+    public static double haversineKm(double lat1, double lon1, double lat2, double lon2) {
+        double dLat = Math.toRadians(lat2-lat1);
+        double dLon = Math.toRadians(lon2-lon1);
+        double a = Math.pow(Math.sin(dLat/2), 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.pow(Math.sin(dLon/2), 2);
+        double c = 2 * Math.asin(Math.sqrt(a));
+        return EARTH_RADIUS_KM * c;
+    }
+}
+
+
+===== FILE: .\src\main\java\com\aerotickets\util\IataResolver.java =====
+package com.aerotickets.util;
+
+import java.text.Normalizer;
+import java.util.*;
+
+/** Normaliza texto y resuelve alias → IATA (Colombia). */
+public final class IataResolver {
+    private IataResolver() {}
+
+    private static final Map<String, String> NAME_TO_IATA = new HashMap<>();
+    static {
+        // Ciudades principales
+        alias("bogota", "bogotá", "bogota d.c.", "el dorado", "bog", "eldorado", "aeropuerto el dorado").forEach(a -> NAME_TO_IATA.put(a, "BOG"));
+        alias("medellin", "medellín", "rio negro", "rionegro", "jose maria cordova", "josé maría córdoba", "mde").forEach(a -> NAME_TO_IATA.put(a, "MDE"));
+        alias("olaya herrera", "eoh", "medellin olaya").forEach(a -> NAME_TO_IATA.put(a, "EOH"));
+        alias("cartagena", "rafael nuñez", "rafael nunez", "ctg").forEach(a -> NAME_TO_IATA.put(a, "CTG"));
+        alias("barranquilla", "ernesto cortissoz", "baq").forEach(a -> NAME_TO_IATA.put(a, "BAQ"));
+        alias("santa marta", "smr", "simon bolivar", "simón bolívar").forEach(a -> NAME_TO_IATA.put(a, "SMR"));
+        alias("cali", "alfonso bonilla aragon", "alfonso bonilla aragón", "carlos ibuague???", "clo", "palmira").forEach(a -> NAME_TO_IATA.put(a, "CLO"));
+        alias("pereira", "matecana", "matecaña", "pei").forEach(a -> NAME_TO_IATA.put(a, "PEI"));
+        alias("armenia", "el eden", "el edén", "axm").forEach(a -> NAME_TO_IATA.put(a, "AXM"));
+        alias("bucaramanga", "palonegro", "bga").forEach(a -> NAME_TO_IATA.put(a, "BGA"));
+        alias("cucuta", "cúcuta", "camilo daza", "cuc").forEach(a -> NAME_TO_IATA.put(a, "CUC"));
+        alias("san andres", "san andrés", "gustavo rojas pinilla", "adz").forEach(a -> NAME_TO_IATA.put(a, "ADZ"));
+        alias("leticia", "alfredo vasquez cobo", "let").forEach(a -> NAME_TO_IATA.put(a, "LET"));
+        alias("ibague", "ibagué", "perales", "ibe").forEach(a -> NAME_TO_IATA.put(a, "IBE"));
+        alias("riohacha","alojandro odessa?","alojandro odessa","rhc???","rhc").forEach(a -> NAME_TO_IATA.put(a, "RCH"));
+        alias("neiva", "benito salas", "nva").forEach(a -> NAME_TO_IATA.put(a, "NVA"));
+        alias("manizales", "la nubia", "mzl").forEach(a -> NAME_TO_IATA.put(a, "MZL"));
+        alias("valledupar", "alfonso lopez", "alfonso lópez", "vup").forEach(a -> NAME_TO_IATA.put(a, "VUP"));
+        alias("quibdo","quibdó","el caraño","uib").forEach(a -> NAME_TO_IATA.put(a, "UIB"));
+        alias("popayan","popayán","guillermo leon valencia","guillermo león valencia","ppn").forEach(a -> NAME_TO_IATA.put(a, "PPN"));
+        alias("guapi","juan casiano solis","juan casiano solís","gpi").forEach(a -> NAME_TO_IATA.put(a, "GPI"));
+        alias("yopal","el alcaravan","eal???","eai???","eyo","eul???").forEach(a -> NAME_TO_IATA.put(a, "EYP"));
+        alias("monteria","montería","los garzones","mtr").forEach(a -> NAME_TO_IATA.put(a, "MTR"));
+        alias("villavicencio","vvc","la vanguardia").forEach(a -> NAME_TO_IATA.put(a, "VVC"));
+        alias("sincelejo","las brujas","sja???","sja").forEach(a -> NAME_TO_IATA.put(a, "OLC")); // (nota: Sincelejo opera por Corozal SKCZ IATA: CZU)
+        NAME_TO_IATA.put("corozal", "CZU");
+        // Corrige posibles errores arriba:
+        NAME_TO_IATA.put("sincelejo", "CZU");
+        NAME_TO_IATA.put("las brujas", "CZU");
+    }
+
+    private static List<String> alias(String... xs) {
+        List<String> out = new ArrayList<>();
+        for (String x : xs) out.add(normalize(x));
+        return out;
+    }
+
+    public static String normalize(String s) {
+        if (s == null) return "";
+        String t = Normalizer.normalize(s, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase(Locale.ROOT).trim();
+        return t.replaceAll("[^a-z0-9\\s-]", "").replaceAll("\\s+", " ");
+    }
+
+    /** Si es IATA de 3 letras, devuelve en upper; si es alias/nombre, intenta resolver; si no, null. */
+    public static String toIata(String input) {
+        if (input == null || input.isBlank()) return null;
+        String t = input.trim();
+        if (t.length() == 3 && t.matches("(?i)[a-z]{3}")) return t.toUpperCase(Locale.ROOT);
+        return NAME_TO_IATA.get(normalize(t));
+    }
+}
+
+
+===== FILE: .\src\main\resources\application-dev.yml =====
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: false
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration-minutes: ${JWT_EXPIRATION_MINUTES:120}
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+
+
+===== FILE: .\src\main\resources\application-prod.yml =====
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    table: flyway_schema_history
+    baseline-on-migrate: true      # 👈 activar solo para este despliegue
+    baseline-version: 1
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS}
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration-minutes: ${JWT_EXPIRATION_MINUTES:120}
+
+
+===== FILE: .\src\main\resources\application.yml =====
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: Aerotickets
+  config:
+    import: >
+      optional:file:.env.${spring.profiles.active}.properties,
+      optional:file:.env.properties
+  jpa:
+    open-in-view: false
+    show-sql: false
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration-minutes: ${JWT_EXPIRATION_MINUTES:120}
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+
+logging:
+  file:
+    name: logs/aerotickets.log
+  level:
+    root: INFO
+    com.aerotickets: DEBUG
+    org.springframework.security: INFO
+    org.springframework.web: INFO
+    org.hibernate.SQL: WARN
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss}){faint} | %clr(%-5level){cyan} | %clr(%logger{36}){blue} | %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} | %-5level | %logger{36} | %msg%n"
+
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health,info,mappings
+  endpoint:
+    health:
+      show-details: when_authorized
+    mappings:
+      enabled: true
+  health:
+    defaults:
+      enabled: true
+
+external:
+  apis:
+    airlabs:
+      base-url: ${AIRLABS_BASE_URL:https://airlabs.co/api/v9}
+      api-key: ${AIRLABS_API_KEY:}
+
+# Si más adelante activas proveedores live reales, puedes agregar:
+# live:
+#   simulate-only: true
+
+
+===== FILE: .\src\main\resources\db\migration\V1__init.sql =====
+-- =========================================================
+-- Aerotickets - V1 inicial de esquema (PostgreSQL)
+-- Tablas: users, flights, reservations
+-- Índices y constraints claves para búsquedas y consistencia
+-- =========================================================
+
+-- 🧑‍💼 Usuarios
+CREATE TABLE IF NOT EXISTS users (
+  id           BIGSERIAL PRIMARY KEY,
+  name         VARCHAR(120)        NOT NULL,
+  email        VARCHAR(190)        NOT NULL,
+  password     VARCHAR(250)        NOT NULL,
+  role         VARCHAR(30)         NOT NULL DEFAULT 'USER',
+  enabled      BOOLEAN             NOT NULL DEFAULT TRUE,
+  created_at   TIMESTAMP           NOT NULL DEFAULT NOW(),
+  updated_at   TIMESTAMP           NOT NULL DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_users_email ON users (email);
+
+-- ✈️ Vuelos (alineado con com.aerotickets.entity.Flight)
+CREATE TABLE IF NOT EXISTS flights (
+  id            BIGSERIAL PRIMARY KEY,
+  airline       VARCHAR(120)       NOT NULL,
+  origin        VARCHAR(10)        NOT NULL,
+  destination   VARCHAR(10)        NOT NULL,
+  departure_at  TIMESTAMP          NOT NULL,
+  arrive_at     TIMESTAMP          NOT NULL,
+  total_seats   INTEGER            NOT NULL CHECK (total_seats >= 0),
+  price         NUMERIC(12,2)      NOT NULL CHECK (price >= 0),
+  version       INTEGER            NOT NULL DEFAULT 0,
+  created_at    TIMESTAMP          NOT NULL DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_flights_unique_dep
+  ON flights (airline, origin, destination, departure_at);
+
+CREATE INDEX IF NOT EXISTS idx_flights_route_departure
+  ON flights (origin, destination, departure_at);
+
+-- 🎟️ Reservas
+CREATE TABLE IF NOT EXISTS reservations (
+  id           BIGSERIAL PRIMARY KEY,
+  user_id      BIGINT              NOT NULL REFERENCES users(id)   ON DELETE CASCADE,
+  flight_id    BIGINT              NOT NULL REFERENCES flights(id) ON DELETE CASCADE,
+  seat_number  INTEGER,
+  seats        INTEGER             NOT NULL DEFAULT 1 CHECK (seats >= 1),
+  status       VARCHAR(20)         NOT NULL DEFAULT 'ACTIVE',
+  created_at   TIMESTAMP           NOT NULL DEFAULT NOW(),
+  version      INTEGER             NOT NULL DEFAULT 0
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_reservations_flight_seat
+  ON reservations (flight_id, seat_number)
+  WHERE seat_number IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS idx_reservations_user_created
+  ON reservations (user_id, created_at DESC);
+
+
+===== FILE: .\src\main\resources\db\migration\V2__seed_flights_co.sql =====
+-- V2: Semillas de vuelos domésticos Colombia (fechas relativas a hoy)
+-- Nota: Render ejecuta Flyway al arrancar. Mantén horarios realistas.
+
+-- Borra duplicados si ya existen mismos (airline, origin, destination, departure_at)
+DELETE FROM flights f
+USING flights g
+WHERE f.id > g.id
+  AND f.airline = g.airline
+  AND f.origin = g.origin
+  AND f.destination = g.destination
+  AND f.departure_at = g.departure_at;
+
+-- Función auxiliar para crear timestamps a partir de hoy
+-- (Si no te deja crear funciones por permisos, puedes inlinear NOW() + interval)
+-- Aquí lo haremos directo con NOW() y fechas/hours fijos.
+
+-- Bogotá – Medellín (Avianca)
+INSERT INTO flights(airline, origin, destination, departure_at, arrive_at, total_seats, price, version, created_at)
+VALUES
+('Avianca','BOG','MDE', date_trunc('day', now()) + interval '10 hour', date_trunc('day', now()) + interval '11 hour 10 min', 180, 220000, 0, now()),
+('Avianca','MDE','BOG', date_trunc('day', now()) + interval '13 hour', date_trunc('day', now()) + interval '14 hour 10 min', 180, 230000, 0, now())
+ON CONFLICT DO NOTHING;
+
+-- Bogotá – Cartagena (LATAM)
+INSERT INTO flights(airline, origin, destination, departure_at, arrive_at, total_seats, price, version, created_at)
+VALUES
+('LATAM Colombia','BOG','CTG', date_trunc('day', now()) + interval '09 hour 30 min', date_trunc('day', now()) + interval '10 hour 55 min', 180, 260000, 0, now()),
+('LATAM Colombia','CTG','BOG', date_trunc('day', now()) + interval '12 hour 30 min', date_trunc('day', now()) + interval '13 hour 55 min', 180, 255000, 0, now())
+ON CONFLICT DO NOTHING;
+
+-- Bogotá – Barranquilla (Wingo)
+INSERT INTO flights(airline, origin, destination, departure_at, arrive_at, total_seats, price, version, created_at)
+VALUES
+('Wingo','BOG','BAQ', date_trunc('day', now()) + interval '15 hour', date_trunc('day', now()) + interval '16 hour 25 min', 186, 240000, 0, now()),
+('Wingo','BAQ','BOG', date_trunc('day', now()) + interval '17 hour 30 min', date_trunc('day', now()) + interval '18 hour 55 min', 186, 245000, 0, now())
+ON CONFLICT DO NOTHING;
+
+-- Bogotá – San Andrés (Avianca)
+INSERT INTO flights(airline, origin, destination, departure_at, arrive_at, total_seats, price, version, created_at)
+VALUES
+('Avianca','BOG','ADZ', date_trunc('day', now()) + interval '07 hour', date_trunc('day', now()) + interval '08 hour 50 min', 180, 420000, 0, now()),
+('Avianca','ADZ','BOG', date_trunc('day', now()) + interval '12 hour', date_trunc('day', now()) + interval '13 hour 50 min', 180, 430000, 0, now())
+ON CONFLICT DO NOTHING;
+
+-- Regionales (Satena / Clic)
+INSERT INTO flights(airline, origin, destination, departure_at, arrive_at, total_seats, price, version, created_at)
+VALUES
+('Satena','BOG','LET', date_trunc('day', now()) + interval '06 hour 30 min', date_trunc('day', now()) + interval '08 hour 30 min', 48, 520000, 0, now()),
+('Satena','LET','BOG', date_trunc('day', now()) + interval '14 hour', date_trunc('day', now()) + interval '16 hour', 48, 525000, 0, now()),
+('Clic','MDE','PEI', date_trunc('day', now()) + interval '11 hour', date_trunc('day', now()) + interval '11 hour 50 min', 70, 190000, 0, now()),
+('Clic','PEI','MDE', date_trunc('day', now()) + interval '17 hour 20 min', date_trunc('day', now()) + interval '18 hour 10 min', 70, 195000, 0, now())
+ON CONFLICT DO NOTHING;
+
+
+===== FILE: .\src\main\resources\db\migration\V3__airports_co.sql =====
+-- V3: Tabla y data de aeropuertos Colombia
+CREATE TABLE IF NOT EXISTS airports_co (
+  iata            VARCHAR(3) PRIMARY KEY,
+  icao            VARCHAR(4),
+  city            VARCHAR(80) NOT NULL,
+  name            VARCHAR(120) NOT NULL,
+  state           VARCHAR(60),
+  latitude        NUMERIC(10,6),
+  longitude       NUMERIC(10,6),
+  elevation_ft    INTEGER,
+  runway_len_m    INTEGER,
+  terrain         VARCHAR(60),
+  allowed_families TEXT NOT NULL -- lista separada por coma (p.ej. 'A320-200,A320neo,B737-800')
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_airports_co_icao ON airports_co(icao);
+CREATE INDEX IF NOT EXISTS idx_airports_co_city ON airports_co(city);
+
+-- Upsert helper (por si re-corres)
+CREATE OR REPLACE FUNCTION upsert_airport_co(
+    _iata VARCHAR, _icao VARCHAR, _city VARCHAR, _name VARCHAR, _state VARCHAR,
+    _lat NUMERIC, _lon NUMERIC, _elev INTEGER, _rwy INTEGER, _terrain VARCHAR, _families TEXT
+) RETURNS VOID AS $$
+BEGIN
+  INSERT INTO airports_co(iata, icao, city, name, state, latitude, longitude, elevation_ft, runway_len_m, terrain, allowed_families)
+  VALUES(_iata,_icao,_city,_name,_state,_lat,_lon,_elev,_rwy,_terrain,_families)
+  ON CONFLICT (iata) DO UPDATE SET
+    icao = EXCLUDED.icao,
+    city = EXCLUDED.city,
+    name = EXCLUDED.name,
+    state = EXCLUDED.state,
+    latitude = EXCLUDED.latitude,
+    longitude = EXCLUDED.longitude,
+    elevation_ft = EXCLUDED.elevation_ft,
+    runway_len_m = EXCLUDED.runway_len_m,
+    terrain = EXCLUDED.terrain,
+    allowed_families = EXCLUDED.allowed_families;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Principales y regionales (coinciden con AirportCatalogCO)
+SELECT upsert_airport_co('BOG','SKBO','Bogotá','El Dorado','Cundinamarca',4.701600,-74.146900,8361,3800,'Llano/Altiplano','A320-200,A320neo,A319,A321,B737-800,B787,A330');
+SELECT upsert_airport_co('MDE','SKRG','Rionegro (Medellín)','José María Córdova','Antioquia',6.164500,-75.423100,6954,3500,'Montañoso','A320-200,A320neo,A319,A321,B737-800');
+SELECT upsert_airport_co('EOH','SKMD','Medellín','Olaya Herrera','Antioquia',6.219000,-75.589000,4949,2500,'Urbano','ATR 72-600,ATR 42-600,ERJ-145');
+SELECT upsert_airport_co('CTG','SKCG','Cartagena','Rafael Núñez','Bolívar',10.442400,-75.513000,6,2600,'Costero','A320-200,A320neo,A319,B737-800');
+SELECT upsert_airport_co('BAQ','SKBQ','Barranquilla','Ernesto Cortissoz','Atlántico',10.889600,-74.780800,94,3000,'Costero','A320-200,A320neo,A319,B737-800');
+SELECT upsert_airport_co('SMR','SKSM','Santa Marta','Simón Bolívar','Magdalena',11.119600,-74.230600,22,1900,'Costero','A320-200,A320neo,B737-800,ATR 72-600');
+SELECT upsert_airport_co('CLO','SKCL','Cali','Alfonso Bonilla Aragón','Valle del Cauca',3.543000,-76.380200,3162,3000,'Valle','A320-200,A320neo,A321,B737-800');
+SELECT upsert_airport_co('PEI','SKPE','Pereira','Matecaña','Risaralda',4.813200,-75.739500,4413,2080,'Ondulado','A320-200,A319,ATR 72-600');
+SELECT upsert_airport_co('AXM','SKAR','Armenia','El Edén','Quindío',4.452800,-75.766400,3999,2050,'Ondulado','A320-200,A319,ATR 72-600');
+SELECT upsert_airport_co('BGA','SKBG','Bucaramanga','Palonegro','Santander',7.126500,-73.184800,3897,3000,'Montañoso','A320-200,A319,B737-800');
+SELECT upsert_airport_co('CUC','SKCC','Cúcuta','Camilo Daza','Norte de Santander',7.928600,-72.511500,1096,2300,'Valle','A320-200,A319,B737-800');
+SELECT upsert_airport_co('ADZ','SKSP','San Andrés','Gustavo Rojas Pinilla','San Andrés',12.583600,-81.711200,19,2380,'Isla','A320-200,A320neo,B737-800');
+SELECT upsert_airport_co('LET','SKLT','Leticia','Alfredo Vásquez Cobo','Amazonas',-4.193600,-69.943200,277,2500,'Selva','A320-200,A319,ATR 72-600');
+SELECT upsert_airport_co('IBE','SKIB','Ibagué','Perales','Tolima',4.421600,-75.133300,2995,1800,'Montañoso','ATR 72-600,ERJ-145');
+SELECT upsert_airport_co('RCH','SKRH','Riohacha','Almirante Padilla','La Guajira',11.526200,-72.926000,43,2100,'Costero','A320-200,ATR 72-600');
+SELECT upsert_airport_co('NVA','SKNV','Neiva','Benito Salas','Huila',2.951400,-75.293600,1460,1880,'Valle','ATR 72-600,ERJ-145');
+SELECT upsert_airport_co('MZL','SKMZ','Manizales','La Nubia','Caldas',5.029600,-75.464700,6890,1480,'Montañoso','ATR 42-600,ERJ-145');
+SELECT upsert_airport_co('VUP','SKVP','Valledupar','Alfonso López Pumarejo','Cesar',10.435000,-73.249500,482,2100,'Valle','A320-200,ATR 72-600');
+SELECT upsert_airport_co('UIB','SKUI','Quibdó','El Caraño','Chocó',5.690800,-76.641200,204,1800,'Selva','ATR 72-600,ERJ-145');
+SELECT upsert_airport_co('PPN','SKPP','Popayán','Guillermo León Valencia','Cauca',2.454400,-76.609300,5689,1850,'Montañoso','ATR 72-600,ERJ-145');
+SELECT upsert_airport_co('GPI','SKGP','Guapi','Juan Casiano Solís','Cauca',2.571200,-77.898600,164,1600,'Selva','ATR 42-600,ERJ-145');
+SELECT upsert_airport_co('EYP','SKYP','Yopal','El Alcaraván','Casanare',5.319100,-72.384000,1020,2300,'Llano','A320-200,ATR 72-600');
+SELECT upsert_airport_co('MTR','SKMR','Montería','Los Garzones','Córdoba',8.823700,-75.825800,36,2300,'Valle','A320-200,A320neo,B737-800');
+SELECT upsert_airport_co('VVC','SKVV','Villavicencio','La Vanguardia','Meta',4.168000,-73.613800,1399,1800,'Llano','ATR 72-600,ERJ-145');
+SELECT upsert_airport_co('CZU','SKCZ','Corozal (Sincelejo)','Las Brujas','Sucre',9.332750,-75.285600,512,1600,'Valle','ATR 72-600,ERJ-145');
+SELECT upsert_airport_co('PSO','SKPS','Pasto','Antonio Nariño','Nariño',1.396200,-77.291500,5951,2300,'Montañoso','A320-200,ATR 72-600');
+SELECT upsert_airport_co('RVE','SKSA','Saravena','Los Colonizadores','Arauca',6.955600,-71.857200,700,1800,'Llano','ATR 42-600,ERJ-145');
+SELECT upsert_airport_co('APO','SKLC','Carepa (Apartadó)','Antonio Roldán Betancourt','Antioquia',7.810000,-76.716000,46,1800,'Selva','ATR 72-600,ERJ-145');
+
+
+===== FILE: .\src\main\resources\logback-spring.xml =====
+<configuration scan="true">
+
+    <property name="LOG_PATH" value="logs" />
+    <property name="APP_NAME" value="Aerotickets" />
+
+    <!-- === Consola con colores === -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%highlight(%-5level) %cyan(%logger{36}) - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- === Log principal con rotación diaria === -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/${APP_NAME}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/${APP_NAME}-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>15</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} | %-5level | %logger{36} | %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- === Log de errores críticos === -->
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/errors-${APP_NAME}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/errors-${APP_NAME}-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>20</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} | %-5level | %logger{36} | %msg%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!-- === Configuración global === -->
+    <logger name="com.aerotickets" level="DEBUG" />
+    <logger name="org.springframework" level="INFO" />
+    <logger name="org.hibernate.SQL" level="WARN" />
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
+        <appender-ref ref="ERROR_FILE" />
+    </root>
+</configuration>

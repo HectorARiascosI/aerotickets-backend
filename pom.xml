@@ -135,6 +135,12 @@
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
+    
+	    <!-- Envío de correos (Gmail SMTP) -->
+	<dependency>
+	    <groupId>org.springframework.boot</groupId>
+	    <artifactId>spring-boot-starter-mail</artifactId>
+	</dependency>
 
     <!-- (Opcional) Testcontainers para integración futura -->
     <dependency>
@@ -142,7 +148,9 @@
       <artifactId>postgresql</artifactId>
       <scope>test</scope>
     </dependency>
+    
   </dependencies>
+
 
   <!-- ============================= -->
   <!-- ⚙️ BUILD / COMPILACIÓN -->

@@ -3,8 +3,10 @@ package com.aerotickets.controller;
 import com.aerotickets.entity.User;
 import com.aerotickets.repository.UserRepository;
 import com.aerotickets.security.JwtUtil;
+import com.aerotickets.service.EmailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -13,14 +15,13 @@ import java.util.Map;
 
 /**
  * Controlador para recuperación de contraseña:
- *  - POST /auth/forgot-password  -> genera token temporal y "envía" enlace
+ *  - POST /auth/forgot-password  -> genera token temporal y envía enlace por email
  *  - POST /auth/reset-password   -> valida token y actualiza la contraseña
  *
- * Las respuestas usan JSON simple: { "message": "..." } para que el frontend
- * pueda mostrar mensajes amigables.
+ * Respuestas JSON: { "message": "..." }
  */
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/auth") // 👈 IMPORTANTE: se mantiene así para que funcione con tu context-path /api
 @CrossOrigin(origins = {"http://localhost:5173"}, allowCredentials = "true")
 public class PasswordRecoveryController {
 
@@ -29,20 +30,30 @@ public class PasswordRecoveryController {
     private final UserRepository userRepository;
     private final PasswordEncoder encoder;
     private final JwtUtil jwtUtil;
+    private final EmailService emailService;
+
+    @Value("${app.frontend.base-url:http://localhost:5173}")
+    private String frontendBaseUrl;
 
     public PasswordRecoveryController(
             UserRepository userRepository,
             PasswordEncoder encoder,
-            JwtUtil jwtUtil
+            JwtUtil jwtUtil,
+            EmailService emailService
     ) {
         this.userRepository = userRepository;
         this.encoder = encoder;
         this.jwtUtil = jwtUtil;
+        this.emailService = emailService;
     }
 
     /**
      * Paso 1: el usuario envía su correo para solicitar recuperación.
      * Body esperado: { "email": "usuario@correo.com" }
+     *
+     * PRIVACIDAD:
+     * - Siempre responde 200 con mensaje genérico, exista o no el usuario.
+     * - No revela si el email está registrado (buena práctica de seguridad / habeas data).
      */
     @PostMapping("/forgot-password")
     public ResponseEntity<Map<String, String>> forgotPassword(@RequestBody Map<String, String> body) {
@@ -52,24 +63,19 @@ public class PasswordRecoveryController {
             throw new IllegalArgumentException("El correo electrónico es obligatorio");
         }
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("No existe un usuario con ese correo"));
+        userRepository.findByEmail(email).ifPresent(user -> {
+            // Solo si el usuario existe generamos token y enviamos correo
+            String token = jwtUtil.generateTemporaryToken(user.getEmail(), 10);
+            String resetUrl = frontendBaseUrl + "/reset-password/" + token;
 
-        // Token válido por 10 minutos
-        String token = jwtUtil.generateTemporaryToken(user.getEmail(), 10);
+            // Envío real de correo
+            emailService.sendPasswordResetEmail(user.getEmail(), resetUrl);
 
-        // En un entorno real, aquí enviarías un correo.
-        // Por ahora dejamos la URL en logs/console para desarrollo:
-        String pathUrl = "http://localhost:5173/reset-password/" + token;
-        String queryUrl = "http://localhost:5173/reset-password?token=" + token;
+            // Log interno (sin token ni email completo)
+            log.info("🔐 Solicitud de recuperación procesada para usuario registrado.");
+        });
 
-        log.info("🔐 Enlace de recuperación (path):  {}", pathUrl);
-        log.info("🔐 Enlace de recuperación (query): {}", queryUrl);
-
-        System.out.println("Password reset (path): " + pathUrl);
-        System.out.println("Password reset (query): " + queryUrl);
-
-        // Devolvemos un mensaje genérico para el usuario
+        // Mensaje siempre genérico
         return ResponseEntity.ok(
                 Map.of("message", "Si el correo está registrado, te hemos enviado un enlace para restablecer tu contraseña.")
         );
@@ -77,9 +83,9 @@ public class PasswordRecoveryController {
 
     /**
      * Paso 2: el usuario envía el token y la nueva contraseña.
-     * Body esperado (compatibles):
+     * Body esperado:
      *  - { "token": "...", "password": "nuevaClave" }
-     *  - { "token": "...", "newPassword": "nuevaClave" }
+     *  o { "token": "...", "newPassword": "nuevaClave" }
      */
     @PostMapping("/reset-password")
     public ResponseEntity<Map<String, String>> resetPassword(@RequestBody Map<String, String> body) {
@@ -97,7 +103,7 @@ public class PasswordRecoveryController {
             throw new IllegalArgumentException("La nueva contraseña es obligatoria");
         }
 
-        // Valida token (firma y expiración); lanza IllegalArgumentException si no sirve
+        // Valida token (firma y expiración). Si es inválido/expirado, JwtUtil lanza excepción.
         String email = jwtUtil.validateTemporaryToken(token);
 
         User user = userRepository.findByEmail(email)

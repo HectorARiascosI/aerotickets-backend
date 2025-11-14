@@ -13,6 +13,18 @@ spring:
   jpa:
     open-in-view: false
     show-sql: false
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL_USER}           
+    password: ${GMAIL_APP_PASSWORD}   
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+    default-encoding: UTF-8
 
 jwt:
   secret: ${JWT_SECRET}
@@ -55,6 +67,12 @@ external:
       base-url: ${AIRLABS_BASE_URL:https://airlabs.co/api/v9}
       api-key: ${AIRLABS_API_KEY:}
 
-# Si más adelante activas proveedores live reales, puedes agregar:
-# live:
-#   simulate-only: true
+
+
+app:
+  mail:
+    
+    from: ${APP_MAIL_FROM:Aerotickets <no-reply@aerotickets.com>}
+  frontend:
+  
+    base-url: ${APP_FRONTEND_BASE_URL:http://localhost:5173}
