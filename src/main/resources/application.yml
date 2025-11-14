@@ -69,7 +69,7 @@ external:
 
 app:
   mail:
-    from: ${APP_MAIL_FROM:Aerotickets <no-reply@aerotickets.com>}
+    from: ${APP_MAIL_FROM:no-reply@aerotickets.com}
   frontend:
     base-url: ${APP_FRONTEND_BASE_URL:http://localhost:5173}
 
