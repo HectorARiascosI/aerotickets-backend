@@ -1,5 +1,6 @@
 package com.aerotickets.service;
 
+import com.aerotickets.constants.LiveFlightConstants;
 import com.aerotickets.constants.LiveFlightStatus;
 import com.aerotickets.dto.FlightSearchDTO;
 import com.aerotickets.entity.Airport;
@@ -57,22 +58,23 @@ public class LiveFlightService {
             return List.of();
         }
 
+        LocalDate today = LocalDate.now(ZONE);
         LocalDate date;
         if (dateIso != null && !dateIso.isBlank()) {
             try {
                 date = LocalDate.parse(dateIso);
             } catch (Exception e) {
-                date = LocalDate.now(ZONE);
+                date = today;
             }
         } else {
-            date = LocalDate.now(ZONE);
+            date = today;
         }
 
-        FlightSearchDTO dto = new FlightSearchDTO();
-        dto.setOrigin(origin);
-        dto.setDestination(destination);
-        dto.setDate(date);
+        if (date.isBefore(today)) {
+            return List.of();
+        }
 
+        FlightSearchDTO dto = new FlightSearchDTO(origin, destination, date);
         return searchInternal(dto);
     }
 
@@ -128,10 +130,10 @@ public class LiveFlightService {
         LiveFlightStatus status = computeStatus(f);
 
         LiveFlight lf = new LiveFlight();
-        lf.setProvider("db");
+        lf.setProvider(LiveFlightConstants.PROVIDER_DB);
         lf.setAirline(f.getAirline());
         lf.setAirlineCode(null);
-        lf.setFlightNumber("FL" + f.getId());
+        lf.setFlightNumber(LiveFlightConstants.FLIGHT_NUMBER_PREFIX + f.getId());
         lf.setOriginIata(f.getOrigin());
         lf.setDestinationIata(f.getDestination());
         lf.setDepartureAt(f.getDepartureAt().atZone(ZONE).format(ISO_LOCAL));
@@ -174,19 +176,18 @@ public class LiveFlightService {
 
     private int estimateCargoKg(int totalSeats, int occupiedSeats) {
         int paxFactor = Math.max(occupiedSeats, 0);
-        int base = 500;
-        int perPax = 15;
-        return base + paxFactor * perPax;
+        return LiveFlightConstants.CARGO_BASE_KG
+                + paxFactor * LiveFlightConstants.CARGO_PER_PAX_KG;
     }
 
     private ZonedDateTime boardingStart(Flight f) {
         ZonedDateTime dep = f.getDepartureAt().atZone(ZONE);
-        return dep.minusMinutes(30);
+        return dep.minusMinutes(LiveFlightConstants.BOARDING_START_MINUTES_BEFORE);
     }
 
     private ZonedDateTime boardingEnd(Flight f) {
         ZonedDateTime dep = f.getDepartureAt().atZone(ZONE);
-        return dep.minusMinutes(10);
+        return dep.minusMinutes(LiveFlightConstants.BOARDING_END_MINUTES_BEFORE);
     }
 
     private boolean matchesAirport(Airport a, String normalizedQuery) {

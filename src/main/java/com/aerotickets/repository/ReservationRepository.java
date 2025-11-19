@@ -20,10 +20,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @EntityGraph(attributePaths = {"flight"})
     Optional<Reservation> findByIdAndUser_Email(Long id, String email);
 
-    // ✅ Agregados para ReservationService
     List<Reservation> findByUser_EmailAndFlight_IdAndStatus(String email, Long flightId, ReservationStatus status);
 
     Optional<Reservation> findFirstByUser_EmailAndFlight_IdAndSeatNumberAndStatus(
             String email, Long flightId, Integer seatNumber, ReservationStatus status
+    );
+
+    List<Reservation> findByFlight_IdAndStatusOrderBySeatNumberAsc(
+            Long flightId, ReservationStatus status
     );
 }

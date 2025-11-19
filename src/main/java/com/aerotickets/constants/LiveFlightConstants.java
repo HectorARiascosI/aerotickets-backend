@@ -23,7 +23,15 @@ public final class LiveFlightConstants {
 
     public static final String PARAM_QUERY = "query";
 
-    // NUEVO: para reutilizar en simulador/registro
     public static final String ZONE_ID_BOGOTA = "America/Bogota";
     public static final String ISO_LOCAL_PATTERN = "yyyy-MM-dd'T'HH:mm:ss";
+
+    public static final String PROVIDER_DB = "db";
+    public static final String FLIGHT_NUMBER_PREFIX = "FL";
+
+    public static final int BOARDING_START_MINUTES_BEFORE = 30;
+    public static final int BOARDING_END_MINUTES_BEFORE = 10;
+
+    public static final int CARGO_BASE_KG = 500;
+    public static final int CARGO_PER_PAX_KG = 15;
 }

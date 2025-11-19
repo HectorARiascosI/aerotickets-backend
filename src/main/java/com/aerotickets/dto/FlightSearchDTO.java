@@ -1,13 +1,36 @@
 package com.aerotickets.dto;
 
+import com.aerotickets.constants.DtoValidationConstants;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
 import java.time.LocalDate;
 
 public class FlightSearchDTO {
-    private String origin;        // Código o nombre de aeropuerto de origen
-    private String destination;   // Código o nombre de aeropuerto de destino
-    private LocalDate date;       // Fecha del vuelo (si no se envía, se asume hoy)
 
-    public FlightSearchDTO() {}
+    @NotBlank
+    @Size(min = DtoValidationConstants.IATA_CODE_LENGTH, max = DtoValidationConstants.IATA_CODE_LENGTH)
+    @Pattern(
+            regexp = DtoValidationConstants.IATA_CODE_REGEX,
+            message = DtoValidationConstants.IATA_ORIGIN_MESSAGE
+    )
+    private String origin;
+
+    @NotBlank
+    @Size(min = DtoValidationConstants.IATA_CODE_LENGTH, max = DtoValidationConstants.IATA_CODE_LENGTH)
+    @Pattern(
+            regexp = DtoValidationConstants.IATA_CODE_REGEX,
+            message = DtoValidationConstants.IATA_DESTINATION_MESSAGE
+    )
+    private String destination;
+
+    @FutureOrPresent(message = DtoValidationConstants.FLIGHT_DATE_PAST_MESSAGE)
+    private LocalDate date;
+
+    public FlightSearchDTO() {
+    }
 
     public FlightSearchDTO(String origin, String destination, LocalDate date) {
         this.origin = origin;
@@ -16,7 +39,7 @@ public class FlightSearchDTO {
     }
 
     public String getOrigin() {
-        return origin;
+        return origin != null ? origin.trim().toUpperCase() : null;
     }
 
     public void setOrigin(String origin) {
@@ -24,7 +47,7 @@ public class FlightSearchDTO {
     }
 
     public String getDestination() {
-        return destination;
+        return destination != null ? destination.trim().toUpperCase() : null;
     }
 
     public void setDestination(String destination) {

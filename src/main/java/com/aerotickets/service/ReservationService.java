@@ -55,25 +55,13 @@ public class ReservationService {
             throw new ConflictException(ReservationServiceConstants.ERR_NO_SEATS_AVAILABLE);
         }
 
-        Integer seat = dto.getSeatNumber();
-        if (seat != null) {
-            if (seat < 1 || seat > flight.getTotalSeats()) {
-                throw new IllegalArgumentException(ReservationServiceConstants.ERR_SEAT_OUT_OF_RANGE);
-            }
-            boolean seatTaken = reservationRepository
-                    .existsByFlight_IdAndSeatNumberAndStatus(
-                            flight.getId(), seat, ReservationStatus.ACTIVE
-                    );
-            if (seatTaken) {
-                throw new ConflictException(ReservationServiceConstants.ERR_SEAT_TAKEN);
-            }
-        }
+        Integer assignedSeat = assignSeatNumber(flight);
 
         try {
             Reservation r = Reservation.builder()
                     .user(user)
                     .flight(flight)
-                    .seatNumber(seat)
+                    .seatNumber(assignedSeat)
                     .status(ReservationStatus.ACTIVE)
                     .build();
 
@@ -85,6 +73,30 @@ public class ReservationService {
                     ReservationServiceConstants.ERR_ACTIVE_RESERVATION_OR_SEAT_TAKEN
             );
         }
+    }
+
+    private Integer assignSeatNumber(Flight flight) {
+        int totalSeats = flight.getTotalSeats();
+        List<Reservation> activeReservations = reservationRepository
+                .findByFlight_IdAndStatusOrderBySeatNumberAsc(
+                        flight.getId(), ReservationStatus.ACTIVE
+                );
+
+        boolean[] taken = new boolean[totalSeats + 1];
+        for (Reservation r : activeReservations) {
+            Integer seat = r.getSeatNumber();
+            if (seat != null && seat > 0 && seat <= totalSeats) {
+                taken[seat] = true;
+            }
+        }
+
+        for (int seat = 1; seat <= totalSeats; seat++) {
+            if (!taken[seat]) {
+                return seat;
+            }
+        }
+
+        throw new ConflictException(ReservationServiceConstants.ERR_NO_SEATS_AVAILABLE);
     }
 
     @Transactional
@@ -119,7 +131,9 @@ public class ReservationService {
                 .findByUser_EmailAndFlight_IdAndStatus(
                         userEmail, flightId, ReservationStatus.ACTIVE
                 );
-        if (active.isEmpty()) return;
+        if (active.isEmpty()) {
+            return;
+        }
         for (Reservation r : active) {
             r.setStatus(ReservationStatus.CANCELLED);
         }

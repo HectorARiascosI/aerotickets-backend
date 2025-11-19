@@ -1,5 +1,6 @@
 package com.aerotickets.service;
 
+import com.aerotickets.constants.FlightConstants;
 import com.aerotickets.dto.FlightSearchDTO;
 import com.aerotickets.entity.Flight;
 import com.aerotickets.repository.FlightRepository;
@@ -21,6 +22,13 @@ public class FlightService {
 
     @Transactional
     public Flight create(Flight f) {
+        LocalDateTime now = LocalDateTime.now();
+        if (f.getDepartureAt() == null || f.getDepartureAt().isBefore(now)) {
+            throw new IllegalArgumentException(FlightConstants.ERR_DEPARTURE_IN_PAST);
+        }
+        if (f.getArriveAt() != null && f.getArriveAt().isBefore(f.getDepartureAt())) {
+            throw new IllegalArgumentException(FlightConstants.ERR_ARRIVAL_BEFORE_DEPARTURE);
+        }
         return flightRepository.save(f);
     }
 
@@ -32,16 +40,23 @@ public class FlightService {
     @Transactional(readOnly = true)
     public List<Flight> searchOrSimulate(FlightSearchDTO dto) {
         if (dto == null || dto.getOrigin() == null || dto.getDestination() == null) {
-            return List.of();
+            throw new IllegalArgumentException(FlightConstants.ERR_ORIGIN_DEST_REQUIRED);
+        }
+
+        LocalDate today = LocalDate.now();
+        LocalDate date = dto.getDate() != null ? dto.getDate() : today;
+
+        if (date.isBefore(today)) {
+            throw new IllegalArgumentException(FlightConstants.ERR_DATE_IN_PAST);
         }
 
         String dep = dto.getOrigin();
         String arr = dto.getDestination();
 
-        LocalDate date = dto.getDate() != null ? dto.getDate() : LocalDate.now();
         LocalDateTime start = date.atStartOfDay();
         LocalDateTime end = start.plusDays(1);
 
-        return flightRepository.findByOriginAndDestinationAndDepartureAtBetween(dep, arr, start, end);
+        return flightRepository
+                .findByOriginAndDestinationAndDepartureAtBetween(dep, arr, start, end);
     }
 }
