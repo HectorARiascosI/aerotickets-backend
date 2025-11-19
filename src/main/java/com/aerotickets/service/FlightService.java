@@ -11,9 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +29,7 @@ public class FlightService {
 
     @Transactional
     public Flight create(Flight f) {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(FlightSeedConstants.SEED_ZONE_ID);
         if (f.getDepartureAt() == null || f.getDepartureAt().isBefore(now)) {
             throw new IllegalArgumentException(FlightConstants.ERR_DEPARTURE_IN_PAST);
         }
@@ -52,7 +50,10 @@ public class FlightService {
             throw new IllegalArgumentException(FlightConstants.ERR_ORIGIN_DEST_REQUIRED);
         }
 
-        LocalDate today = LocalDate.now(FlightSeedConstants.SEED_ZONE_ID);
+        ZoneId zone = FlightSeedConstants.SEED_ZONE_ID;
+        LocalDate today = LocalDate.now(zone);
+        LocalDateTime now = LocalDateTime.now(zone);
+
         LocalDate date = dto.getDate() != null ? dto.getDate() : today;
 
         if (date.isBefore(today)) {
@@ -65,31 +66,54 @@ public class FlightService {
         LocalDateTime start = date.atStartOfDay();
         LocalDateTime end = start.plusDays(1);
 
-        List<Flight> existing = flightRepository
+        List<Flight> flights = flightRepository
                 .findByOriginAndDestinationAndDepartureAtBetween(origin, destination, start, end);
 
-        if (!existing.isEmpty()) {
-            return existing;
+        if (date.isEqual(today)) {
+            flights = filterFromNow(flights, now);
         }
 
-        return generateAndPersistDailyFlights(origin, destination, date);
+        if (!flights.isEmpty()) {
+            return flights;
+        }
+
+        List<Flight> generated = generateAndPersistDailyFlights(origin, destination, date, today, now);
+
+        if (date.isEqual(today)) {
+            generated = filterFromNow(generated, now);
+        }
+
+        return generated;
     }
 
-    private List<Flight> generateAndPersistDailyFlights(String origin, String destination, LocalDate date) {
+    private List<Flight> filterFromNow(List<Flight> flights, LocalDateTime now) {
+        List<Flight> result = new ArrayList<>();
+        for (Flight f : flights) {
+            if (f.getDepartureAt() != null && !f.getDepartureAt().isBefore(now)) {
+                result.add(f);
+            }
+        }
+        return result;
+    }
+
+    private List<Flight> generateAndPersistDailyFlights(String origin,
+                                                        String destination,
+                                                        LocalDate date,
+                                                        LocalDate today,
+                                                        LocalDateTime now) {
         RouteProfileCo profile = routeProfileRepository
                 .findByOriginIataAndDestinationIata(origin, destination)
                 .orElse(null);
 
-        if (profile == null) {
-            return List.of();
+        int typicalMinutes;
+        if (profile != null && profile.getTypicalMinutes() != null && profile.getTypicalMinutes() > 0) {
+            typicalMinutes = profile.getTypicalMinutes();
+        } else {
+            typicalMinutes = FlightConstants.DEFAULT_DURATION_HOURS * 60;
         }
 
-        int typicalMinutes = profile.getTypicalMinutes() != null
-                ? profile.getTypicalMinutes()
-                : FlightConstants.DEFAULT_DURATION_HOURS * 60;
-
-        int flightsPerDay = FlightSeedConstants.FLIGHTS_PER_ROUTE_PER_DAY;
         int[] hours = FlightSeedConstants.DEFAULT_DEPARTURE_HOURS;
+        int flightsPerDay = FlightSeedConstants.FLIGHTS_PER_ROUTE_PER_DAY;
         int count = Math.min(flightsPerDay, hours.length);
 
         List<Flight> toSave = new ArrayList<>();
@@ -98,6 +122,11 @@ public class FlightService {
             int hour = hours[i];
 
             LocalDateTime departureAt = LocalDateTime.of(date, LocalTime.of(hour, 0));
+
+            if (date.isEqual(today) && departureAt.isBefore(now)) {
+                continue;
+            }
+
             LocalDateTime arriveAt = departureAt.plusMinutes(typicalMinutes);
 
             BigDecimal basePrice = FlightSeedConstants.PRICE_PER_MINUTE

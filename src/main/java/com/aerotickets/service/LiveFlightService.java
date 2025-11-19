@@ -74,7 +74,16 @@ public class LiveFlightService {
         }
 
         FlightSearchDTO dto = new FlightSearchDTO(origin, destination, date);
-        return searchInternal(dto);
+
+        List<Flight> flights = flightService.searchOrSimulate(dto);
+        if (flights.isEmpty()) {
+            return List.of();
+        }
+
+        return flights.stream()
+                .map(this::toLiveFlight)
+                .sorted(Comparator.comparing(LiveFlight::getDepartureAt))
+                .collect(Collectors.toList());
     }
 
     public List<Map<String, Object>> autocompleteAirports(String query) {
@@ -99,18 +108,6 @@ public class LiveFlightService {
                 .collect(Collectors.toList());
     }
 
-    private List<LiveFlight> searchInternal(FlightSearchDTO dto) {
-        List<Flight> flights = flightService.searchOrSimulate(dto);
-        if (flights.isEmpty()) {
-            return List.of();
-        }
-
-        return flights.stream()
-                .map(this::toLiveFlight)
-                .sorted(Comparator.comparing(LiveFlight::getDepartureAt))
-                .collect(Collectors.toList());
-    }
-
     private LiveFlight toLiveFlight(Flight f) {
         long occupied = reservationRepository
                 .countByFlight_IdAndStatus(f.getId(), ReservationStatus.ACTIVE);
@@ -123,7 +120,7 @@ public class LiveFlightService {
         LiveFlight lf = new LiveFlight();
         lf.setProvider(LiveFlightConstants.PROVIDER_DB);
         lf.setAirline(f.getAirline());
-        lf.setAirlineCode(null);
+        lf.setAirlineCode(LiveFlightConstants.FLIGHT_NUMBER_PREFIX);
         lf.setFlightNumber(LiveFlightConstants.FLIGHT_NUMBER_PREFIX + f.getId());
         lf.setOriginIata(f.getOrigin());
         lf.setDestinationIata(f.getDestination());
