@@ -19,8 +19,14 @@ public final class FlightConstants {
 
     public static final String OFFSET_DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss[.SSS]XXX";
 
-    public static final String ERR_DEPARTURE_IN_PAST = "Departure time must be in the future";
-    public static final String ERR_ARRIVAL_BEFORE_DEPARTURE = "Arrival time must be after departure time";
-    public static final String ERR_ORIGIN_DEST_REQUIRED = "Origin and destination are required";
-    public static final String ERR_DATE_IN_PAST = "Flight date cannot be in the past";
+    public static final String ERR_DEPARTURE_IN_PAST =
+            "Departure time must be in the future";
+    public static final String ERR_ARRIVAL_BEFORE_DEPARTURE =
+            "Arrival time must be after departure time";
+    public static final String ERR_ORIGIN_DEST_REQUIRED =
+            "Origin and destination are required";
+    public static final String ERR_DATE_IN_PAST =
+            "Flight date cannot be in the past";
+
+    public static final String DEFAULT_AIRLINE_NAME = "Aerolinea Demo";
 }
