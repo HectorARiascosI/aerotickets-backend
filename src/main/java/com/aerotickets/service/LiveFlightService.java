@@ -8,7 +8,6 @@ import com.aerotickets.entity.Flight;
 import com.aerotickets.entity.ReservationStatus;
 import com.aerotickets.model.LiveFlight;
 import com.aerotickets.repository.AirportRepository;
-import com.aerotickets.repository.FlightRepository;
 import com.aerotickets.repository.ReservationRepository;
 import org.springframework.stereotype.Service;
 
@@ -27,16 +26,16 @@ public class LiveFlightService {
     private static final ZoneId ZONE = ZoneId.of(ZONE_ID_BOGOTA);
     private static final DateTimeFormatter ISO_LOCAL = DateTimeFormatter.ofPattern(ISO_LOCAL_PATTERN);
 
-    private final FlightRepository flightRepository;
     private final ReservationRepository reservationRepository;
     private final AirportRepository airportRepository;
+    private final FlightService flightService;
 
-    public LiveFlightService(FlightRepository flightRepository,
-                             ReservationRepository reservationRepository,
-                             AirportRepository airportRepository) {
-        this.flightRepository = flightRepository;
+    public LiveFlightService(ReservationRepository reservationRepository,
+                             AirportRepository airportRepository,
+                             FlightService flightService) {
         this.reservationRepository = reservationRepository;
         this.airportRepository = airportRepository;
+        this.flightService = flightService;
     }
 
     public List<LiveFlight> searchLive(String originRaw,
@@ -101,15 +100,7 @@ public class LiveFlightService {
     }
 
     private List<LiveFlight> searchInternal(FlightSearchDTO dto) {
-        LocalDate date = dto.getDate() != null ? dto.getDate() : LocalDate.now(ZONE);
-        LocalDateTime start = date.atStartOfDay();
-        LocalDateTime end = start.plusDays(1);
-
-        List<Flight> flights = flightRepository
-                .findByOriginAndDestinationAndDepartureAtBetween(
-                        dto.getOrigin(), dto.getDestination(), start, end
-                );
-
+        List<Flight> flights = flightService.searchOrSimulate(dto);
         if (flights.isEmpty()) {
             return List.of();
         }
@@ -132,7 +123,7 @@ public class LiveFlightService {
         LiveFlight lf = new LiveFlight();
         lf.setProvider(LiveFlightConstants.PROVIDER_DB);
         lf.setAirline(f.getAirline());
-        lf.setAirlineCode(null);
+        lf.setAirlineCode(LiveFlightConstants.FLIGHT_NUMBER_PREFIX);
         lf.setFlightNumber(LiveFlightConstants.FLIGHT_NUMBER_PREFIX + f.getId());
         lf.setOriginIata(f.getOrigin());
         lf.setDestinationIata(f.getDestination());

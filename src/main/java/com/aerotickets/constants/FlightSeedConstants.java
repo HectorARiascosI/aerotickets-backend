@@ -1,5 +1,6 @@
 package com.aerotickets.constants;
 
+import java.math.BigDecimal;
 import java.time.ZoneId;
 
 public final class FlightSeedConstants {
@@ -14,4 +15,7 @@ public final class FlightSeedConstants {
     public static final ZoneId SEED_ZONE_ID = ZoneId.of(LiveFlightConstants.ZONE_ID_BOGOTA);
 
     public static final int[] DEFAULT_DEPARTURE_HOURS = {6, 12, 18};
+
+    public static final BigDecimal MIN_BASE_PRICE = new BigDecimal("80000");
+    public static final BigDecimal PRICE_PER_MINUTE = new BigDecimal("200");
 }

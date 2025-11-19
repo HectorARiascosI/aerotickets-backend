@@ -28,5 +28,5 @@ public final class FlightConstants {
     public static final String ERR_DATE_IN_PAST =
             "Flight date cannot be in the past";
 
-    public static final String DEFAULT_AIRLINE_NAME = "Aerolinea Demo";
+    public static final String DEFAULT_AIRLINE_NAME = "Aerotickets";
 }
