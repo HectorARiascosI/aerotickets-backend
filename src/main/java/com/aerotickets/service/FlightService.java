@@ -3,28 +3,37 @@ package com.aerotickets.service;
 import com.aerotickets.constants.FlightConstants;
 import com.aerotickets.constants.FlightSeedConstants;
 import com.aerotickets.dto.FlightSearchDTO;
+import com.aerotickets.entity.AirlineFleet;
 import com.aerotickets.entity.Flight;
 import com.aerotickets.entity.RouteProfileCo;
+import com.aerotickets.repository.AirlineFleetRepository;
 import com.aerotickets.repository.FlightRepository;
 import com.aerotickets.repository.RouteProfileRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class FlightService {
 
     private final FlightRepository flightRepository;
     private final RouteProfileRepository routeProfileRepository;
+    private final AirlineFleetRepository airlineFleetRepository;
 
     public FlightService(FlightRepository flightRepository,
-                         RouteProfileRepository routeProfileRepository) {
+                         RouteProfileRepository routeProfileRepository,
+                         AirlineFleetRepository airlineFleetRepository) {
         this.flightRepository = flightRepository;
         this.routeProfileRepository = routeProfileRepository;
+        this.airlineFleetRepository = airlineFleetRepository;
     }
 
     @Transactional
@@ -116,6 +125,9 @@ public class FlightService {
         int flightsPerDay = FlightSeedConstants.FLIGHTS_PER_ROUTE_PER_DAY;
         int count = Math.min(flightsPerDay, hours.length);
 
+        String airlineName = chooseAirlineName(origin, destination);
+        int seatsForRoute = chooseSeatsForRoute(origin, destination);
+
         List<Flight> toSave = new ArrayList<>();
 
         for (int i = 0; i < count; i++) {
@@ -136,12 +148,12 @@ public class FlightService {
             }
 
             Flight f = new Flight();
-            f.setAirline(FlightConstants.DEFAULT_AIRLINE_NAME);
+            f.setAirline(airlineName);
             f.setOrigin(origin);
             f.setDestination(destination);
             f.setDepartureAt(departureAt);
             f.setArriveAt(arriveAt);
-            f.setTotalSeats(FlightConstants.DEFAULT_TOTAL_SEATS);
+            f.setTotalSeats(seatsForRoute);
             f.setPrice(basePrice);
 
             toSave.add(f);
@@ -152,5 +164,33 @@ public class FlightService {
         }
 
         return flightRepository.saveAll(toSave);
+    }
+
+    private String chooseAirlineName(String origin, String destination) {
+        List<AirlineFleet> fleets = airlineFleetRepository.findAllByOrderByAirlineNameAsc();
+        if (fleets.isEmpty()) {
+            return FlightConstants.DEFAULT_AIRLINE_NAME;
+        }
+        int index = Math.abs(Objects.hash(origin, destination)) % fleets.size();
+        AirlineFleet fleet = fleets.get(index);
+        String name = fleet.getAirlineName();
+        if (name == null || name.isBlank()) {
+            return FlightConstants.DEFAULT_AIRLINE_NAME;
+        }
+        return name;
+    }
+
+    private int chooseSeatsForRoute(String origin, String destination) {
+        List<AirlineFleet> fleets = airlineFleetRepository.findAllByOrderByAirlineNameAsc();
+        if (fleets.isEmpty()) {
+            return FlightConstants.DEFAULT_TOTAL_SEATS;
+        }
+        int index = Math.abs(Objects.hash(origin, destination, "seats")) % fleets.size();
+        AirlineFleet fleet = fleets.get(index);
+        Integer typicalSeats = fleet.getTypicalSeats();
+        if (typicalSeats == null || typicalSeats <= 0) {
+            return FlightConstants.DEFAULT_TOTAL_SEATS;
+        }
+        return typicalSeats;
     }
 }
