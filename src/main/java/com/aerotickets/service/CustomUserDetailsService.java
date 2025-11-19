@@ -1,5 +1,6 @@
 package com.aerotickets.service;
 
+import com.aerotickets.constants.SecurityMessagesConstants;
 import com.aerotickets.entity.User;
 import com.aerotickets.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +21,19 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User u = users.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + email));
+                .orElseThrow(() ->
+                        new UsernameNotFoundException(
+                                SecurityMessagesConstants.ERR_USER_NOT_FOUND_PREFIX + email
+                        )
+                );
 
         return new org.springframework.security.core.userdetails.User(
                 u.getEmail(),
                 u.getPasswordHash(),
                 u.isEnabled(),
-                true, true, true,
+                true,
+                true,
+                true,
                 List.of(new SimpleGrantedAuthority("ROLE_" + u.getRole()))
         );
     }

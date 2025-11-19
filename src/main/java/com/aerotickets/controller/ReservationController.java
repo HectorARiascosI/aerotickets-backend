@@ -1,5 +1,6 @@
 package com.aerotickets.controller;
 
+import com.aerotickets.constants.ReservationConstants;
 import com.aerotickets.dto.ReservationRequestDTO;
 import com.aerotickets.dto.ReservationResponseDTO;
 import com.aerotickets.service.ReservationService;
@@ -12,9 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-// IMPORTANTE: con server.servlet.context-path=/api, el base path aquí
-// NO debe volver a incluir /api. Déjalo en "/reservations".
-@RequestMapping("/reservations")
+@RequestMapping(ReservationConstants.BASE_PATH)
 public class ReservationController {
 
     private final ReservationService service;
@@ -33,7 +32,7 @@ public class ReservationController {
         return ResponseEntity.ok(service.create(email, dto));
     }
 
-    @GetMapping("/my")
+    @GetMapping(ReservationConstants.MY_PATH)
     public ResponseEntity<List<ReservationResponseDTO>> myReservations(Authentication auth) {
         String email = (auth != null) ? auth.getName() : null;
         if (email == null || email.isBlank()) {
@@ -42,8 +41,7 @@ public class ReservationController {
         return ResponseEntity.ok(service.listMine(email));
     }
 
-    // Alias opcional
-    @GetMapping("/me")
+    @GetMapping(ReservationConstants.ME_PATH)
     public ResponseEntity<List<ReservationResponseDTO>> myReservationsAlias(Authentication auth) {
         String email = (auth != null) ? auth.getName() : null;
         if (email == null || email.isBlank()) {

@@ -1,5 +1,6 @@
 package com.aerotickets.service;
 
+import com.aerotickets.constants.ReservationServiceConstants;
 import com.aerotickets.dto.ReservationRequestDTO;
 import com.aerotickets.dto.ReservationResponseDTO;
 import com.aerotickets.entity.Flight;
@@ -11,9 +12,9 @@ import com.aerotickets.exception.NotFoundException;
 import com.aerotickets.repository.FlightRepository;
 import com.aerotickets.repository.ReservationRepository;
 import com.aerotickets.repository.UserRepository;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,33 +37,35 @@ public class ReservationService {
     @Transactional
     public ReservationResponseDTO create(String userEmail, ReservationRequestDTO dto) {
         if (userEmail == null || userEmail.isBlank()) {
-            throw new IllegalArgumentException("User email is required");
+            throw new IllegalArgumentException(ReservationServiceConstants.ERR_USER_EMAIL_REQUIRED);
         }
         if (dto == null || dto.getFlightId() == null) {
-            throw new IllegalArgumentException("Flight id is required");
+            throw new IllegalArgumentException(ReservationServiceConstants.ERR_FLIGHT_ID_REQUIRED);
         }
 
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new NotFoundException(ReservationServiceConstants.ERR_USER_NOT_FOUND));
 
         Flight flight = flightRepository.findById(dto.getFlightId())
-                .orElseThrow(() -> new NotFoundException("Flight not found"));
+                .orElseThrow(() -> new NotFoundException(ReservationServiceConstants.ERR_FLIGHT_NOT_FOUND));
 
-        long activeCount = reservationRepository.countByFlight_IdAndStatus(flight.getId(), ReservationStatus.ACTIVE);
+        long activeCount = reservationRepository
+                .countByFlight_IdAndStatus(flight.getId(), ReservationStatus.ACTIVE);
         if (activeCount >= flight.getTotalSeats()) {
-            throw new ConflictException("No seats available for this flight");
+            throw new ConflictException(ReservationServiceConstants.ERR_NO_SEATS_AVAILABLE);
         }
 
         Integer seat = dto.getSeatNumber();
         if (seat != null) {
             if (seat < 1 || seat > flight.getTotalSeats()) {
-                throw new IllegalArgumentException("Seat number out of range");
+                throw new IllegalArgumentException(ReservationServiceConstants.ERR_SEAT_OUT_OF_RANGE);
             }
-            boolean seatTaken = reservationRepository.existsByFlight_IdAndSeatNumberAndStatus(
-                    flight.getId(), seat, ReservationStatus.ACTIVE
-            );
+            boolean seatTaken = reservationRepository
+                    .existsByFlight_IdAndSeatNumberAndStatus(
+                            flight.getId(), seat, ReservationStatus.ACTIVE
+                    );
             if (seatTaken) {
-                throw new ConflictException("Selected seat is already reserved");
+                throw new ConflictException(ReservationServiceConstants.ERR_SEAT_TAKEN);
             }
         }
 
@@ -78,21 +81,24 @@ public class ReservationService {
             return toDto(saved);
 
         } catch (DataIntegrityViolationException ex) {
-            throw new ConflictException("You already have an ACTIVE reservation for this flight or the seat is taken");
+            throw new ConflictException(
+                    ReservationServiceConstants.ERR_ACTIVE_RESERVATION_OR_SEAT_TAKEN
+            );
         }
     }
 
     @Transactional
     public void cancel(String userEmail, Long reservationId) {
         if (userEmail == null || userEmail.isBlank()) {
-            throw new IllegalArgumentException("User email is required");
+            throw new IllegalArgumentException(ReservationServiceConstants.ERR_USER_EMAIL_REQUIRED);
         }
         if (reservationId == null) {
-            throw new IllegalArgumentException("Reservation id is required");
+            throw new IllegalArgumentException(ReservationServiceConstants.ERR_RESERVATION_ID_REQUIRED);
         }
 
         Reservation r = reservationRepository.findByIdAndUser_Email(reservationId, userEmail)
-                .orElseThrow(() -> new NotFoundException("Reservation not found"));
+                .orElseThrow(() -> new NotFoundException(
+                        ReservationServiceConstants.ERR_RESERVATION_NOT_FOUND));
 
         if (r.getStatus() == ReservationStatus.CANCELLED) {
             return;
@@ -105,10 +111,14 @@ public class ReservationService {
     @Transactional
     public void cancelAllActiveByFlightForUser(String userEmail, Long flightId) {
         if (userEmail == null || userEmail.isBlank() || flightId == null) {
-            throw new IllegalArgumentException("User email and flight id are required");
+            throw new IllegalArgumentException(
+                    ReservationServiceConstants.ERR_USER_EMAIL_AND_FLIGHT_ID_REQUIRED
+            );
         }
         List<Reservation> active = reservationRepository
-                .findByUser_EmailAndFlight_IdAndStatus(userEmail, flightId, ReservationStatus.ACTIVE);
+                .findByUser_EmailAndFlight_IdAndStatus(
+                        userEmail, flightId, ReservationStatus.ACTIVE
+                );
         if (active.isEmpty()) return;
         for (Reservation r : active) {
             r.setStatus(ReservationStatus.CANCELLED);
@@ -118,14 +128,19 @@ public class ReservationService {
 
     @Transactional
     public void cancelSeatIfActive(String userEmail, Long flightId, Integer seatNumber) {
-        if (userEmail == null || userEmail.isBlank() || flightId == null || seatNumber == null) {
-            throw new IllegalArgumentException("User email, flight id and seat number are required");
+        if (userEmail == null || userEmail.isBlank()
+                || flightId == null || seatNumber == null) {
+            throw new IllegalArgumentException(
+                    ReservationServiceConstants.ERR_USER_EMAIL_FLIGHT_ID_SEAT_REQUIRED
+            );
         }
         Reservation r = reservationRepository
                 .findFirstByUser_EmailAndFlight_IdAndSeatNumberAndStatus(
                         userEmail, flightId, seatNumber, ReservationStatus.ACTIVE
                 )
-                .orElseThrow(() -> new NotFoundException("Active reservation for that seat not found"));
+                .orElseThrow(() -> new NotFoundException(
+                        ReservationServiceConstants.ERR_ACTIVE_RESERVATION_FOR_SEAT_NOT_FOUND
+                ));
         r.setStatus(ReservationStatus.CANCELLED);
         reservationRepository.save(r);
     }
@@ -133,7 +148,7 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public List<ReservationResponseDTO> listMine(String userEmail) {
         if (userEmail == null || userEmail.isBlank()) {
-            throw new IllegalArgumentException("User email is required");
+            throw new IllegalArgumentException(ReservationServiceConstants.ERR_USER_EMAIL_REQUIRED);
         }
         return reservationRepository.findByUser_EmailOrderByCreatedAtDesc(userEmail)
                 .stream()

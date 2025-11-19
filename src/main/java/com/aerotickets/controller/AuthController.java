@@ -1,5 +1,6 @@
 package com.aerotickets.controller;
 
+import com.aerotickets.constants.AuthConstants;
 import com.aerotickets.entity.User;
 import com.aerotickets.model.AuthResponse;
 import com.aerotickets.model.LoginRequest;
@@ -15,15 +16,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Controlador para registro y autenticación de usuarios.
- * Proporciona endpoints públicos:
- *  - POST /api/auth/register
- *  - POST /api/auth/login
- */
 @RestController
-@RequestMapping("/auth")
-@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+@RequestMapping(AuthConstants.BASE_PATH)
+@CrossOrigin(origins = AuthConstants.CORS_ORIGIN_LOCAL, allowCredentials = "true")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -32,13 +27,12 @@ public class AuthController {
     private final UserRepository userRepository;
     private final JwtService jwtService;
 
-    /**
-     * Registro de un nuevo usuario.
-     */
-    @PostMapping("/register")
+    @PostMapping(AuthConstants.REGISTER_PATH)
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest req) {
         if (userRepository.findByEmail(req.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body("El correo ya está registrado.");
+            return ResponseEntity
+                    .badRequest()
+                    .body(AuthConstants.MSG_EMAIL_ALREADY_REGISTERED);
         }
 
         User user = new User();
@@ -47,23 +41,26 @@ public class AuthController {
         user.setPasswordHash(passwordEncoder.encode(req.getPassword()));
         userRepository.save(user);
 
-        return ResponseEntity.ok("Usuario registrado exitosamente");
+        return ResponseEntity.ok(AuthConstants.MSG_USER_REGISTERED_SUCCESS);
     }
 
-    /**
-     * Inicio de sesión con generación de JWT.
-     */
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest req) {
-        // Autenticar credenciales del usuario
+    @PostMapping(AuthConstants.LOGIN_PATH)
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest req) {
         authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword())
         );
 
         User user = userRepository.findByEmail(req.getEmail())
-                .orElseThrow(() -> new BadCredentialsException("Usuario no encontrado"));
+                .orElseThrow(() -> new BadCredentialsException(AuthConstants.MSG_USER_NOT_FOUND));
 
         String token = jwtService.generateToken(user);
-        return ResponseEntity.ok(new AuthResponse(token, user));
+
+        AuthResponse response = new AuthResponse(
+                token,
+                user.getFullName(),
+                user.getEmail()
+        );
+
+        return ResponseEntity.ok(response);
     }
 }

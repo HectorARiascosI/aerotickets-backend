@@ -1,5 +1,6 @@
 package com.aerotickets.exception;
 
+import com.aerotickets.constants.GlobalExceptionConstants;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
@@ -30,32 +31,50 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Map<String, Object>> handleAuth(AuthenticationException ex) {
         return new ResponseEntity<>(
-                Map.of("message", "No autenticado", "type", ex.getClass().getSimpleName()),
-                JSON_HEADERS, HttpStatus.UNAUTHORIZED
+                Map.of(
+                        "message", GlobalExceptionConstants.MSG_UNAUTHENTICATED,
+                        "type", ex.getClass().getSimpleName()
+                ),
+                JSON_HEADERS,
+                HttpStatus.UNAUTHORIZED
         );
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Map<String, Object>> handleAccess(AccessDeniedException ex) {
         return new ResponseEntity<>(
-                Map.of("message", "Acceso denegado", "type", ex.getClass().getSimpleName()),
-                JSON_HEADERS, HttpStatus.FORBIDDEN
+                Map.of(
+                        "message", GlobalExceptionConstants.MSG_ACCESS_DENIED,
+                        "type", ex.getClass().getSimpleName()
+                ),
+                JSON_HEADERS,
+                HttpStatus.FORBIDDEN
         );
     }
 
     @ExceptionHandler({NoSuchElementException.class})
     public ResponseEntity<Map<String, Object>> handleNotFound(RuntimeException ex) {
+        String msg = ex.getMessage() != null
+                ? ex.getMessage()
+                : GlobalExceptionConstants.MSG_NOT_FOUND;
+
         return new ResponseEntity<>(
-                Map.of("message", ex.getMessage() != null ? ex.getMessage() : "Recurso no encontrado"),
-                JSON_HEADERS, HttpStatus.NOT_FOUND
+                Map.of("message", msg),
+                JSON_HEADERS,
+                HttpStatus.NOT_FOUND
         );
     }
 
     @ExceptionHandler({IllegalArgumentException.class, HttpMessageNotReadableException.class})
     public ResponseEntity<Map<String, Object>> handleBadRequest(Exception ex) {
+        String msg = ex.getMessage() != null
+                ? ex.getMessage()
+                : GlobalExceptionConstants.MSG_BAD_REQUEST;
+
         return new ResponseEntity<>(
-                Map.of("message", ex.getMessage() != null ? ex.getMessage() : "Petición inválida"),
-                JSON_HEADERS, HttpStatus.BAD_REQUEST
+                Map.of("message", msg),
+                JSON_HEADERS,
+                HttpStatus.BAD_REQUEST
         );
     }
 
@@ -64,9 +83,11 @@ public class GlobalExceptionHandler {
         String rootMsg = ex.getMostSpecificCause() != null
                 ? ex.getMostSpecificCause().getMessage()
                 : ex.getMessage();
+
         return new ResponseEntity<>(
-                Map.of("message", "Conflicto de datos. " + rootMsg),
-                JSON_HEADERS, HttpStatus.CONFLICT
+                Map.of("message", GlobalExceptionConstants.MSG_DATA_CONFLICT + rootMsg),
+                JSON_HEADERS,
+                HttpStatus.CONFLICT
         );
     }
 
@@ -76,26 +97,40 @@ public class GlobalExceptionHandler {
         for (FieldError err : ex.getBindingResult().getFieldErrors()) {
             errors.put(err.getField(), err.getDefaultMessage());
         }
+
         return new ResponseEntity<>(
-                Map.of("message", "Error de validación de campos", "errors", errors),
-                JSON_HEADERS, HttpStatus.UNPROCESSABLE_ENTITY
+                Map.of(
+                        "message", GlobalExceptionConstants.MSG_VALIDATION_ERROR,
+                        "errors", errors
+                ),
+                JSON_HEADERS,
+                HttpStatus.UNPROCESSABLE_ENTITY
         );
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Map<String, Object>> handleConstraint(ConstraintViolationException ex) {
         return new ResponseEntity<>(
-                Map.of("message", "Violación de restricciones", "errors", ex.getMessage()),
-                JSON_HEADERS, HttpStatus.UNPROCESSABLE_ENTITY
+                Map.of(
+                        "message", GlobalExceptionConstants.MSG_CONSTRAINT_VIOLATION,
+                        "errors", ex.getMessage()
+                ),
+                JSON_HEADERS,
+                HttpStatus.UNPROCESSABLE_ENTITY
         );
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
-        ex.printStackTrace(); // para ver la causa real en Render
+        ex.printStackTrace();
+
         return new ResponseEntity<>(
-                Map.of("message", "Error inesperado en el servidor", "type", ex.getClass().getSimpleName()),
-                JSON_HEADERS, HttpStatus.INTERNAL_SERVER_ERROR
+                Map.of(
+                        "message", GlobalExceptionConstants.MSG_INTERNAL_SERVER_ERROR,
+                        "type", ex.getClass().getSimpleName()
+                ),
+                JSON_HEADERS,
+                HttpStatus.INTERNAL_SERVER_ERROR
         );
     }
 }

@@ -1,53 +1,58 @@
 package com.aerotickets.controller;
 
+import com.aerotickets.constants.CatalogConstants;
+import com.aerotickets.entity.Airport;
+import com.aerotickets.entity.Airline;
+import com.aerotickets.repository.AirportRepository;
+import com.aerotickets.repository.AirlineRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/catalog")
+@RequestMapping(CatalogConstants.BASE_PATH)
 public class AirCatalogController {
 
-    @GetMapping("/airports/co")
+    private final AirportRepository airportRepository;
+    private final AirlineRepository airlineRepository;
+
+    public AirCatalogController(AirportRepository airportRepository,
+                                AirlineRepository airlineRepository) {
+        this.airportRepository = airportRepository;
+        this.airlineRepository = airlineRepository;
+    }
+
+    @GetMapping(CatalogConstants.AIRPORTS_CO_PATH)
     public ResponseEntity<List<Map<String, String>>> airportsColombia() {
-        List<Map<String,String>> list = new ArrayList<>();
-        add(list, "BOG", "El Dorado", "Bogotá");
-        add(list, "MDE", "J. M. Córdova", "Medellín");
-        add(list, "EOH", "Olaya Herrera", "Medellín");
-        add(list, "CLO", "Alfonso Bonilla Aragón", "Cali");
-        add(list, "CTG", "Rafael Núñez", "Cartagena");
-        add(list, "SMR", "Simón Bolívar", "Santa Marta");
-        add(list, "BAQ", "Ernesto Cortissoz", "Barranquilla");
-        add(list, "PEI", "Matecaña", "Pereira");
-        add(list, "CUC", "Camilo Daza", "Cúcuta");
-        add(list, "ADZ", "G. O. y G. S. A. Newball", "San Andrés");
-        add(list, "BGA", "Palo Negro", "Bucaramanga");
-        add(list, "PSO", "Antonio Nariño", "Pasto");
-        add(list, "LET", "Alfredo V. Cobo", "Leticia");
-        add(list, "AXM", "El Edén", "Armenia");
-        add(list, "MZL", "La Nubia", "Manizales");
-        add(list, "NVA", "Benito Salas", "Neiva");
-        add(list, "PPN", "G. L. Valencia", "Popayán");
-        add(list, "UIB", "El Caraño", "Quibdó");
-        add(list, "MTR", "Los Garzones", "Montería");
-        add(list, "VVC", "Vanguardia", "Villavicencio");
-        add(list, "RCH", "Almirante Padilla", "Riohacha");
+
+        List<Airport> airports = airportRepository.findAll();
+
+        List<Map<String, String>> list = airports.stream()
+                .map(a -> Map.of(
+                        CatalogConstants.FIELD_IATA, a.getIata(),
+                        CatalogConstants.FIELD_NAME, a.getName(),
+                        CatalogConstants.FIELD_CITY, a.getCity(),
+                        CatalogConstants.FIELD_COUNTRY, CatalogConstants.COUNTRY_COLOMBIA
+                ))
+                .collect(Collectors.toList());
+
         return ResponseEntity.ok(list);
     }
 
-    @GetMapping("/airlines/co")
+    @GetMapping(CatalogConstants.AIRLINES_CO_PATH)
     public ResponseEntity<List<Map<String, String>>> airlinesColombia() {
-        List<Map<String,String>> list = new ArrayList<>();
-        list.add(Map.of("code","AV","name","Avianca"));
-        list.add(Map.of("code","LA","name","LATAM Airlines"));
-        list.add(Map.of("code","9R","name","SATENA"));
-        list.add(Map.of("code","UL","name","Ultra Air (sim)"));
-        list.add(Map.of("code","VH","name","Viva (sim)"));
-        return ResponseEntity.ok(list);
-    }
 
-    private void add(List<Map<String,String>> list, String iata, String name, String city) {
-        list.add(Map.of("iata", iata, "name", name, "city", city, "country", "Colombia"));
+        List<Airline> airlines = airlineRepository.findAll();
+
+        List<Map<String, String>> list = airlines.stream()
+                .map(a -> Map.of(
+                        CatalogConstants.FIELD_CODE, a.getCode(),
+                        CatalogConstants.FIELD_NAME, a.getName()
+                ))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(list);
     }
 }

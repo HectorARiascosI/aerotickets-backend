@@ -1,5 +1,6 @@
 package com.aerotickets.controller;
 
+import com.aerotickets.constants.AuthConstants;
 import com.aerotickets.entity.User;
 import com.aerotickets.repository.UserRepository;
 import com.aerotickets.security.JwtUtil;
@@ -14,12 +15,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping(AuthConstants.BASE_PATH)
 @CrossOrigin(
         origins = {
-                "http://localhost:5173",
-                "https://aerotickets-frontend.vercel.app",
-                "https://aerotickets-frontend-iaqxjc453-hector-riascos-projects.vercel.app"
+                AuthConstants.CORS_ORIGIN_LOCAL,
+                AuthConstants.CORS_ORIGIN_VERCEL_MAIN,
+                AuthConstants.CORS_ORIGIN_VERCEL_ENV
         },
         allowCredentials = "true"
 )
@@ -47,17 +48,17 @@ public class PasswordRecoveryController {
         this.emailService = emailService;
     }
 
-    @PostMapping("/forgot-password")
+    @PostMapping(AuthConstants.FORGOT_PASSWORD_PATH)
     public ResponseEntity<Map<String, String>> forgotPassword(@RequestBody Map<String, String> body) {
-        String email = body.get("email");
+        String email = body.get(AuthConstants.FIELD_EMAIL);
 
         if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("El correo electrónico es obligatorio");
+            throw new IllegalArgumentException(AuthConstants.MSG_EMAIL_REQUIRED);
         }
 
         userRepository.findByEmail(email).ifPresent(user -> {
-            String token = jwtUtil.generateTemporaryToken(user.getEmail(), 10);
-            String resetUrl = frontendBaseUrl + "/reset-password/" + token;
+            String token = jwtUtil.generateTemporaryToken(user.getEmail(), AuthConstants.TEMP_TOKEN_MINUTES);
+            String resetUrl = frontendBaseUrl + AuthConstants.RESET_PASSWORD_PATH + "/" + token;
 
             emailService.sendPasswordResetEmail(user.getEmail(), resetUrl);
 
@@ -65,35 +66,35 @@ public class PasswordRecoveryController {
         });
 
         return ResponseEntity.ok(
-                Map.of("message", "Si el correo está registrado, te hemos enviado un enlace para restablecer tu contraseña.")
+                Map.of(AuthConstants.FIELD_MESSAGE, AuthConstants.MSG_PASSWORD_RESET_SENT)
         );
     }
 
-    @PostMapping("/reset-password")
+    @PostMapping(AuthConstants.RESET_PASSWORD_PATH)
     public ResponseEntity<Map<String, String>> resetPassword(@RequestBody Map<String, String> body) {
-        String token = body.get("token");
-        String newPassword = body.get("password");
+        String token = body.get(AuthConstants.FIELD_TOKEN);
+        String newPassword = body.get(AuthConstants.FIELD_PASSWORD);
         if (newPassword == null) {
-            newPassword = body.get("newPassword");
+            newPassword = body.get(AuthConstants.FIELD_NEW_PASSWORD);
         }
 
         if (token == null || token.isBlank()) {
-            throw new IllegalArgumentException("El token de recuperación es obligatorio");
+            throw new IllegalArgumentException(AuthConstants.MSG_TOKEN_REQUIRED);
         }
         if (newPassword == null || newPassword.isBlank()) {
-            throw new IllegalArgumentException("La nueva contraseña es obligatoria");
+            throw new IllegalArgumentException(AuthConstants.MSG_NEW_PASSWORD_REQUIRED);
         }
 
         String email = jwtUtil.validateTemporaryToken(token);
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Token inválido o usuario no encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException(AuthConstants.MSG_INVALID_TOKEN_OR_USER));
 
         user.setPasswordHash(encoder.encode(newPassword));
         userRepository.save(user);
 
         return ResponseEntity.ok(
-                Map.of("message", "Tu contraseña ha sido actualizada correctamente. Ya puedes iniciar sesión.")
+                Map.of(AuthConstants.FIELD_MESSAGE, AuthConstants.MSG_PASSWORD_UPDATED)
         );
     }
 }

@@ -1,5 +1,6 @@
 package com.aerotickets.service;
 
+import com.aerotickets.constants.EmailConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class EmailService {
 
     public void sendPasswordResetEmail(String toEmail, String resetUrl) {
         if (sendgridApiKey == null || sendgridApiKey.isBlank()) {
-            log.error("No se ha configurado SENDGRID_API_KEY. No se puede enviar el correo de recuperación.");
+            log.error(EmailConstants.LOG_SENDGRID_MISSING_API_KEY);
             return;
         }
 
@@ -31,12 +32,7 @@ public class EmailService {
             String url = "https://api.sendgrid.com/v3/mail/send";
 
             String textContent = String.format(
-                    "Hola,%n%n" +
-                    "Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en Aerotickets.%n%n" +
-                    "Para crear una nueva contraseña, usa este enlace:%n%n%s%n%n" +
-                    "Si tú no solicitaste este cambio, puedes ignorar este mensaje.%n%n" +
-                    "Atentamente,%n" +
-                    "Equipo Aerotickets",
+                    EmailConstants.TEMPLATE_PASSWORD_RESET_TEXT,
                     resetUrl
             );
 
@@ -45,8 +41,8 @@ public class EmailService {
                       "personalizations": [{
                         "to": [{ "email": "%s" }]
                       }],
-                      "from": { "email": "%s", "name": "Aerotickets" },
-                      "subject": "Recuperación de contraseña - Aerotickets",
+                      "from": { "email": "%s", "name": "%s" },
+                      "subject": "%s",
                       "content": [{
                         "type": "text/plain",
                         "value": "%s"
@@ -55,6 +51,8 @@ public class EmailService {
                     """.formatted(
                     escapeJson(toEmail),
                     escapeJson(fromAddress),
+                    escapeJson(EmailConstants.SENDER_NAME),
+                    escapeJson(EmailConstants.SUBJECT_PASSWORD_RESET),
                     escapeJson(textContent)
             );
 
@@ -65,22 +63,32 @@ public class EmailService {
                     .POST(HttpRequest.BodyPublishers.ofString(payload))
                     .build();
 
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = httpClient.send(
+                    request,
+                    HttpResponse.BodyHandlers.ofString()
+            );
             int status = response.statusCode();
 
             if (status >= 200 && status < 300) {
-                log.info("Email de recuperación enviado a {}", maskEmail(toEmail));
+                log.info(EmailConstants.LOG_PASSWORD_RESET_SENT, maskEmail(toEmail));
             } else {
-                log.error("Error en SendGrid (status {}): {}", status, response.body());
+                log.error(EmailConstants.LOG_SENDGRID_ERROR, status, response.body());
             }
         } catch (Exception ex) {
-            log.error("Error enviando email de recuperación a {}: {}", maskEmail(toEmail), ex.getMessage(), ex);
+            log.error(
+                    EmailConstants.LOG_PASSWORD_RESET_ERROR,
+                    maskEmail(toEmail),
+                    ex.getMessage(),
+                    ex
+            );
         }
     }
 
     private String maskEmail(String email) {
         int atIndex = email.indexOf("@");
-        if (atIndex <= 1) return "***" + email.substring(Math.max(atIndex, 0));
+        if (atIndex <= 1) {
+            return "***" + email.substring(Math.max(atIndex, 0));
+        }
         return email.charAt(0) + "***" + email.substring(atIndex);
     }
 

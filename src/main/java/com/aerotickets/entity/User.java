@@ -32,17 +32,17 @@ public class User {
     @Column(nullable = false)
     private Instant createdAt = Instant.now();
 
-    // ✅ Campos necesarios para autenticación
+    
     @Builder.Default
     @Column(nullable = false)
-    private String role = "USER"; // puedes cambiar por "ADMIN" o lo que necesites
+    private String role = "USER"; 
     
     
     @Builder.Default
     @Column(nullable = false)
-    private boolean enabled = true; // indica si la cuenta está activa
+    private boolean enabled = true; 
 
-    // ✅ Getters y Setters (redundantes pero seguros para Eclipse)
+    
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

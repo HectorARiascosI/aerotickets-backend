@@ -1,5 +1,6 @@
 package com.aerotickets;
 
+import com.aerotickets.constants.AppMessages;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
@@ -16,52 +17,55 @@ import java.util.Map;
 public class App {
 
     public static void main(String[] args) {
-        var app = new SpringApplication(App.class);
-        var ctx = app.run(args);
+        SpringApplication app = new SpringApplication(App.class);
+        ApplicationContext ctx = app.run(args);
 
         ConfigurableEnvironment env = (ConfigurableEnvironment) ctx.getEnvironment();
 
-        String appEnv = env.getProperty("SPRING_PROFILES_ACTIVE", "dev");
-        String dbUrl  = env.getProperty("DB_URL", "jdbc:postgresql://localhost:5432/aerotickets");
-        String port   = env.getProperty("PORT", "8080");
+        String appEnv = env.getProperty(AppMessages.ENV_PROFILE_KEY, AppMessages.DEFAULT_PROFILE);
+        String dbUrl = env.getProperty(AppMessages.ENV_DB_URL_KEY, AppMessages.DEFAULT_DB_URL);
+        String port = env.getProperty(AppMessages.ENV_PORT_KEY, AppMessages.DEFAULT_PORT);
 
-        System.out.println("\n==============================================");
-        System.out.println(" Aerotickets Backend iniciado");
-        System.out.println(" Entorno: " + appEnv.toUpperCase());
-        System.out.println(" Puerto : " + port);
-        System.out.println(" DB URL : " + maskDbUrl(dbUrl));
-        System.out.println(" Logs   : logs/aerotickets.log");
-        System.out.println("==============================================\n");
+        System.out.println(AppMessages.BANNER_HEADER_SEPARATOR);
+        System.out.println(AppMessages.BANNER_TITLE);
+        System.out.println(AppMessages.BANNER_ENV_PREFIX + appEnv.toUpperCase());
+        System.out.println(AppMessages.BANNER_PORT_PREFIX + port);
+        System.out.println(AppMessages.BANNER_DB_URL_PREFIX + maskDbUrl(dbUrl));
+        System.out.println(AppMessages.BANNER_LOGS_LINE);
+        System.out.println(AppMessages.BANNER_FOOTER_SEPARATOR);
     }
 
-    /**
-     * ✅ Muestra todos los endpoints REST registrados (sin romper por múltiples beans).
-     */
     @Bean
     public CommandLineRunner logAllEndpoints(ApplicationContext ctx) {
         return args -> {
-            System.out.println("========= ENDPOINTS REGISTRADOS =========");
+            System.out.println(AppMessages.ENDPOINTS_HEADER);
             try {
                 Map<String, RequestMappingHandlerMapping> mappings =
                         ctx.getBeansOfType(RequestMappingHandlerMapping.class);
 
                 mappings.forEach((name, mapping) -> {
                     mapping.getHandlerMethods().forEach((key, value) -> {
-                        System.out.println("[" + name + "] " + key + " -> " + value);
+                        System.out.println(
+                                AppMessages.BRACKET_OPEN
+                                        + name
+                                        + AppMessages.BRACKET_CLOSE_SPACE
+                                        + key
+                                        + AppMessages.ARROW
+                                        + value
+                        );
                     });
                 });
             } catch (Exception e) {
-                System.out.println("⚠️ No se pudo obtener la lista de endpoints: " + e.getMessage());
+                System.out.println(AppMessages.ENDPOINTS_ERROR_PREFIX + e.getMessage());
             }
-            System.out.println("=========================================");
+            System.out.println(AppMessages.ENDPOINTS_FOOTER);
         };
     }
 
-    /**
-     * Oculta cualquier contraseña presente en la URL JDBC para evitar exponer credenciales en logs.
-     */
     private static String maskDbUrl(String url) {
-        if (url == null) return "N/A";
-        return url.replaceAll("(?i)(password=)[^&]+", "$1********");
+        if (url == null) {
+            return AppMessages.MASK_DB_URL_FALLBACK;
+        }
+        return url.replaceAll(AppMessages.DB_PASSWORD_REGEX, AppMessages.DB_PASSWORD_REPLACEMENT);
     }
 }

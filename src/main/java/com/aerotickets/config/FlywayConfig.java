@@ -1,6 +1,6 @@
 package com.aerotickets.config;
 
-import org.flywaydb.core.Flyway;
+import com.aerotickets.constants.FlywayConstants;
 import org.flywaydb.core.api.MigrationInfoService;
 import org.flywaydb.core.api.exception.FlywayValidateException;
 import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy;
@@ -12,25 +12,25 @@ public class FlywayConfig {
 
     @Bean
     public FlywayMigrationStrategy baselineIfNeededThenMigrate() {
-        return (Flyway flyway) -> {
+        return flyway -> {
             try {
-                // Si no hay tabla de metadatos, info() sigue funcionando y pending() > 0
                 MigrationInfoService info = flyway.info();
 
                 boolean hasApplied = info != null && info.applied() != null && info.applied().length > 0;
                 boolean hasPending = info != null && info.pending() != null && info.pending().length > 0;
 
-                // Si no hay aplicadas pero sí pendientes, probablemente la BD tiene tablas “huérfanas”
-                // y Flyway aún no está inicializado: hacemos baseline a la versión 1.
-                if (!hasApplied && hasPending) {
+                if (FlywayConstants.BASELINE_ON_PENDING_WITHOUT_APPLIED && !hasApplied && hasPending) {
                     flyway.baseline();
                 }
 
                 flyway.migrate();
             } catch (FlywayValidateException ex) {
-                // Si hay un desajuste, intenta “baseline” y luego migrate
-                flyway.baseline();
-                flyway.migrate();
+                if (FlywayConstants.BASELINE_ON_VALIDATE_EXCEPTION) {
+                    flyway.baseline();
+                    flyway.migrate();
+                } else {
+                    throw ex;
+                }
             }
         };
     }

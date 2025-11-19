@@ -6,22 +6,35 @@ import com.aerotickets.repository.FlightRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 public class FlightService {
+
     private final FlightRepository flightRepository;
 
-    public FlightService(FlightRepository flightRepository){ this.flightRepository = flightRepository; }
+    public FlightService(FlightRepository flightRepository){
+        this.flightRepository = flightRepository;
+    }
 
     @Transactional
-    public Flight create(Flight f) { return flightRepository.save(f); }
+    public Flight create(Flight f) {
+        return flightRepository.save(f);
+    }
 
-    public List<Flight> listAll() { return flightRepository.findAll(); }
+    @Transactional(readOnly = true)
+    public List<Flight> listAll() {
+        return flightRepository.findAll();
+    }
 
+    @Transactional(readOnly = true)
     public List<Flight> searchOrSimulate(FlightSearchDTO dto) {
-        if (dto == null || dto.getOrigin()==null || dto.getDestination()==null) return List.of();
+        if (dto == null || dto.getOrigin() == null || dto.getDestination() == null) {
+            return List.of();
+        }
+
         String dep = dto.getOrigin();
         String arr = dto.getDestination();
 

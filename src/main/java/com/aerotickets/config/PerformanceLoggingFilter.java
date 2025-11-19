@@ -1,5 +1,6 @@
 package com.aerotickets.config;
 
+import com.aerotickets.constants.PerformanceLoggingConstants;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -13,10 +14,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-/**
- * Filtro que mide el tiempo de ejecución de cada petición HTTP
- * y registra errores y tiempos lentos con alertas visuales.
- */
 @Component
 public class PerformanceLoggingFilter implements Filter {
 
@@ -38,26 +35,31 @@ public class PerformanceLoggingFilter implements Filter {
         String method = req.getMethod();
         String uri = req.getRequestURI();
 
-        // Colores ANSI para visibilidad
-        final String RESET = "\033[0m";
-        final String RED = "\033[0;31m";
-        final String GREEN = "\033[0;32m";
-        final String YELLOW = "\033[0;33m";
-
         String color;
-        if (status >= 500) color = RED; // Error interno
-        else if (status >= 400) color = YELLOW; // Error cliente
-        else color = GREEN; // OK
+        if (status >= 500) {
+            color = PerformanceLoggingConstants.ANSI_RED;
+        } else if (status >= 400) {
+            color = PerformanceLoggingConstants.ANSI_YELLOW;
+        } else {
+            color = PerformanceLoggingConstants.ANSI_GREEN;
+        }
 
-        String msg = String.format("%s➡️ %s %s - %d (%d ms)%s",
-                color, method, uri, status, duration, RESET);
+        String msg = String.format(
+                PerformanceLoggingConstants.LOG_PATTERN_REQUEST,
+                color,
+                method,
+                uri,
+                status,
+                duration,
+                PerformanceLoggingConstants.ANSI_RESET
+        );
 
         if (status >= 500) {
             logger.error(msg);
         } else if (status >= 400) {
             logger.warn(msg);
-        } else if (duration > 1000) { // Más de 1 segundo = lento
-            logger.warn("⚠️ Petición lenta detectada: {} {} ({} ms)", method, uri, duration);
+        } else if (duration > PerformanceLoggingConstants.SLOW_REQUEST_THRESHOLD_MS) {
+            logger.warn(PerformanceLoggingConstants.LOG_SLOW_REQUEST, method, uri, duration);
         } else {
             logger.info(msg);
         }

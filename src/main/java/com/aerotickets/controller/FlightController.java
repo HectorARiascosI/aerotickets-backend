@@ -1,5 +1,6 @@
 package com.aerotickets.controller;
 
+import com.aerotickets.constants.FlightConstants;
 import com.aerotickets.dto.FlightDTO;
 import com.aerotickets.dto.FlightSearchDTO;
 import com.aerotickets.entity.Flight;
@@ -14,7 +15,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 
 @RestController
-@RequestMapping("/flights")
+@RequestMapping(FlightConstants.BASE_PATH)
 public class FlightController {
 
     private final FlightService flightService;
@@ -34,22 +35,24 @@ public class FlightController {
             dto.getOrigin() == null ||
             dto.getDestination() == null ||
             dto.getDepartureAt() == null) {
-            throw new IllegalArgumentException(
-                "Campos obligatorios faltantes: airline, origin, destination, departureAt"
-            );
+            throw new IllegalArgumentException(FlightConstants.MSG_MISSING_REQUIRED_FIELDS);
         }
 
-        // Convertimos OffsetDateTime -> LocalDateTime en UTC
         LocalDateTime dep = dto.getDepartureAt()
                 .atZoneSameInstant(ZoneOffset.UTC)
                 .toLocalDateTime();
 
         LocalDateTime arr = (dto.getArriveAt() != null)
                 ? dto.getArriveAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime()
-                : dep.plusHours(2);
+                : dep.plusHours(FlightConstants.DEFAULT_DURATION_HOURS);
 
-        Integer seats = (dto.getTotalSeats() != null) ? dto.getTotalSeats() : 180;
-        BigDecimal price = (dto.getPrice() != null) ? dto.getPrice() : BigDecimal.ZERO;
+        Integer seats = (dto.getTotalSeats() != null)
+                ? dto.getTotalSeats()
+                : FlightConstants.DEFAULT_TOTAL_SEATS;
+
+        BigDecimal price = (dto.getPrice() != null)
+                ? dto.getPrice()
+                : FlightConstants.DEFAULT_PRICE;
 
         Flight f = Flight.builder()
                 .airline(dto.getAirline())
@@ -64,7 +67,7 @@ public class FlightController {
         return ResponseEntity.ok(flightService.create(f));
     }
 
-    @PostMapping("/search")
+    @PostMapping(FlightConstants.SEARCH_PATH)
     public ResponseEntity<List<Flight>> search(@RequestBody FlightSearchDTO dto) {
         return ResponseEntity.ok(flightService.searchOrSimulate(dto));
     }

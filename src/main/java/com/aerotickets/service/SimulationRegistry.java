@@ -1,5 +1,7 @@
 package com.aerotickets.service;
 
+import com.aerotickets.constants.LiveFlightConstants;
+import com.aerotickets.constants.LiveFlightStatus;
 import com.aerotickets.model.LiveFlight;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -13,10 +15,11 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static com.aerotickets.constants.LiveFlightConstants.ZONE_ID_BOGOTA;
+
 @Component
 public class SimulationRegistry {
 
-    // flightNumber -> LiveFlight
     private final Map<String, LiveFlight> live = new ConcurrentHashMap<>();
     private final List<SseEmitter> subscribers = new CopyOnWriteArrayList<>();
 
@@ -27,68 +30,75 @@ public class SimulationRegistry {
         broadcastSnapshot();
     }
 
-    public List<LiveFlight> list() { return new ArrayList<>(live.values()); }
+    public List<LiveFlight> list() {
+        return new ArrayList<>(live.values());
+    }
 
     public Optional<LiveFlight> get(String flightNumber) {
         return Optional.ofNullable(live.get(flightNumber));
     }
 
-    public void update(LiveFlight f) { live.put(f.getFlightNumber(), f); }
+    public void update(LiveFlight f) {
+        live.put(f.getFlightNumber(), f);
+    }
 
     public void clear() {
         live.clear();
         broadcastSnapshot();
     }
 
-    // Actualiza estados cada 30s (zona Bogotá)
     @Scheduled(fixedRate = 30000, initialDelay = 10000)
     public void tick() {
-        ZoneId tz = ZoneId.of("America/Bogota");
+        ZoneId tz = ZoneId.of(ZONE_ID_BOGOTA);
         LocalDateTime now = LocalDateTime.now(tz);
 
         for (LiveFlight f : live.values()) {
-            // Si por cualquier razón viene null o formato inválido, lo ignoramos
             try {
                 LocalDateTime dep = LocalDateTime.parse(f.getDepartureAt());
                 LocalDateTime arr = LocalDateTime.parse(f.getArrivalAt());
 
-                if ("CANCELLED".equals(f.getStatus()) || "DIVERTED".equals(f.getStatus())) continue;
+                LiveFlightStatus currentStatus = parseStatus(f.getStatus());
+                if (currentStatus == LiveFlightStatus.CANCELLED
+                        || currentStatus == LiveFlightStatus.DIVERTED) {
+                    continue;
+                }
 
                 boolean delayed = f.getDelayMinutes() != null && f.getDelayMinutes() > 10;
+
+                LiveFlightStatus newStatus;
                 if (now.isBefore(dep.minusMinutes(60))) {
-                    f.setStatus("SCHEDULED");
+                    newStatus = LiveFlightStatus.SCHEDULED;
                 } else if (!now.isAfter(dep) && now.isAfter(dep.minusMinutes(60))) {
-                    f.setStatus(delayed ? "DELAYED" : "BOARDING");
+                    newStatus = delayed ? LiveFlightStatus.DELAYED : LiveFlightStatus.BOARDING;
                 } else if (now.isAfter(dep) && now.isBefore(arr)) {
-                    f.setStatus(delayed ? "DELAYED" : "EN-ROUTE");
+                    newStatus = delayed ? LiveFlightStatus.DELAYED : LiveFlightStatus.EN_ROUTE;
                 } else {
-                    f.setStatus("LANDED");
+                    newStatus = LiveFlightStatus.LANDED;
                 }
-            } catch (Exception ignore) {
-                // Evita que una entrada malformada rompa todo el tick
+
+                f.setStatus(newStatus.name());
+
+            } catch (Exception ignored) {
             }
         }
         broadcastSnapshot();
     }
 
-    // SSE
     public SseEmitter subscribe() {
-        // 0L = sin timeout (Tomcat no cerrará por timeout). El front seguirá recibiendo eventos.
         SseEmitter emitter = new SseEmitter(0L);
         subscribers.add(emitter);
 
         emitter.onCompletion(() -> subscribers.remove(emitter));
         emitter.onTimeout(() -> subscribers.remove(emitter));
-        emitter.onError((ex) -> subscribers.remove(emitter));
+        emitter.onError(ex -> subscribers.remove(emitter));
 
-        // Enviar snapshot inicial y un "ping" para asegurar la apertura del stream
         try {
             emitter.send(SseEmitter.event()
                     .name("snapshot")
                     .data(list(), MediaType.APPLICATION_JSON));
             emitter.send(SseEmitter.event()
-                    .name("ping")
-                    .data("ok"));
+                    .name(LiveFlightConstants.SSE_EVENT_PING_NAME)
+                    .data(LiveFlightConstants.SSE_EVENT_PING_DATA));
         } catch (IOException ignored) {
             subscribers.remove(emitter);
         }
@@ -105,6 +115,17 @@ public class SimulationRegistry {
             } catch (IOException e) {
                 subscribers.remove(em);
             }
+        }
+    }
+
+    private LiveFlightStatus parseStatus(String status) {
+        if (status == null || status.isBlank()) {
+            return LiveFlightStatus.SCHEDULED;
+        }
+        try {
+            return LiveFlightStatus.valueOf(status);
+        } catch (IllegalArgumentException ex) {
+            return LiveFlightStatus.SCHEDULED;
         }
     }
 }

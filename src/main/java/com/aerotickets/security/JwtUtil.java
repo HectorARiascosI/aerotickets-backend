@@ -1,10 +1,12 @@
 package com.aerotickets.security;
 
+import com.aerotickets.constants.JwtConstants;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -13,10 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
 
-/**
- * Utility class for generating and validating temporary JWTs
- * (for example password recovery or email confirmation links).
- */
+@Slf4j
 @Component
 public class JwtUtil {
 
@@ -30,14 +29,13 @@ public class JwtUtil {
         byte[] bytes = secret.getBytes(StandardCharsets.UTF_8);
         if (bytes.length < 32) {
             throw new IllegalStateException(
-                    "JWT secret must be at least 32 characters (256 bits). Current length: " + bytes.length
+                    JwtConstants.SECRET_TOO_SHORT_PREFIX + bytes.length
             );
         }
         this.key = Keys.hmacShaKeyFor(bytes);
         this.expirationMs = expirationMinutes * 60_000;
     }
 
-    /** Generate a general-purpose token for a given subject. */
     public String generate(String subject) {
         Instant now = Instant.now();
         return Jwts.builder()
@@ -48,7 +46,6 @@ public class JwtUtil {
                 .compact();
     }
 
-    /** Generate a short-lived temporary token (e.g. password reset). */
     public String generateTemporaryToken(String subject, int minutes) {
         Instant now = Instant.now();
         return Jwts.builder()
@@ -59,27 +56,24 @@ public class JwtUtil {
                 .compact();
     }
 
-    /** Validate a temporary token and return the subject if valid. */
     public String validateTemporaryToken(String token) {
         try {
             return parseClaims(token).getSubject();
         } catch (JwtException e) {
-            throw new IllegalArgumentException("Invalid or expired token");
+            throw new IllegalArgumentException(JwtConstants.TEMP_TOKEN_INVALID_OR_EXPIRED);
         }
     }
 
-    /** Extract the subject from any valid token. */
     public String getSubject(String token) {
         return parseClaims(token).getSubject();
     }
 
-    /** Check if a token is valid and correctly signed. */
     public boolean isValid(String token) {
         try {
             parseClaims(token);
             return true;
         } catch (JwtException e) {
-            System.out.println("⚠️ Invalid token: " + e.getMessage());
+            log.warn("Invalid token: {}", e.getMessage());
             return false;
         }
     }

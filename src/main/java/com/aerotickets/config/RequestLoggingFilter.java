@@ -1,5 +1,6 @@
 package com.aerotickets.config;
 
+import com.aerotickets.constants.RequestLoggingConstants;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -30,6 +31,6 @@ public class RequestLoggingFilter implements Filter {
 
         long duration = System.currentTimeMillis() - startTime;
 
-        logger.info("➡️ {} {} completado en {} ms", method, uri, duration);
+        logger.info(RequestLoggingConstants.LOG_PATTERN_REQUEST_COMPLETED, method, uri, duration);
     }
 }

@@ -1,5 +1,6 @@
 package com.aerotickets.dto;
 
+import com.aerotickets.constants.FlightConstants;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
@@ -14,20 +15,18 @@ import java.time.OffsetDateTime;
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FlightDTO {
-    private Long id;
 
+    private Long id;
     private String airline;
     private String origin;
     private String destination;
 
-    // Acepta ISO-8601 con zona horaria (e.g. ...Z)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss[.SSS]XXX")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = FlightConstants.OFFSET_DATETIME_PATTERN)
     private OffsetDateTime departureAt;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss[.SSS]XXX")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = FlightConstants.OFFSET_DATETIME_PATTERN)
     private OffsetDateTime arriveAt;
 
-    // Pueden venir null; el controller aplica defaults
     private Integer totalSeats;
     private BigDecimal price;
 }

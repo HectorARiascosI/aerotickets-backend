@@ -1,107 +1,211 @@
 package com.aerotickets.service;
 
+import com.aerotickets.constants.LiveFlightStatus;
 import com.aerotickets.dto.FlightSearchDTO;
+import com.aerotickets.entity.Airport;
+import com.aerotickets.entity.Flight;
+import com.aerotickets.entity.ReservationStatus;
 import com.aerotickets.model.LiveFlight;
-import com.aerotickets.sim.AirportCatalogCO;
-import com.aerotickets.util.IataResolver;
+import com.aerotickets.repository.AirportRepository;
+import com.aerotickets.repository.FlightRepository;
+import com.aerotickets.repository.ReservationRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.text.Normalizer;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
-/**
- * Servicio de búsqueda de vuelos en tiempo real (sim por ahora).
- * - Convierte nombres humanos → IATA
- * - Autocomplete basado en catálogo nacional
- * - Delegación de simulación a FlightSimulatorService
- */
+import static com.aerotickets.constants.LiveFlightConstants.ISO_LOCAL_PATTERN;
+import static com.aerotickets.constants.LiveFlightConstants.ZONE_ID_BOGOTA;
+
 @Service
 public class LiveFlightService {
 
-    private final FlightSimulatorService simulator;
+    private static final ZoneId ZONE = ZoneId.of(ZONE_ID_BOGOTA);
+    private static final DateTimeFormatter ISO_LOCAL = DateTimeFormatter.ofPattern(ISO_LOCAL_PATTERN);
 
-    public LiveFlightService(FlightSimulatorService simulator) {
-        this.simulator = simulator;
+    private final FlightRepository flightRepository;
+    private final ReservationRepository reservationRepository;
+    private final AirportRepository airportRepository;
+
+    public LiveFlightService(FlightRepository flightRepository,
+                             ReservationRepository reservationRepository,
+                             AirportRepository airportRepository) {
+        this.flightRepository = flightRepository;
+        this.reservationRepository = reservationRepository;
+        this.airportRepository = airportRepository;
     }
 
-    public List<LiveFlight> searchLive(String originRaw, String destinationRaw, String dateIso, String ignored) {
-        String origin = smartToIata(originRaw);
-        String destination = smartToIata(destinationRaw);
-        if (origin == null || destination == null || origin.equalsIgnoreCase(destination)) return List.of();
+    public List<LiveFlight> searchLive(String originRaw,
+                                       String destinationRaw,
+                                       String dateIso,
+                                       String ignored) {
+        if (originRaw == null || destinationRaw == null) {
+            return List.of();
+        }
+
+        String origin = originRaw.trim().toUpperCase(Locale.ROOT);
+        String destination = destinationRaw.trim().toUpperCase(Locale.ROOT);
+
+        if (origin.isBlank() || destination.isBlank() || origin.equals(destination)) {
+            return List.of();
+        }
+
+        if (!airportRepository.existsById(origin) || !airportRepository.existsById(destination)) {
+            return List.of();
+        }
+
+        LocalDate date;
+        if (dateIso != null && !dateIso.isBlank()) {
+            try {
+                date = LocalDate.parse(dateIso);
+            } catch (Exception e) {
+                date = LocalDate.now(ZONE);
+            }
+        } else {
+            date = LocalDate.now(ZONE);
+        }
 
         FlightSearchDTO dto = new FlightSearchDTO();
         dto.setOrigin(origin);
         dto.setDestination(destination);
-        if (dateIso != null && !dateIso.isBlank()) {
-            try { dto.setDate(LocalDate.parse(dateIso)); } catch (Exception ignored2) {}
-        }
-        return simulator.search(dto);
+        dto.setDate(date);
+
+        return searchInternal(dto);
     }
 
     public List<Map<String, Object>> autocompleteAirports(String query) {
-        if (query == null || query.isBlank()) return List.of();
-        query = IataResolver.normalize(query);
-
-        List<Map<String, Object>> results = new ArrayList<>();
-        for (String iata : AirportCatalogCO.keys()) {
-            AirportCatalogCO.Airport info = AirportCatalogCO.get(iata);
-            if (matches(info, query)) {
-                Map<String, Object> item = new HashMap<>();
-                item.put("iata", info.iata);
-                item.put("city", info.city);
-                item.put("airport", info.name);
-                item.put("terrain", info.terrain);
-                item.put("runway_m", info.runwayLenM);
-                item.put("elevation_ft", info.elevationFt);
-                item.put("allowed_families", info.allowedFamilies);
-                results.add(item);
-            }
+        if (query == null || query.isBlank()) {
+            return List.of();
         }
-        results.sort(Comparator.comparing(m -> ((String) m.get("city"))));
-        return results;
+
+        String normalizedQuery = normalize(query);
+        List<Airport> airports = airportRepository.findAll();
+
+        return airports.stream()
+                .filter(a -> matchesAirport(a, normalizedQuery))
+                .sorted(Comparator.comparing(Airport::getCity, String.CASE_INSENSITIVE_ORDER))
+                .map(a -> {
+                    Map<String, Object> m = new HashMap<>();
+                    m.put("iata", a.getIata());
+                    m.put("city", a.getCity());
+                    m.put("airport", a.getName());
+                    m.put("state", a.getState());
+                    return m;
+                })
+                .collect(Collectors.toList());
     }
 
-    private boolean matches(AirportCatalogCO.Airport info, String query) {
-        String city = IataResolver.normalize(info.city);
-        String name = IataResolver.normalize(info.name);
-        String iata = info.iata.toLowerCase(Locale.ROOT);
-        String terrain = IataResolver.normalize(info.terrain);
-        return iata.contains(query) || city.contains(query) || name.contains(query) || terrain.contains(query);
+    private List<LiveFlight> searchInternal(FlightSearchDTO dto) {
+        LocalDate date = dto.getDate() != null ? dto.getDate() : LocalDate.now(ZONE);
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = start.plusDays(1);
+
+        List<Flight> flights = flightRepository
+                .findByOriginAndDestinationAndDepartureAtBetween(
+                        dto.getOrigin(), dto.getDestination(), start, end
+                );
+
+        if (flights.isEmpty()) {
+            return List.of();
+        }
+
+        return flights.stream()
+                .map(this::toLiveFlight)
+                .sorted(Comparator.comparing(LiveFlight::getDepartureAt))
+                .collect(Collectors.toList());
     }
 
-    private String smartToIata(String input) {
-        if (input == null || input.isBlank()) return null;
-        String resolved = IataResolver.toIata(input);
-        if (resolved != null) return resolved;
+    private LiveFlight toLiveFlight(Flight f) {
+        long occupied = reservationRepository
+                .countByFlight_IdAndStatus(f.getId(), ReservationStatus.ACTIVE);
 
-        String normalized = IataResolver.normalize(input);
-        String best = null; int bestScore = Integer.MAX_VALUE;
-        for (String iata : AirportCatalogCO.keys()) {
-            var a = AirportCatalogCO.get(iata);
-            String city = IataResolver.normalize(a.city);
-            String name = IataResolver.normalize(a.name);
-            if (normalized.equals(iata.toLowerCase(Locale.ROOT)) || normalized.equals(city) || normalized.equals(name)) {
-                return iata;
-            }
-            int score = levenshtein(normalized, city);
-            if (score < bestScore) { bestScore = score; best = iata; }
-        }
-        return bestScore <= Math.max(2, normalized.length() / 2) ? best : null;
+        int totalSeats = f.getTotalSeats() != null ? f.getTotalSeats() : 0;
+        int occupiedSeats = (int) Math.min(occupied, totalSeats);
+
+        LiveFlightStatus status = computeStatus(f);
+
+        LiveFlight lf = new LiveFlight();
+        lf.setProvider("db");
+        lf.setAirline(f.getAirline());
+        lf.setAirlineCode(null);
+        lf.setFlightNumber("FL" + f.getId());
+        lf.setOriginIata(f.getOrigin());
+        lf.setDestinationIata(f.getDestination());
+        lf.setDepartureAt(f.getDepartureAt().atZone(ZONE).format(ISO_LOCAL));
+        lf.setArrivalAt(f.getArriveAt().atZone(ZONE).format(ISO_LOCAL));
+        lf.setStatus(status.name());
+        lf.setDelayMinutes(null);
+        lf.setAircraftType(null);
+        lf.setTerminal(null);
+        lf.setGate(null);
+        lf.setBaggageBelt(null);
+        lf.setTotalSeats(totalSeats);
+        lf.setOccupiedSeats(occupiedSeats);
+        lf.setCargoKg(estimateCargoKg(totalSeats, occupiedSeats));
+        lf.setBoardingStartAt(boardingStart(f).format(ISO_LOCAL));
+        lf.setBoardingEndAt(boardingEnd(f).format(ISO_LOCAL));
+
+        return lf;
     }
 
-    private int levenshtein(String a, String b) {
-        int n = a.length(), m = b.length();
-        if (n == 0) return m; if (m == 0) return n;
-        int[] prev = new int[m + 1], cur = new int[m + 1];
-        for (int j = 0; j <= m; j++) prev[j] = j;
-        for (int i = 1; i <= n; i++) {
-            cur[0] = i;
-            for (int j = 1; j <= m; j++) {
-                int cost = (a.charAt(i-1) == b.charAt(j-1)) ? 0 : 1;
-                cur[j] = Math.min(Math.min(cur[j-1]+1, prev[j]+1), prev[j-1]+cost);
-            }
-            int[] tmp = prev; prev = cur; cur = tmp;
+    private LiveFlightStatus computeStatus(Flight f) {
+        ZonedDateTime now = ZonedDateTime.now(ZONE);
+        ZonedDateTime dep = f.getDepartureAt().atZone(ZONE);
+        ZonedDateTime arr = f.getArriveAt().atZone(ZONE);
+
+        long minutesToDeparture = Duration.between(now, dep).toMinutes();
+        long minutesSinceDeparture = Duration.between(dep, now).toMinutes();
+        long minutesToArrival = Duration.between(now, arr).toMinutes();
+
+        if (minutesToDeparture > 60) {
+            return LiveFlightStatus.SCHEDULED;
         }
-        return prev[m];
+        if (minutesToDeparture <= 60 && minutesToDeparture >= 0) {
+            return LiveFlightStatus.BOARDING;
+        }
+        if (minutesSinceDeparture >= 0 && minutesToArrival > 0) {
+            return LiveFlightStatus.EN_ROUTE;
+        }
+        return LiveFlightStatus.LANDED;
+    }
+
+    private int estimateCargoKg(int totalSeats, int occupiedSeats) {
+        int paxFactor = Math.max(occupiedSeats, 0);
+        int base = 500;
+        int perPax = 15;
+        return base + paxFactor * perPax;
+    }
+
+    private ZonedDateTime boardingStart(Flight f) {
+        ZonedDateTime dep = f.getDepartureAt().atZone(ZONE);
+        return dep.minusMinutes(30);
+    }
+
+    private ZonedDateTime boardingEnd(Flight f) {
+        ZonedDateTime dep = f.getDepartureAt().atZone(ZONE);
+        return dep.minusMinutes(10);
+    }
+
+    private boolean matchesAirport(Airport a, String normalizedQuery) {
+        String iata = a.getIata() != null ? a.getIata().toLowerCase(Locale.ROOT) : "";
+        String city = normalize(a.getCity());
+        String name = normalize(a.getName());
+        return iata.contains(normalizedQuery)
+                || city.contains(normalizedQuery)
+                || name.contains(normalizedQuery);
+    }
+
+    private String normalize(String s) {
+        if (s == null) {
+            return "";
+        }
+        String t = Normalizer.normalize(s, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase(Locale.ROOT)
+                .trim();
+        return t.replaceAll("[^a-z0-9\\s-]", "").replaceAll("\\s+", " ");
     }
 }

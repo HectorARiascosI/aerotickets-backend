@@ -1,10 +1,12 @@
 package com.aerotickets.bootstrap;
 
+import com.aerotickets.constants.DataLoaderConstants;
 import com.aerotickets.entity.Flight;
 import com.aerotickets.repository.FlightRepository;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.*;
-import java.math.BigDecimal;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Bean;
+
 import java.time.LocalDateTime;
 
 @Configuration
@@ -14,25 +16,49 @@ public class DataLoader {
     CommandLineRunner initFlights(FlightRepository flightRepository) {
         return args -> {
             if (flightRepository.count() == 0) {
-                flightRepository.save(Flight.builder()
-                        .airline("Aerolíneas Demo")
-                        .origin("BOG")
-                        .destination("MDE")
-                        .departureAt(LocalDateTime.now().plusDays(3).withHour(8).withMinute(0))
-                        .arriveAt(LocalDateTime.now().plusDays(3).withHour(9).withMinute(15))
-                        .totalSeats(150)
-                        .price(new BigDecimal("220000"))
-                        .build());
+                flightRepository.save(
+                        Flight.builder()
+                                .airline(DataLoaderConstants.FLIGHT_1_AIRLINE)
+                                .origin(DataLoaderConstants.FLIGHT_1_ORIGIN)
+                                .destination(DataLoaderConstants.FLIGHT_1_DESTINATION)
+                                .departureAt(
+                                        LocalDateTime.now()
+                                                .plusDays(DataLoaderConstants.FLIGHT_1_DAYS_OFFSET)
+                                                .withHour(DataLoaderConstants.FLIGHT_1_DEPARTURE_HOUR)
+                                                .withMinute(DataLoaderConstants.FLIGHT_1_DEPARTURE_MINUTE)
+                                )
+                                .arriveAt(
+                                        LocalDateTime.now()
+                                                .plusDays(DataLoaderConstants.FLIGHT_1_DAYS_OFFSET)
+                                                .withHour(DataLoaderConstants.FLIGHT_1_ARRIVAL_HOUR)
+                                                .withMinute(DataLoaderConstants.FLIGHT_1_ARRIVAL_MINUTE)
+                                )
+                                .totalSeats(DataLoaderConstants.FLIGHT_1_TOTAL_SEATS)
+                                .price(DataLoaderConstants.FLIGHT_1_PRICE)
+                                .build()
+                );
 
-                flightRepository.save(Flight.builder()
-                        .airline("Demo Air")
-                        .origin("CLO")
-                        .destination("CTG")
-                        .departureAt(LocalDateTime.now().plusDays(7).withHour(10).withMinute(30))
-                        .arriveAt(LocalDateTime.now().plusDays(7).withHour(12).withMinute(0))
-                        .totalSeats(120)
-                        .price(new BigDecimal("380000"))
-                        .build());
+                flightRepository.save(
+                        Flight.builder()
+                                .airline(DataLoaderConstants.FLIGHT_2_AIRLINE)
+                                .origin(DataLoaderConstants.FLIGHT_2_ORIGIN)
+                                .destination(DataLoaderConstants.FLIGHT_2_DESTINATION)
+                                .departureAt(
+                                        LocalDateTime.now()
+                                                .plusDays(DataLoaderConstants.FLIGHT_2_DAYS_OFFSET)
+                                                .withHour(DataLoaderConstants.FLIGHT_2_DEPARTURE_HOUR)
+                                                .withMinute(DataLoaderConstants.FLIGHT_2_DEPARTURE_MINUTE)
+                                )
+                                .arriveAt(
+                                        LocalDateTime.now()
+                                                .plusDays(DataLoaderConstants.FLIGHT_2_DAYS_OFFSET)
+                                                .withHour(DataLoaderConstants.FLIGHT_2_ARRIVAL_HOUR)
+                                                .withMinute(DataLoaderConstants.FLIGHT_2_ARRIVAL_MINUTE)
+                                )
+                                .totalSeats(DataLoaderConstants.FLIGHT_2_TOTAL_SEATS)
+                                .price(DataLoaderConstants.FLIGHT_2_PRICE)
+                                .build()
+                );
             }
         };
     }
