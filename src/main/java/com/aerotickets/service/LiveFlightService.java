@@ -123,7 +123,7 @@ public class LiveFlightService {
         LiveFlight lf = new LiveFlight();
         lf.setProvider(LiveFlightConstants.PROVIDER_DB);
         lf.setAirline(f.getAirline());
-        lf.setAirlineCode(LiveFlightConstants.FLIGHT_NUMBER_PREFIX);
+        lf.setAirlineCode(null);
         lf.setFlightNumber(LiveFlightConstants.FLIGHT_NUMBER_PREFIX + f.getId());
         lf.setOriginIata(f.getOrigin());
         lf.setDestinationIata(f.getDestination());

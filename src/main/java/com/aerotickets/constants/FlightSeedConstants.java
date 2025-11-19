@@ -16,6 +16,7 @@ public final class FlightSeedConstants {
 
     public static final int[] DEFAULT_DEPARTURE_HOURS = {6, 12, 18};
 
-    public static final BigDecimal MIN_BASE_PRICE = new BigDecimal("80000");
-    public static final BigDecimal PRICE_PER_MINUTE = new BigDecimal("200");
+    public static final BigDecimal PRICE_PER_MINUTE = BigDecimal.valueOf(200L);
+
+    public static final BigDecimal MIN_BASE_PRICE = BigDecimal.valueOf(80000L);
 }

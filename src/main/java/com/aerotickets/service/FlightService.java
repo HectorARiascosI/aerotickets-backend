@@ -52,7 +52,7 @@ public class FlightService {
             throw new IllegalArgumentException(FlightConstants.ERR_ORIGIN_DEST_REQUIRED);
         }
 
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(FlightSeedConstants.SEED_ZONE_ID);
         LocalDate date = dto.getDate() != null ? dto.getDate() : today;
 
         if (date.isBefore(today)) {
