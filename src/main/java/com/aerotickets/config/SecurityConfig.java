@@ -41,6 +41,7 @@ public class SecurityConfig {
                         .requestMatchers(SecurityConstants.LIVE_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, SecurityConstants.CATALOG_GET_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, SecurityConstants.FLIGHTS_GET_ENDPOINTS).permitAll()
+                        .requestMatchers("/payments/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

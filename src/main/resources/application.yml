@@ -78,3 +78,10 @@ email:
 
 sendgrid:
   api-key: ${SENDGRID_API_KEY:}
+
+stripe:
+  public-key: ${STRIPE_PUBLIC_KEY}
+  secret-key: ${STRIPE_SECRET_KEY}
+  currency: ${STRIPE_CURRENCY:cop}
+  success-url: ${STRIPE_SUCCESS_URL}
+  cancel-url: ${STRIPE_CANCEL_URL}
