@@ -1,12 +1,15 @@
 package com.aerotickets.service;
 
+import com.aerotickets.constants.FlightConstants;
 import com.aerotickets.constants.LiveFlightConstants;
 import com.aerotickets.constants.LiveFlightStatus;
 import com.aerotickets.dto.FlightSearchDTO;
+import com.aerotickets.entity.AirlineFleet;
 import com.aerotickets.entity.Airport;
 import com.aerotickets.entity.Flight;
 import com.aerotickets.entity.ReservationStatus;
 import com.aerotickets.model.LiveFlight;
+import com.aerotickets.repository.AirlineFleetRepository;
 import com.aerotickets.repository.AirportRepository;
 import com.aerotickets.repository.ReservationRepository;
 import org.springframework.stereotype.Service;
@@ -29,13 +32,16 @@ public class LiveFlightService {
     private final ReservationRepository reservationRepository;
     private final AirportRepository airportRepository;
     private final FlightService flightService;
+    private final AirlineFleetRepository airlineFleetRepository;
 
     public LiveFlightService(ReservationRepository reservationRepository,
                              AirportRepository airportRepository,
-                             FlightService flightService) {
+                             FlightService flightService,
+                             AirlineFleetRepository airlineFleetRepository) {
         this.reservationRepository = reservationRepository;
         this.airportRepository = airportRepository;
         this.flightService = flightService;
+        this.airlineFleetRepository = airlineFleetRepository;
     }
 
     public List<LiveFlight> searchLive(String originRaw,
@@ -117,21 +123,40 @@ public class LiveFlightService {
 
         LiveFlightStatus status = computeStatus(f);
 
+        AirlineFleet fleet = chooseFleetForRoute(f.getOrigin(), f.getDestination());
+
+        String airlineName = f.getAirline();
+        if (fleet != null && (airlineName == null
+                || airlineName.isBlank()
+                || FlightConstants.DEFAULT_AIRLINE_NAME.equals(airlineName))) {
+            airlineName = fleet.getAirlineName();
+        }
+        if (airlineName == null || airlineName.isBlank()) {
+            airlineName = FlightConstants.DEFAULT_AIRLINE_NAME;
+        }
+
+        String airlineCode = null;
+        String aircraftType = null;
+        if (fleet != null) {
+            airlineCode = fleet.getAirlineCode();
+            aircraftType = fleet.getAircraftType();
+        }
+
         LiveFlight lf = new LiveFlight();
         lf.setProvider(LiveFlightConstants.PROVIDER_DB);
-        lf.setAirline(f.getAirline());
-        lf.setAirlineCode(LiveFlightConstants.FLIGHT_NUMBER_PREFIX);
-        lf.setFlightNumber(LiveFlightConstants.FLIGHT_NUMBER_PREFIX + f.getId());
+        lf.setAirline(airlineName);
+        lf.setAirlineCode(airlineCode);
+        lf.setFlightNumber((airlineCode != null ? airlineCode : LiveFlightConstants.FLIGHT_NUMBER_PREFIX) + f.getId());
         lf.setOriginIata(f.getOrigin());
         lf.setDestinationIata(f.getDestination());
         lf.setDepartureAt(f.getDepartureAt().atZone(ZONE).format(ISO_LOCAL));
         lf.setArrivalAt(f.getArriveAt().atZone(ZONE).format(ISO_LOCAL));
         lf.setStatus(status.name());
         lf.setDelayMinutes(null);
-        lf.setAircraftType(null);
-        lf.setTerminal(null);
-        lf.setGate(null);
-        lf.setBaggageBelt(null);
+        lf.setAircraftType(aircraftType);
+        lf.setTerminal("Principal");
+        lf.setGate("Por asignar");
+        lf.setBaggageBelt("Por asignar");
         lf.setTotalSeats(totalSeats);
         lf.setOccupiedSeats(occupiedSeats);
         lf.setCargoKg(estimateCargoKg(totalSeats, occupiedSeats));
@@ -196,5 +221,14 @@ public class LiveFlightService {
                 .toLowerCase(Locale.ROOT)
                 .trim();
         return t.replaceAll("[^a-z0-9\\s-]", "").replaceAll("\\s+", " ");
+    }
+
+    private AirlineFleet chooseFleetForRoute(String origin, String destination) {
+        List<AirlineFleet> fleets = airlineFleetRepository.findAllByOrderByAirlineNameAsc();
+        if (fleets.isEmpty()) {
+            return null;
+        }
+        int index = Math.abs(Objects.hash(origin, destination)) % fleets.size();
+        return fleets.get(index);
     }
 }

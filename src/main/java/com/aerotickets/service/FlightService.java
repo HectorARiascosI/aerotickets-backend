@@ -13,10 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -121,12 +118,25 @@ public class FlightService {
             typicalMinutes = FlightConstants.DEFAULT_DURATION_HOURS * 60;
         }
 
+        AirlineFleet fleet = chooseFleetForRoute(origin, destination);
+
+        String airlineName;
+        if (fleet != null && fleet.getAirlineName() != null && !fleet.getAirlineName().isBlank()) {
+            airlineName = fleet.getAirlineName();
+        } else {
+            airlineName = FlightConstants.DEFAULT_AIRLINE_NAME;
+        }
+
+        int seatsForRoute;
+        if (fleet != null && fleet.getTypicalSeats() != null && fleet.getTypicalSeats() > 0) {
+            seatsForRoute = fleet.getTypicalSeats();
+        } else {
+            seatsForRoute = FlightConstants.DEFAULT_TOTAL_SEATS;
+        }
+
         int[] hours = FlightSeedConstants.DEFAULT_DEPARTURE_HOURS;
         int flightsPerDay = FlightSeedConstants.FLIGHTS_PER_ROUTE_PER_DAY;
         int count = Math.min(flightsPerDay, hours.length);
-
-        String airlineName = chooseAirlineName(origin, destination);
-        int seatsForRoute = chooseSeatsForRoute(origin, destination);
 
         List<Flight> toSave = new ArrayList<>();
 
@@ -166,31 +176,12 @@ public class FlightService {
         return flightRepository.saveAll(toSave);
     }
 
-    private String chooseAirlineName(String origin, String destination) {
+    private AirlineFleet chooseFleetForRoute(String origin, String destination) {
         List<AirlineFleet> fleets = airlineFleetRepository.findAllByOrderByAirlineNameAsc();
         if (fleets.isEmpty()) {
-            return FlightConstants.DEFAULT_AIRLINE_NAME;
+            return null;
         }
         int index = Math.abs(Objects.hash(origin, destination)) % fleets.size();
-        AirlineFleet fleet = fleets.get(index);
-        String name = fleet.getAirlineName();
-        if (name == null || name.isBlank()) {
-            return FlightConstants.DEFAULT_AIRLINE_NAME;
-        }
-        return name;
-    }
-
-    private int chooseSeatsForRoute(String origin, String destination) {
-        List<AirlineFleet> fleets = airlineFleetRepository.findAllByOrderByAirlineNameAsc();
-        if (fleets.isEmpty()) {
-            return FlightConstants.DEFAULT_TOTAL_SEATS;
-        }
-        int index = Math.abs(Objects.hash(origin, destination, "seats")) % fleets.size();
-        AirlineFleet fleet = fleets.get(index);
-        Integer typicalSeats = fleet.getTypicalSeats();
-        if (typicalSeats == null || typicalSeats <= 0) {
-            return FlightConstants.DEFAULT_TOTAL_SEATS;
-        }
-        return typicalSeats;
+        return fleets.get(index);
     }
 }
