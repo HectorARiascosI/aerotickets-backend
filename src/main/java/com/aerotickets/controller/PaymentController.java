@@ -20,15 +20,18 @@ import java.util.Map;
 public class PaymentController {
 
     private final FlightRepository flightRepository;
+    private final com.aerotickets.service.ReservationService reservationService;
     private final String successUrl;
     private final String cancelUrl;
     private final String currency;
 
     public PaymentController(FlightRepository flightRepository,
+                             com.aerotickets.service.ReservationService reservationService,
                              @Value("${stripe.success-url}") String successUrl,
                              @Value("${stripe.cancel-url}") String cancelUrl,
                              @Value("${stripe.currency}") String currency) {
         this.flightRepository = flightRepository;
+        this.reservationService = reservationService;
         this.successUrl = successUrl;
         this.cancelUrl = cancelUrl;
         this.currency = currency;
@@ -92,5 +95,28 @@ public class PaymentController {
                         "url", session.getUrl()
                 )
         );
+    }
+
+    @PostMapping("/confirm")
+    public ResponseEntity<Map<String, String>> confirmPayment(
+            @RequestBody PaymentRequestDTO request,
+            org.springframework.security.core.Authentication auth
+    ) {
+        if (request == null || request.getFlightId() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        String email = (auth != null) ? auth.getName() : null;
+        if (email == null || email.isBlank()) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            reservationService.markAsPaid(email, request.getFlightId());
+            return ResponseEntity.ok(Map.of("message", "Payment confirmed successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
 }

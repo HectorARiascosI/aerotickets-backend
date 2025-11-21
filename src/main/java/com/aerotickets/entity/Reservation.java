@@ -58,6 +58,13 @@ public class Reservation {
     private ReservationStatus status = ReservationStatus.ACTIVE;
 
     @Builder.Default
+    @Column(name = "paid", nullable = false)
+    private Boolean paid = false;
+
+    @Column(name = "paid_at")
+    private Instant paidAt;
+
+    @Builder.Default
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 

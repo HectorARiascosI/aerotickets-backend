@@ -234,11 +234,34 @@ public class ReservationService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public void markAsPaid(String userEmail, Long flightId) {
+        if (userEmail == null || userEmail.isBlank() || flightId == null) {
+            throw new IllegalArgumentException("User email and flight ID are required");
+        }
+        
+        List<Reservation> reservations = reservationRepository
+                .findByUser_EmailAndFlight_IdAndStatus(userEmail, flightId, ReservationStatus.ACTIVE);
+        
+        if (reservations.isEmpty()) {
+            throw new NotFoundException("No active reservation found for this flight");
+        }
+        
+        for (Reservation r : reservations) {
+            r.setPaid(true);
+            r.setPaidAt(Instant.now());
+        }
+        
+        reservationRepository.saveAll(reservations);
+    }
+
     private ReservationResponseDTO toDto(Reservation r) {
         ReservationResponseDTO dto = new ReservationResponseDTO();
         dto.setId(r.getId());
         dto.setSeatNumber(r.getSeatNumber());
         dto.setStatus(r.getStatus());
+        dto.setPaid(r.getPaid());
+        dto.setPaidAt(r.getPaidAt());
         dto.setCreatedAt(r.getCreatedAt());
         dto.setFlightId(r.getFlight().getId());
         dto.setAirline(r.getFlight().getAirline());

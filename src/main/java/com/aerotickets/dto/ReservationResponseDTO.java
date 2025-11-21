@@ -11,6 +11,8 @@ public class ReservationResponseDTO {
     private Long id;
     private String seatNumber;
     private ReservationStatus status;
+    private Boolean paid;
+    private Instant paidAt;
     private Instant createdAt;
 
     private Long flightId;
@@ -27,6 +29,10 @@ public class ReservationResponseDTO {
     public void setSeatNumber(String seatNumber) { this.seatNumber = seatNumber; }
     public ReservationStatus getStatus() { return status; }
     public void setStatus(ReservationStatus status) { this.status = status; }
+    public Boolean getPaid() { return paid; }
+    public void setPaid(Boolean paid) { this.paid = paid; }
+    public Instant getPaidAt() { return paidAt; }
+    public void setPaidAt(Instant paidAt) { this.paidAt = paidAt; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public Long getFlightId() { return flightId; }
