@@ -94,3 +94,8 @@ stripe:
   # AJUSTA estas rutas a las que tenga tu frontend
   success-url: ${STRIPE_SUCCESS_URL:${app.frontend.base-url}/pagos/success}
   cancel-url: ${STRIPE_CANCEL_URL:${app.frontend.base-url}/pagos/cancel}
+
+groq:
+  api:
+    key: ${GROQ_API_KEY:}
+    url: ${GROQ_API_URL:https://api.groq.com/openai/v1/chat/completions}
