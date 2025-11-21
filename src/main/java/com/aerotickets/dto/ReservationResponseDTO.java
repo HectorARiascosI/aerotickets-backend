@@ -16,6 +16,7 @@ public class ReservationResponseDTO {
     private Instant createdAt;
 
     private Long flightId;
+    private String flightNumber;
     private String airline;
     private String origin;
     private String destination;
@@ -37,6 +38,8 @@ public class ReservationResponseDTO {
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public Long getFlightId() { return flightId; }
     public void setFlightId(Long flightId) { this.flightId = flightId; }
+    public String getFlightNumber() { return flightNumber; }
+    public void setFlightNumber(String flightNumber) { this.flightNumber = flightNumber; }
     public String getAirline() { return airline; }
     public void setAirline(String airline) { this.airline = airline; }
     public String getOrigin() { return origin; }

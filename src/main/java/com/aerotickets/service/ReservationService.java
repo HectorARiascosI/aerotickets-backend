@@ -265,6 +265,7 @@ public class ReservationService {
         dto.setPaidAt(r.getPaidAt());
         dto.setCreatedAt(r.getCreatedAt());
         dto.setFlightId(r.getFlight().getId());
+        dto.setFlightNumber(r.getFlight().getFlightNumber());
         dto.setAirline(r.getFlight().getAirline());
         dto.setOrigin(r.getFlight().getOrigin());
         dto.setDestination(r.getFlight().getDestination());
