@@ -49,8 +49,8 @@ public class AIChatService {
             // Analizar el mensaje del usuario
             Map<String, Object> context = analyzeUserIntent(userMessage, userEmail);
             
-            // Generar respuesta con Groq
-            String aiResponse = callGroqAPI(userMessage, context);
+            // SIMPLIFICADO: Usar solo respuestas fallback (sin Groq)
+            String aiResponse = generateFallbackResponse(userMessage, context);
             
             // Determinar si hay una acción específica
             String action = (String) context.get("action");
