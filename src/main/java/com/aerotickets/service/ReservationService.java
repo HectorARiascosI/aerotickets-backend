@@ -265,7 +265,9 @@ public class ReservationService {
         dto.setPaidAt(r.getPaidAt());
         dto.setCreatedAt(r.getCreatedAt());
         dto.setFlightId(r.getFlight().getId());
-        dto.setFlightNumber(r.getFlight().getFlightNumber());
+        // Generar número de vuelo basado en origen-destino-id
+        String flightNumber = r.getFlight().getOrigin() + "-" + r.getFlight().getDestination() + "-" + r.getFlight().getId();
+        dto.setFlightNumber(flightNumber);
         dto.setAirline(r.getFlight().getAirline());
         dto.setOrigin(r.getFlight().getOrigin());
         dto.setDestination(r.getFlight().getDestination());
