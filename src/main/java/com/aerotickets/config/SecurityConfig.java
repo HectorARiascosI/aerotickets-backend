@@ -41,7 +41,7 @@ public class SecurityConfig {
                         .requestMatchers(SecurityConstants.LIVE_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, SecurityConstants.CATALOG_GET_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, SecurityConstants.FLIGHTS_GET_ENDPOINTS).permitAll()
-                        .requestMatchers("/api/ai/**").authenticated()
+                        .requestMatchers("/ai/**").authenticated()
                         .requestMatchers("/payments/**").authenticated()
                         .anyRequest().authenticated()
                 )

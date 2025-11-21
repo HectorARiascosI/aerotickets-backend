@@ -8,7 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/ai/chat")
+@RequestMapping("/ai/chat")
 public class AIChatController {
 
     private final AIChatService aiChatService;
