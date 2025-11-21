@@ -49,13 +49,25 @@ public class ReservationService {
         Flight flight = flightRepository.findById(dto.getFlightId())
                 .orElseThrow(() -> new NotFoundException(ReservationServiceConstants.ERR_FLIGHT_NOT_FOUND));
 
-        // Verificar si el usuario ya tiene una reserva ACTIVA para este vuelo
+        // Verificar si el usuario ya tiene CUALQUIER reserva para este vuelo (ACTIVA o CANCELADA)
         // Esto evita que se pueda comprar el mismo vuelo múltiples veces
-        List<Reservation> userActiveReservations = reservationRepository
-                .findByUser_EmailAndFlight_IdAndStatus(userEmail, flight.getId(), ReservationStatus.ACTIVE);
-        if (!userActiveReservations.isEmpty()) {
+        List<Reservation> userReservations = reservationRepository
+                .findByUser_EmailAndFlight_Id(userEmail, flight.getId());
+        
+        if (!userReservations.isEmpty()) {
+            // Si tiene alguna reserva ACTIVA, mensaje específico
+            boolean hasActiveReservation = userReservations.stream()
+                    .anyMatch(r -> r.getStatus() == ReservationStatus.ACTIVE);
+            
+            if (hasActiveReservation) {
+                throw new ConflictException(
+                    ReservationServiceConstants.ERR_USER_ALREADY_HAS_ACTIVE_RESERVATION
+                );
+            }
+            
+            // Si ya tiene reservas (aunque estén canceladas), no puede comprar el mismo vuelo de nuevo
             throw new ConflictException(
-                "Ya tienes una reserva activa para este vuelo. No puedes volver a comprarlo."
+                "Ya has reservado este vuelo anteriormente. No puedes volver a comprarlo."
             );
         }
 

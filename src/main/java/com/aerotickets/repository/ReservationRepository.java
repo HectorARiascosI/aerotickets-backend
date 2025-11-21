@@ -22,6 +22,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByUser_EmailAndFlight_IdAndStatus(String email, Long flightId, ReservationStatus status);
 
+    List<Reservation> findByUser_EmailAndFlight_Id(String email, Long flightId);
+
     Optional<Reservation> findFirstByUser_EmailAndFlight_IdAndSeatNumberAndStatus(
             String email, Long flightId, String seatNumber, ReservationStatus status
     );

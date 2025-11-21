@@ -48,6 +48,7 @@ public final class ErrorMessages {
         public static final String SEAT_MUST_BE_POSITIVE = "Seat number must be positive";
         public static final String SEAT_INVALID_FORMAT = "Invalid seat format. Must be number + letter (e.g., 1A, 12B)";
         public static final String FLIGHT_ALREADY_PURCHASED = "You have already purchased this flight. You cannot buy it again.";
+        public static final String FLIGHT_ALREADY_RESERVED = "You have already reserved this flight previously. You cannot buy it again.";
     }
 
     public static final class Jwt {
