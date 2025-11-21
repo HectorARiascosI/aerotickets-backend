@@ -73,7 +73,7 @@ public class AIChatService {
                     FlightSearchDTO searchDTO = new FlightSearchDTO();
                     searchDTO.setOrigin(searchInfo.origin);
                     searchDTO.setDestination(searchInfo.destination);
-                    searchDTO.setDate(searchInfo.date != null ? searchInfo.date.toString() : null);
+                    searchDTO.setDate(searchInfo.date);
                     
                     List<Flight> flights = flightService.searchOrSimulate(searchDTO);
                     
