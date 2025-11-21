@@ -26,11 +26,11 @@ public class AIChatService {
     private final ReservationRepository reservationRepository;
     private final ObjectMapper objectMapper;
 
-    @Value("${groq.api.key:}")
-    private String groqApiKey;
+    @Value("${openai.api.key:}")
+    private String openaiApiKey;
 
-    @Value("${groq.api.url:https://api.groq.com/openai/v1/chat/completions}")
-    private String groqApiUrl;
+    @Value("${openai.api.url:https://api.openai.com/v1/chat/completions}")
+    private String openaiApiUrl;
 
     public AIChatService(FlightService flightService,
                          ReservationRepository reservationRepository) {
@@ -49,8 +49,8 @@ public class AIChatService {
             // Analizar el mensaje del usuario
             Map<String, Object> context = analyzeUserIntent(userMessage, userEmail);
             
-            // SIMPLIFICADO: Usar solo respuestas fallback (sin Groq)
-            String aiResponse = generateFallbackResponse(userMessage, context);
+            // Generar respuesta con OpenAI
+            String aiResponse = callOpenAI(userMessage, context);
             
             // Determinar si hay una acción específica
             String action = (String) context.get("action");
@@ -225,30 +225,30 @@ public class AIChatService {
         return today;
     }
 
-    private String callGroqAPI(String userMessage, Map<String, Object> context) {
-        if (groqApiKey == null || groqApiKey.isBlank()) {
+    private String callOpenAI(String userMessage, Map<String, Object> context) {
+        if (openaiApiKey == null || openaiApiKey.isBlank()) {
             return generateFallbackResponse(userMessage, context);
         }
 
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(groqApiKey);
+            headers.setBearerAuth(openaiApiKey);
 
             String systemPrompt = buildSystemPrompt(context);
             
             Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("model", "llama-3.1-70b-versatile");
+            requestBody.put("model", "gpt-3.5-turbo");
             requestBody.put("messages", List.of(
                 Map.of("role", "system", "content", systemPrompt),
                 Map.of("role", "user", "content", userMessage)
             ));
             requestBody.put("temperature", 0.7);
-            requestBody.put("max_tokens", 500);
+            requestBody.put("max_tokens", 300);
 
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
             ResponseEntity<String> response = restTemplate.exchange(
-                groqApiUrl,
+                openaiApiUrl,
                 HttpMethod.POST,
                 request,
                 String.class
@@ -258,6 +258,7 @@ public class AIChatService {
             return jsonResponse.get("choices").get(0).get("message").get("content").asText();
 
         } catch (Exception e) {
+            System.err.println("Error llamando a OpenAI: " + e.getMessage());
             return generateFallbackResponse(userMessage, context);
         }
     }
@@ -265,42 +266,51 @@ public class AIChatService {
     private String buildSystemPrompt(Map<String, Object> context) {
         StringBuilder prompt = new StringBuilder();
         
-        // Identidad y propósito
-        prompt.append("Eres AeroBot, el asistente virtual de AeroTickets, plataforma de reserva de vuelos en Colombia.\n\n");
+        prompt.append("Eres AeroBot, asistente virtual profesional de AeroTickets, plataforma de reserva de vuelos en Colombia.\n\n");
         
-        // Reglas fundamentales
-        prompt.append("REGLAS:\n");
-        prompt.append("1. SOLO responde sobre vuelos, aeropuertos, reservas y viajes en AeroTickets.\n");
-        prompt.append("2. Si preguntan temas NO relacionados (deportes, política, etc.), responde: 'Lo siento, solo ayudo con vuelos y reservas en AeroTickets.'\n");
-        prompt.append("3. Sé amable, conciso y profesional. Usa emojis ocasionalmente.\n");
-        prompt.append("4. Respuestas cortas (máximo 3-4 líneas).\n\n");
+        prompt.append("IDENTIDAD Y COMPORTAMIENTO:\n");
+        prompt.append("- Eres experto en vuelos, reservas y viajes dentro de Colombia\n");
+        prompt.append("- Respondes SOLO sobre temas relacionados con AeroTickets\n");
+        prompt.append("- Si preguntan temas externos (deportes, política, etc.), educadamente redirige al tema de vuelos\n");
+        prompt.append("- Tono: Profesional, amigable y conciso\n");
+        prompt.append("- Usa emojis moderadamente (✈️, 🎫, 💺)\n");
+        prompt.append("- Respuestas máximo 3-4 líneas\n\n");
         
-        // Funcionalidades
-        prompt.append("FUNCIONALIDADES:\n");
-        prompt.append("- Búsqueda de vuelos por origen, destino y fecha\n");
-        prompt.append("- Reserva con selección de asientos (1A, 2B, etc.)\n");
-        prompt.append("- Gestión de reservas (ver, cancelar, pagar)\n");
-        prompt.append("- Pago seguro con Stripe\n\n");
+        prompt.append("FUNCIONALIDADES DE AEROTICKETS:\n");
+        prompt.append("1. Búsqueda de vuelos: origen, destino, fecha\n");
+        prompt.append("2. Reserva de vuelos con selección de asientos (formato: 1A, 2B, 12F)\n");
+        prompt.append("3. Gestión de reservas: ver, cancelar, pagar\n");
+        prompt.append("4. Pago seguro con Stripe\n");
+        prompt.append("5. Visualización de rutas en mapa interactivo\n");
+        prompt.append("6. Limpiar historial de reservas antiguas\n\n");
         
-        // Aeropuertos
-        prompt.append("CIUDADES: Bogotá (BOG), Medellín (MDE), Cali (CLO), Cartagena (CTG), Barranquilla (BAQ), Pereira (PEI), Bucaramanga (BGA), Santa Marta (SMR), Cúcuta (CUC), Pasto (PSO)\n\n");
+        prompt.append("CIUDADES DISPONIBLES:\n");
+        prompt.append("Bogotá (BOG), Medellín (MDE), Cali (CLO), Cartagena (CTG), Barranquilla (BAQ), ");
+        prompt.append("Pereira (PEI), Bucaramanga (BGA), Santa Marta (SMR), Cúcuta (CUC), Pasto (PSO)\n\n");
+        
+        prompt.append("REGLAS IMPORTANTES:\n");
+        prompt.append("- Un usuario solo puede reservar un vuelo específico una vez\n");
+        prompt.append("- Los asientos se asignan automáticamente si no se elige uno\n");
+        prompt.append("- Las reservas se pueden cancelar antes del vuelo\n");
+        prompt.append("- El pago se realiza después de reservar\n\n");
 
-        // Contexto dinámico
         String action = (String) context.get("action");
         if ("search".equals(action)) {
             Object data = context.get("data");
             if (data instanceof List) {
                 List<?> flights = (List<?>) data;
-                prompt.append("CONTEXTO: Encontré ").append(flights.size()).append(" vuelo(s). Informa al usuario y dile que puede verlos abajo.\n");
+                prompt.append("CONTEXTO ACTUAL: Encontré ").append(flights.size()).append(" vuelo(s) disponible(s). ");
+                prompt.append("Informa al usuario y menciona que puede verlos en la lista para reservar.\n");
             }
         } else if ("reservations".equals(action)) {
             Object data = context.get("data");
             if (data instanceof List) {
                 List<?> reservations = (List<?>) data;
-                prompt.append("CONTEXTO: Usuario tiene ").append(reservations.size()).append(" reserva(s). Redirigiendo a 'Mis Reservas'.\n");
+                prompt.append("CONTEXTO ACTUAL: El usuario tiene ").append(reservations.size()).append(" reserva(s). ");
+                prompt.append("Menciona que lo estás redirigiendo a 'Mis Reservas'.\n");
             }
         } else if ("help".equals(action)) {
-            prompt.append("CONTEXTO: Usuario pide ayuda. Explica funcionalidades principales.\n");
+            prompt.append("CONTEXTO ACTUAL: Usuario solicita ayuda. Explica las funcionalidades principales brevemente.\n");
         }
 
         return prompt.toString();
