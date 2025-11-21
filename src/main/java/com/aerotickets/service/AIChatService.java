@@ -70,12 +70,11 @@ public class AIChatService {
             FlightSearchInfo searchInfo = extractFlightSearchInfo(message);
             if (searchInfo.isValid()) {
                 try {
-                    FlightSearchDTO searchDTO = new FlightSearchDTO();
-                    searchDTO.setOrigin(searchInfo.origin);
-                    searchDTO.setDestination(searchInfo.destination);
-                    searchDTO.setDate(searchInfo.date);
-                    
-                    List<Flight> flights = flightService.searchOrSimulate(searchDTO);
+                    List<Flight> flights = flightService.searchFlights(
+                        searchInfo.origin,
+                        searchInfo.destination,
+                        searchInfo.date != null ? searchInfo.date.toString() : null
+                    );
                     
                     context.put("action", "search");
                     context.put("data", flights);
