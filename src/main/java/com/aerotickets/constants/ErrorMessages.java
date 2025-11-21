@@ -39,12 +39,15 @@ public final class ErrorMessages {
         public static final String SEAT_OUT_OF_RANGE = "Seat number out of range";
         public static final String SEAT_TAKEN = "Selected seat is already reserved";
         public static final String ACTIVE_RESERVATION_OR_SEAT_TAKEN = "You already have an active reservation for this flight or the seat is taken";
+        public static final String USER_ALREADY_HAS_ACTIVE_RESERVATION = "You already have an active reservation for this flight";
         public static final String RESERVATION_ID_REQUIRED = "Reservation id is required";
         public static final String RESERVATION_NOT_FOUND = "Reservation not found";
         public static final String USER_EMAIL_AND_FLIGHT_ID_REQUIRED = "User email and flight id are required";
         public static final String USER_EMAIL_FLIGHT_ID_SEAT_REQUIRED = "User email, flight id and seat number are required";
         public static final String ACTIVE_RESERVATION_FOR_SEAT_NOT_FOUND = "Active reservation for that seat not found";
         public static final String SEAT_MUST_BE_POSITIVE = "Seat number must be positive";
+        public static final String SEAT_INVALID_FORMAT = "Invalid seat format. Must be number + letter (e.g., 1A, 12B)";
+        public static final String FLIGHT_ALREADY_PURCHASED = "You have already purchased this flight. You cannot buy it again.";
     }
 
     public static final class Jwt {

@@ -49,13 +49,41 @@ public class ReservationService {
         Flight flight = flightRepository.findById(dto.getFlightId())
                 .orElseThrow(() -> new NotFoundException(ReservationServiceConstants.ERR_FLIGHT_NOT_FOUND));
 
+        // Verificar si el usuario ya tiene una reserva ACTIVA para este vuelo
+        // Esto evita que se pueda comprar el mismo vuelo múltiples veces
+        List<Reservation> userActiveReservations = reservationRepository
+                .findByUser_EmailAndFlight_IdAndStatus(userEmail, flight.getId(), ReservationStatus.ACTIVE);
+        if (!userActiveReservations.isEmpty()) {
+            throw new ConflictException(
+                "Ya tienes una reserva activa para este vuelo. No puedes volver a comprarlo."
+            );
+        }
+
         long activeCount = reservationRepository
                 .countByFlight_IdAndStatus(flight.getId(), ReservationStatus.ACTIVE);
         if (activeCount >= flight.getTotalSeats()) {
             throw new ConflictException(ReservationServiceConstants.ERR_NO_SEATS_AVAILABLE);
         }
 
-        Integer assignedSeat = assignSeatNumber(flight);
+        String assignedSeat;
+        if (dto.getSeatNumber() != null && !dto.getSeatNumber().isBlank()) {
+            // Validar formato del asiento (debe ser número + letra, ej: "1A", "12B")
+            if (!dto.getSeatNumber().matches("^\\d+[A-Z]$")) {
+                throw new IllegalArgumentException(
+                    "Formato de asiento inválido. Debe ser número + letra (ej: 1A, 12B)"
+                );
+            }
+            
+            boolean seatTaken = reservationRepository.existsByFlight_IdAndSeatNumberAndStatus(
+                    flight.getId(), dto.getSeatNumber(), ReservationStatus.ACTIVE
+            );
+            if (seatTaken) {
+                throw new ConflictException(ReservationServiceConstants.ERR_SEAT_TAKEN);
+            }
+            assignedSeat = dto.getSeatNumber();
+        } else {
+            assignedSeat = assignSeatNumber(flight);
+        }
 
         try {
             Reservation r = Reservation.builder()
@@ -75,24 +103,34 @@ public class ReservationService {
         }
     }
 
-    private Integer assignSeatNumber(Flight flight) {
+    private String assignSeatNumber(Flight flight) {
         int totalSeats = flight.getTotalSeats();
         List<Reservation> activeReservations = reservationRepository
                 .findByFlight_IdAndStatusOrderBySeatNumberAsc(
                         flight.getId(), ReservationStatus.ACTIVE
                 );
 
-        boolean[] taken = new boolean[totalSeats + 1];
+        // Crear un set con los asientos ocupados
+        java.util.Set<String> takenSeats = new java.util.HashSet<>();
         for (Reservation r : activeReservations) {
-            Integer seat = r.getSeatNumber();
-            if (seat != null && seat > 0 && seat <= totalSeats) {
-                taken[seat] = true;
+            String seat = r.getSeatNumber();
+            if (seat != null && !seat.isBlank()) {
+                takenSeats.add(seat);
             }
         }
 
-        for (int seat = 1; seat <= totalSeats; seat++) {
-            if (!taken[seat]) {
-                return seat;
+        // Generar asientos en formato fila + letra (1A, 1B, 1C, 2A, 2B, etc.)
+        // Asumiendo 6 asientos por fila (A, B, C, D, E, F)
+        String[] columns = {"A", "B", "C", "D", "E", "F"};
+        int seatsPerRow = columns.length;
+        int totalRows = (int) Math.ceil((double) totalSeats / seatsPerRow);
+
+        for (int row = 1; row <= totalRows; row++) {
+            for (String col : columns) {
+                String seatId = row + col;
+                if (!takenSeats.contains(seatId)) {
+                    return seatId;
+                }
             }
         }
 
@@ -141,9 +179,9 @@ public class ReservationService {
     }
 
     @Transactional
-    public void cancelSeatIfActive(String userEmail, Long flightId, Integer seatNumber) {
+    public void cancelSeatIfActive(String userEmail, Long flightId, String seatNumber) {
         if (userEmail == null || userEmail.isBlank()
-                || flightId == null || seatNumber == null) {
+                || flightId == null || seatNumber == null || seatNumber.isBlank()) {
             throw new IllegalArgumentException(
                     ReservationServiceConstants.ERR_USER_EMAIL_FLIGHT_ID_SEAT_REQUIRED
             );
@@ -167,6 +205,20 @@ public class ReservationService {
         return reservationRepository.findByUser_EmailOrderByCreatedAtDesc(userEmail)
                 .stream()
                 .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getOccupiedSeats(Long flightId) {
+        if (flightId == null) {
+            throw new IllegalArgumentException("Flight ID is required");
+        }
+        List<Reservation> activeReservations = reservationRepository
+                .findByFlight_IdAndStatusOrderBySeatNumberAsc(flightId, ReservationStatus.ACTIVE);
+        
+        return activeReservations.stream()
+                .map(Reservation::getSeatNumber)
+                .filter(seat -> seat != null && !seat.isBlank())
                 .collect(Collectors.toList());
     }
 

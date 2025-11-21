@@ -9,8 +9,7 @@ public class ReservationRequestDTO {
     @NotNull
     private Long flightId;
 
-    @Positive(message = ReservationConstants.MSG_SEAT_MUST_BE_POSITIVE)
-    private Integer seatNumber;
+    private String seatNumber;
 
     public Long getFlightId() {
         return flightId;
@@ -20,11 +19,11 @@ public class ReservationRequestDTO {
         this.flightId = flightId;
     }
 
-    public Integer getSeatNumber() {
+    public String getSeatNumber() {
         return seatNumber;
     }
 
-    public void setSeatNumber(Integer seatNumber) {
+    public void setSeatNumber(String seatNumber) {
         this.seatNumber = seatNumber;
     }
 }

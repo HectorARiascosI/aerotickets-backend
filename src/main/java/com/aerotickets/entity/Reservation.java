@@ -49,8 +49,8 @@ public class Reservation {
             foreignKey = @ForeignKey(name = "fk_res_flight"))
     private Flight flight;
 
-    @Column(name = "seat_number")
-    private Integer seatNumber;
+    @Column(name = "seat_number", length = 10)
+    private String seatNumber;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)

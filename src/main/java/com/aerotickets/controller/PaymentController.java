@@ -1,5 +1,7 @@
 package com.aerotickets.controller;
 
+import com.aerotickets.constants.ApiPaths;
+import com.aerotickets.constants.ErrorMessages;
 import com.aerotickets.dto.PaymentRequestDTO;
 import com.aerotickets.entity.Flight;
 import com.aerotickets.repository.FlightRepository;
@@ -14,7 +16,7 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/payments")
+@RequestMapping(ApiPaths.Payments.BASE)
 public class PaymentController {
 
     private final FlightRepository flightRepository;
@@ -32,7 +34,7 @@ public class PaymentController {
         this.currency = currency;
     }
 
-    @PostMapping("/checkout-session")
+    @PostMapping(ApiPaths.Payments.CHECKOUT_SESSION)
     public ResponseEntity<Map<String, String>> createCheckoutSession(
             @RequestBody PaymentRequestDTO request
     ) throws StripeException {
@@ -42,7 +44,7 @@ public class PaymentController {
         }
 
         Flight flight = flightRepository.findById(request.getFlightId())
-                .orElseThrow(() -> new IllegalArgumentException("Flight not found"));
+                .orElseThrow(() -> new IllegalArgumentException(ErrorMessages.Reservation.FLIGHT_NOT_FOUND));
 
         BigDecimal price = flight.getPrice();
         if (price == null) {

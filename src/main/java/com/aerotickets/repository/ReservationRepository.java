@@ -12,7 +12,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     long countByFlight_IdAndStatus(Long flightId, ReservationStatus status);
 
-    boolean existsByFlight_IdAndSeatNumberAndStatus(Long flightId, Integer seatNumber, ReservationStatus status);
+    boolean existsByFlight_IdAndSeatNumberAndStatus(Long flightId, String seatNumber, ReservationStatus status);
 
     @EntityGraph(attributePaths = {"flight"})
     List<Reservation> findByUser_EmailOrderByCreatedAtDesc(String email);
@@ -23,7 +23,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByUser_EmailAndFlight_IdAndStatus(String email, Long flightId, ReservationStatus status);
 
     Optional<Reservation> findFirstByUser_EmailAndFlight_IdAndSeatNumberAndStatus(
-            String email, Long flightId, Integer seatNumber, ReservationStatus status
+            String email, Long flightId, String seatNumber, ReservationStatus status
     );
 
     List<Reservation> findByFlight_IdAndStatusOrderBySeatNumberAsc(

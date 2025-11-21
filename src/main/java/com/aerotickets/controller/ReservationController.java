@@ -59,4 +59,9 @@ public class ReservationController {
         service.cancel(email, id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/occupied-seats/{flightId}")
+    public ResponseEntity<List<String>> getOccupiedSeats(@PathVariable Long flightId) {
+        return ResponseEntity.ok(service.getOccupiedSeats(flightId));
+    }
 }

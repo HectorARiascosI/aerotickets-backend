@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public class ReservationResponseDTO {
 
     private Long id;
-    private Integer seatNumber;
+    private String seatNumber;
     private ReservationStatus status;
     private Instant createdAt;
 
@@ -23,8 +23,8 @@ public class ReservationResponseDTO {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public Integer getSeatNumber() { return seatNumber; }
-    public void setSeatNumber(Integer seatNumber) { this.seatNumber = seatNumber; }
+    public String getSeatNumber() { return seatNumber; }
+    public void setSeatNumber(String seatNumber) { this.seatNumber = seatNumber; }
     public ReservationStatus getStatus() { return status; }
     public void setStatus(ReservationStatus status) { this.status = status; }
     public Instant getCreatedAt() { return createdAt; }

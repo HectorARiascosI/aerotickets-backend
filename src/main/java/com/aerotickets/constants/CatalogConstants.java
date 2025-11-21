@@ -1,13 +1,18 @@
 package com.aerotickets.constants;
 
+/**
+ * @deprecated Use {@link ApiPaths.Catalog} instead.
+ * This class will be removed in a future version.
+ */
+@Deprecated(since = "1.0", forRemoval = true)
 public final class CatalogConstants {
 
     private CatalogConstants() {
     }
 
-    public static final String BASE_PATH = "/catalog";
-    public static final String AIRPORTS_CO_PATH = "/airports/co";
-    public static final String AIRLINES_CO_PATH = "/airlines/co";
+    public static final String BASE_PATH = ApiPaths.Catalog.BASE;
+    public static final String AIRPORTS_CO_PATH = ApiPaths.Catalog.AIRPORTS_CO;
+    public static final String AIRLINES_CO_PATH = ApiPaths.Catalog.AIRLINES_CO;
 
     public static final String COUNTRY_COLOMBIA = "Colombia";
 

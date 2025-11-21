@@ -14,7 +14,7 @@ public final class DataLoaderConstants {
     public static final int FLIGHT_1_ARRIVAL_MINUTE = 15;
     public static final int FLIGHT_1_TOTAL_SEATS = 150;
     public static final BigDecimal FLIGHT_1_PRICE = new BigDecimal("220000");
-    public static final String FLIGHT_1_AIRLINE = "Aerolíneas Demo";
+    public static final String FLIGHT_1_AIRLINE = "Demo Airlines";
     public static final String FLIGHT_1_ORIGIN = "BOG";
     public static final String FLIGHT_1_DESTINATION = "MDE";
 
