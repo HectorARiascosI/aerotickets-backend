@@ -89,8 +89,20 @@ public class SimulationRegistry {
         subscribers.add(emitter);
 
         emitter.onCompletion(() -> subscribers.remove(emitter));
-        emitter.onTimeout(() -> subscribers.remove(emitter));
-        emitter.onError(ex -> subscribers.remove(emitter));
+        emitter.onTimeout(() -> {
+            subscribers.remove(emitter);
+            try {
+                emitter.complete();
+            } catch (Exception ignored) {
+            }
+        });
+        emitter.onError(ex -> {
+            subscribers.remove(emitter);
+            try {
+                emitter.complete();
+            } catch (Exception ignored) {
+            }
+        });
 
         try {
             emitter.send(SseEmitter.event()
@@ -99,8 +111,12 @@ public class SimulationRegistry {
             emitter.send(SseEmitter.event()
                     .name(LiveFlightConstants.SSE_EVENT_PING_NAME)
                     .data(LiveFlightConstants.SSE_EVENT_PING_DATA));
-        } catch (IOException ignored) {
+        } catch (IOException | IllegalStateException e) {
             subscribers.remove(emitter);
+            try {
+                emitter.complete();
+            } catch (Exception ignored) {
+            }
         }
         return emitter;
     }
@@ -112,8 +128,14 @@ public class SimulationRegistry {
                 em.send(SseEmitter.event()
                         .name("snapshot")
                         .data(snapshot, MediaType.APPLICATION_JSON));
-            } catch (IOException e) {
+            } catch (IOException | IllegalStateException e) {
+                // Remove emitter if it's already completed or has an error
                 subscribers.remove(em);
+                try {
+                    em.complete();
+                } catch (Exception ignored) {
+                    // Emitter might already be completed
+                }
             }
         }
     }

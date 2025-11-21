@@ -39,22 +39,42 @@ public class LiveFlightController {
     public SseEmitter stream() {
         SseEmitter emitter = registry.subscribe();
         ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
-        exec.scheduleAtFixedRate(() -> {
+        
+        ScheduledFuture<?> pingTask = exec.scheduleAtFixedRate(() -> {
             try {
                 emitter.send(SseEmitter.event()
                         .name(LiveFlightConstants.SSE_EVENT_PING_NAME)
                         .data(LiveFlightConstants.SSE_EVENT_PING_DATA));
             } catch (Exception e) {
-                emitter.complete();
+                try {
+                    emitter.complete();
+                } catch (Exception ignored) {
+                }
                 exec.shutdownNow();
             }
         }, LiveFlightConstants.PING_INITIAL_DELAY_SECONDS, LiveFlightConstants.PING_PERIOD_SECONDS, TimeUnit.SECONDS);
 
-        emitter.onCompletion(exec::shutdownNow);
-        emitter.onTimeout(() -> {
-            emitter.complete();
+        emitter.onCompletion(() -> {
+            pingTask.cancel(true);
             exec.shutdownNow();
         });
+        emitter.onTimeout(() -> {
+            try {
+                emitter.complete();
+            } catch (Exception ignored) {
+            }
+            pingTask.cancel(true);
+            exec.shutdownNow();
+        });
+        emitter.onError(ex -> {
+            try {
+                emitter.complete();
+            } catch (Exception ignored) {
+            }
+            pingTask.cancel(true);
+            exec.shutdownNow();
+        });
+        
         return emitter;
     }
 
