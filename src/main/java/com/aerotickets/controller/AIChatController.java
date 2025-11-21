@@ -22,18 +22,27 @@ public class AIChatController {
             @RequestBody ChatMessageDTO request,
             Authentication auth
     ) {
-        String userEmail = (auth != null) ? auth.getName() : null;
-        
-        if (request.getMessage() == null || request.getMessage().trim().isEmpty()) {
-            return ResponseEntity.badRequest()
-                .body(new ChatResponseDTO("Por favor envía un mensaje válido"));
+        try {
+            String userEmail = (auth != null) ? auth.getName() : null;
+            
+            if (request == null || request.getMessage() == null || request.getMessage().trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(new ChatResponseDTO("Por favor envía un mensaje válido"));
+            }
+
+            ChatResponseDTO response = aiChatService.processMessage(
+                request.getMessage(),
+                userEmail
+            );
+
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            System.err.println("Error en AIChatController: " + e.getMessage());
+            e.printStackTrace();
+            
+            return ResponseEntity.status(500)
+                .body(new ChatResponseDTO("Lo siento, ocurrió un error. Por favor intenta de nuevo."));
         }
-
-        ChatResponseDTO response = aiChatService.processMessage(
-            request.getMessage(),
-            userEmail
-        );
-
-        return ResponseEntity.ok(response);
     }
 }

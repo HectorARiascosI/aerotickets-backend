@@ -71,42 +71,53 @@ public class AIChatService {
 
     private Map<String, Object> analyzeUserIntent(String message, String userEmail) {
         Map<String, Object> context = new HashMap<>();
-        String lowerMessage = message.toLowerCase();
+        
+        try {
+            String lowerMessage = message.toLowerCase();
 
-        // Detectar intención de búsqueda de vuelos
-        if (containsFlightSearchIntent(lowerMessage)) {
-            FlightSearchInfo searchInfo = extractFlightSearchInfo(message);
-            if (searchInfo.isValid()) {
-                try {
-                    FlightSearchDTO searchDTO = new FlightSearchDTO();
-                    searchDTO.setOrigin(searchInfo.origin);
-                    searchDTO.setDestination(searchInfo.destination);
-                    searchDTO.setDate(searchInfo.date);
-                    
-                    List<Flight> flights = flightService.searchOrSimulate(searchDTO);
-                    
-                    context.put("action", "search");
-                    context.put("data", flights);
-                    context.put("searchInfo", searchInfo);
-                } catch (Exception e) {
-                    context.put("error", "No se pudieron buscar vuelos");
+            // Detectar intención de búsqueda de vuelos
+            if (containsFlightSearchIntent(lowerMessage)) {
+                FlightSearchInfo searchInfo = extractFlightSearchInfo(message);
+                if (searchInfo.isValid()) {
+                    try {
+                        FlightSearchDTO searchDTO = new FlightSearchDTO();
+                        searchDTO.setOrigin(searchInfo.origin);
+                        searchDTO.setDestination(searchInfo.destination);
+                        searchDTO.setDate(searchInfo.date);
+                        
+                        List<Flight> flights = flightService.searchOrSimulate(searchDTO);
+                        
+                        context.put("action", "search");
+                        context.put("data", flights);
+                        context.put("searchInfo", searchInfo);
+                    } catch (Exception e) {
+                        System.err.println("Error buscando vuelos: " + e.getMessage());
+                        context.put("error", "No se pudieron buscar vuelos");
+                    }
                 }
             }
-        }
-        
-        // Detectar consulta sobre reservas
-        else if (containsReservationIntent(lowerMessage)) {
-            if (userEmail != null && !userEmail.isBlank()) {
-                List<Reservation> reservations = reservationRepository
-                    .findByUser_EmailOrderByCreatedAtDesc(userEmail);
-                context.put("action", "reservations");
-                context.put("data", reservations);
+            
+            // Detectar consulta sobre reservas
+            else if (containsReservationIntent(lowerMessage)) {
+                if (userEmail != null && !userEmail.isBlank()) {
+                    try {
+                        List<Reservation> reservations = reservationRepository
+                            .findByUser_EmailOrderByCreatedAtDesc(userEmail);
+                        context.put("action", "reservations");
+                        context.put("data", reservations);
+                    } catch (Exception e) {
+                        System.err.println("Error obteniendo reservas: " + e.getMessage());
+                    }
+                }
             }
-        }
-        
-        // Detectar solicitud de ayuda
-        else if (containsHelpIntent(lowerMessage)) {
-            context.put("action", "help");
+            
+            // Detectar solicitud de ayuda
+            else if (containsHelpIntent(lowerMessage)) {
+                context.put("action", "help");
+            }
+        } catch (Exception e) {
+            System.err.println("Error en analyzeUserIntent: " + e.getMessage());
+            e.printStackTrace();
         }
 
         return context;
