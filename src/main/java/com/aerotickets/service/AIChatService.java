@@ -46,20 +46,24 @@ public class AIChatService {
                 return new ChatResponseDTO("Por favor envía un mensaje válido.");
             }
             
-            // Analizar el mensaje del usuario
+            // Analizar el mensaje del usuario y ejecutar acciones
             Map<String, Object> context = analyzeUserIntent(userMessage, userEmail);
             
-            // Generar respuesta con OpenAI
+            // Ejecutar acciones automáticas basadas en la intención
+            ChatResponseDTO autoResponse = executeAutomaticActions(context, userEmail, userMessage);
+            if (autoResponse != null) {
+                return autoResponse;
+            }
+            
+            // Si no hay acción automática, generar respuesta inteligente
             String aiResponse = callOpenAI(userMessage, context);
             
-            // Determinar si hay una acción específica
             String action = (String) context.get("action");
             Object data = context.get("data");
             
             return new ChatResponseDTO(aiResponse, action, data);
             
         } catch (Exception e) {
-            // Log del error para debugging
             System.err.println("Error en AIChatService.processMessage: " + e.getMessage());
             e.printStackTrace();
             
@@ -67,6 +71,101 @@ public class AIChatService {
                 "Lo siento, tuve un problema procesando tu solicitud. ¿Podrías reformular tu pregunta?"
             );
         }
+    }
+    
+    private ChatResponseDTO executeAutomaticActions(Map<String, Object> context, String userEmail, String userMessage) {
+        String action = (String) context.get("action");
+        
+        // ACCIÓN: BÚSQUEDA AUTOMÁTICA DE VUELOS
+        if ("search".equals(action)) {
+            Object searchInfoObj = context.get("searchInfo");
+            Object data = context.get("data");
+            
+            if (searchInfoObj != null && data instanceof List) {
+                FlightSearchInfo info = (FlightSearchInfo) searchInfoObj;
+                List<?> flights = (List<?>) data;
+                
+                if (!flights.isEmpty()) {
+                    // Construir respuesta detallada con los vuelos
+                    StringBuilder response = new StringBuilder();
+                    response.append(String.format("🎯 Búsqueda completada: %s → %s (%s)\n\n",
+                        getCityName(info.origin), getCityName(info.destination), formatDate(info.date)));
+                    
+                    response.append(String.format("✅ Encontré %d vuelo(s) disponible(s):\n\n", flights.size()));
+                    
+                    int count = 0;
+                    for (Object flightObj : flights) {
+                        if (count >= 3) break; // Mostrar máximo 3 vuelos
+                        if (flightObj instanceof Flight) {
+                            Flight flight = (Flight) flightObj;
+                            count++;
+                            response.append(String.format("✈️ Vuelo %d:\n", count));
+                            response.append(String.format("   Aerolínea: %s\n", flight.getAirline()));
+                            response.append(String.format("   Salida: %s\n", formatDateTime(flight.getDepartureAt())));
+                            response.append(String.format("   Llegada: %s\n", formatDateTime(flight.getArriveAt())));
+                            response.append(String.format("   Precio: $%,.0f COP\n", flight.getPrice()));
+                            response.append(String.format("   Asientos: %d disponibles\n\n", flight.getTotalSeats()));
+                        }
+                    }
+                    
+                    if (flights.size() > 3) {
+                        response.append(String.format("... y %d vuelo(s) más.\n\n", flights.size() - 3));
+                    }
+                    
+                    response.append("💡 Haz clic en 'Reservar' en el vuelo que prefieras para continuar.");
+                    
+                    return new ChatResponseDTO(response.toString(), "search", flights);
+                }
+            }
+        }
+        
+        // ACCIÓN: MOSTRAR RESERVAS CON DETALLES
+        if ("reservations".equals(action)) {
+            Object data = context.get("data");
+            if (data instanceof List) {
+                List<?> reservations = (List<?>) data;
+                
+                if (reservations.isEmpty()) {
+                    return new ChatResponseDTO(
+                        "📋 No tienes reservas activas.\n\n" +
+                        "¿Quieres buscar un vuelo? Dime:\n" +
+                        "• 'Buscar vuelos de Bogotá a Cali'\n" +
+                        "• 'Quiero volar a Cartagena mañana'",
+                        "reservations", reservations
+                    );
+                }
+                
+                StringBuilder response = new StringBuilder();
+                response.append(String.format("📋 Tienes %d reserva(s):\n\n", reservations.size()));
+                
+                int count = 0;
+                for (Object resObj : reservations) {
+                    if (count >= 5) break;
+                    if (resObj instanceof Reservation) {
+                        Reservation res = (Reservation) resObj;
+                        count++;
+                        response.append(String.format("🎫 Reserva %d:\n", count));
+                        response.append(String.format("   Ruta: %s → %s\n", 
+                            res.getFlight().getOrigin(), res.getFlight().getDestination()));
+                        response.append(String.format("   Fecha: %s\n", formatDateTime(res.getFlight().getDepartureAt())));
+                        response.append(String.format("   Asiento: %s\n", res.getSeatNumber()));
+                        response.append(String.format("   Estado: %s\n", res.getStatus()));
+                        response.append(String.format("   Pagado: %s\n\n", res.getPaid() ? "Sí ✅" : "No ❌"));
+                    }
+                }
+                
+                response.append("Te redirijo a 'Mis Reservas' para más opciones...");
+                
+                return new ChatResponseDTO(response.toString(), "reservations", reservations);
+            }
+        }
+        
+        return null; // No hay acción automática
+    }
+    
+    private String formatDateTime(java.time.LocalDateTime dateTime) {
+        if (dateTime == null) return "N/A";
+        return dateTime.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
     }
 
     private Map<String, Object> analyzeUserIntent(String message, String userEmail) {
