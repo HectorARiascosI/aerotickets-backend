@@ -138,17 +138,20 @@ public class AIChatService {
         FlightSearchInfo info = new FlightSearchInfo();
         
         // Códigos IATA de aeropuertos colombianos
-        Map<String, String> cities = Map.of(
-            "bogotá", "BOG", "bogota", "BOG",
-            "medellín", "MDE", "medellin", "MDE",
-            "cali", "CLO",
-            "cartagena", "CTG",
-            "barranquilla", "BAQ",
-            "pereira", "PEI",
-            "bucaramanga", "BGA",
-            "santa marta", "SMR",
-            "cúcuta", "CUC", "cucuta", "CUC",
-            "pasto", "PSO"
+        Map<String, String> cities = Map.ofEntries(
+            Map.entry("bogotá", "BOG"),
+            Map.entry("bogota", "BOG"),
+            Map.entry("medellín", "MDE"),
+            Map.entry("medellin", "MDE"),
+            Map.entry("cali", "CLO"),
+            Map.entry("cartagena", "CTG"),
+            Map.entry("barranquilla", "BAQ"),
+            Map.entry("pereira", "PEI"),
+            Map.entry("bucaramanga", "BGA"),
+            Map.entry("santa marta", "SMR"),
+            Map.entry("cúcuta", "CUC"),
+            Map.entry("cucuta", "CUC"),
+            Map.entry("pasto", "PSO")
         );
         
         String lowerMessage = message.toLowerCase();
