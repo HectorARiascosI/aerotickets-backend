@@ -2,31 +2,31 @@ package com.aerotickets.constants;
 
 import java.math.BigDecimal;
 
+/**
+ * @deprecated Use {@link ApiPaths.Flights}, {@link ErrorMessages.Flight}, and {@link BusinessRules.Flight} instead.
+ * This class will be removed in a future version.
+ */
+@Deprecated(since = "1.0", forRemoval = true)
 public final class FlightConstants {
 
     private FlightConstants() {
     }
 
-    public static final String BASE_PATH = "/flights";
-    public static final String SEARCH_PATH = "/search";
+    public static final String BASE_PATH = ApiPaths.Flights.BASE;
+    public static final String SEARCH_PATH = ApiPaths.Flights.SEARCH;
 
-    public static final String MSG_MISSING_REQUIRED_FIELDS =
-            "Campos obligatorios faltantes: airline, origin, destination, departureAt";
+    public static final String MSG_MISSING_REQUIRED_FIELDS = ErrorMessages.Flight.MISSING_REQUIRED_FIELDS;
 
-    public static final int DEFAULT_TOTAL_SEATS = 180;
-    public static final int DEFAULT_DURATION_HOURS = 2;
-    public static final BigDecimal DEFAULT_PRICE = BigDecimal.ZERO;
+    public static final int DEFAULT_TOTAL_SEATS = BusinessRules.Flight.DEFAULT_TOTAL_SEATS;
+    public static final int DEFAULT_DURATION_HOURS = BusinessRules.Flight.DEFAULT_DURATION_HOURS;
+    public static final BigDecimal DEFAULT_PRICE = BusinessRules.Flight.DEFAULT_PRICE;
 
-    public static final String OFFSET_DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss[.SSS]XXX";
+    public static final String OFFSET_DATETIME_PATTERN = BusinessRules.Flight.OFFSET_DATETIME_PATTERN;
 
-    public static final String ERR_DEPARTURE_IN_PAST =
-            "Departure time must be in the future";
-    public static final String ERR_ARRIVAL_BEFORE_DEPARTURE =
-            "Arrival time must be after departure time";
-    public static final String ERR_ORIGIN_DEST_REQUIRED =
-            "Origin and destination are required";
-    public static final String ERR_DATE_IN_PAST =
-            "Flight date cannot be in the past";
+    public static final String ERR_DEPARTURE_IN_PAST = ErrorMessages.Flight.DEPARTURE_IN_PAST;
+    public static final String ERR_ARRIVAL_BEFORE_DEPARTURE = ErrorMessages.Flight.ARRIVAL_BEFORE_DEPARTURE;
+    public static final String ERR_ORIGIN_DEST_REQUIRED = ErrorMessages.Flight.ORIGIN_DEST_REQUIRED;
+    public static final String ERR_DATE_IN_PAST = ErrorMessages.Flight.DATE_IN_PAST;
 
-    public static final String DEFAULT_AIRLINE_NAME = "Aerotickets";
+    public static final String DEFAULT_AIRLINE_NAME = BusinessRules.Flight.DEFAULT_AIRLINE_NAME;
 }

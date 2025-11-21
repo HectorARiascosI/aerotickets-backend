@@ -1,10 +1,8 @@
--- =========================================================
--- Aerotickets - V1 inicial de esquema (PostgreSQL)
--- Tablas: users, flights, reservations
--- Índices y constraints claves para búsquedas y consistencia
--- =========================================================
+-- Aerotickets - V1 initial schema (PostgreSQL)
+-- Tables: users, flights, reservations
+-- Indexes and key constraints for searches and consistency
 
--- 🧑‍💼 Usuarios
+-- Users table
 CREATE TABLE IF NOT EXISTS users (
   id           BIGSERIAL PRIMARY KEY,
   name         VARCHAR(120)        NOT NULL,
@@ -18,7 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE UNIQUE INDEX IF NOT EXISTS uq_users_email ON users (email);
 
--- ✈️ Vuelos (alineado con com.aerotickets.entity.Flight)
+-- Flights table (aligned with com.aerotickets.entity.Flight)
 CREATE TABLE IF NOT EXISTS flights (
   id            BIGSERIAL PRIMARY KEY,
   airline       VARCHAR(120)       NOT NULL,
@@ -38,7 +36,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_flights_unique_dep
 CREATE INDEX IF NOT EXISTS idx_flights_route_departure
   ON flights (origin, destination, departure_at);
 
--- 🎟️ Reservas
+-- Reservations table
 CREATE TABLE IF NOT EXISTS reservations (
   id           BIGSERIAL PRIMARY KEY,
   user_id      BIGINT              NOT NULL REFERENCES users(id)   ON DELETE CASCADE,

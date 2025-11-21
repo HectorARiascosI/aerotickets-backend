@@ -1,4 +1,4 @@
--- V3: Tabla y data de aeropuertos Colombia
+-- V3: Colombian airports table and data
 CREATE TABLE IF NOT EXISTS airports_co (
   iata            VARCHAR(3) PRIMARY KEY,
   icao            VARCHAR(4),
@@ -10,17 +10,17 @@ CREATE TABLE IF NOT EXISTS airports_co (
   elevation_ft    INTEGER,
   runway_len_m    INTEGER,
   terrain         VARCHAR(60),
-  allowed_families TEXT NOT NULL -- lista separada por coma (p.ej. 'A320-200,A320neo,B737-800')
+  allowed_families TEXT NOT NULL
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS uq_airports_co_icao ON airports_co(icao);
 CREATE INDEX IF NOT EXISTS idx_airports_co_city ON airports_co(city);
 
--- Upsert helper (por si re-corres)
+-- Upsert helper function
 CREATE OR REPLACE FUNCTION upsert_airport_co(
     _iata VARCHAR, _icao VARCHAR, _city VARCHAR, _name VARCHAR, _state VARCHAR,
     _lat NUMERIC, _lon NUMERIC, _elev INTEGER, _rwy INTEGER, _terrain VARCHAR, _families TEXT
-) RETURNS VOID AS $$
+) RETURNS VOID AS $
 BEGIN
   INSERT INTO airports_co(iata, icao, city, name, state, latitude, longitude, elevation_ft, runway_len_m, terrain, allowed_families)
   VALUES(_iata,_icao,_city,_name,_state,_lat,_lon,_elev,_rwy,_terrain,_families)
@@ -36,9 +36,9 @@ BEGIN
     terrain = EXCLUDED.terrain,
     allowed_families = EXCLUDED.allowed_families;
 END;
-$$ LANGUAGE plpgsql;
+$ LANGUAGE plpgsql;
 
--- Principales y regionales (coinciden con AirportCatalogCO)
+-- Main and regional airports data
 SELECT upsert_airport_co('BOG','SKBO','Bogotá','El Dorado','Cundinamarca',4.701600,-74.146900,8361,3800,'Llano/Altiplano','A320-200,A320neo,A319,A321,B737-800,B787,A330');
 SELECT upsert_airport_co('MDE','SKRG','Rionegro (Medellín)','José María Córdova','Antioquia',6.164500,-75.423100,6954,3500,'Montañoso','A320-200,A320neo,A319,A321,B737-800');
 SELECT upsert_airport_co('EOH','SKMD','Medellín','Olaya Herrera','Antioquia',6.219000,-75.589000,4949,2500,'Urbano','ATR 72-600,ATR 42-600,ERJ-145');
