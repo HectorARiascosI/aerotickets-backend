@@ -323,8 +323,7 @@ public class AIChatService {
         // Detectar temas no relacionados
         String[] bannedTopics = {"fútbol", "futbol", "partido", "gol", "política", "politica", 
                                  "elecciones", "presidente", "película", "pelicula", "serie", 
-                                 "música", "musica", "canción", "clima", "tiempo", "temperatura",
-                                 "receta", "comida", "cocinar", "juego", "videojuego"};
+                                 "música", "musica", "canción", "receta", "comida", "cocinar", "juego", "videojuego"};
         
         for (String topic : bannedTopics) {
             if (lowerMessage.contains(topic)) {
@@ -332,62 +331,188 @@ public class AIChatService {
             }
         }
         
+        // BÚSQUEDA DE VUELOS
         if ("search".equals(action)) {
             Object data = context.get("data");
+            Object searchInfoObj = context.get("searchInfo");
+            
             if (data instanceof List) {
                 List<?> flights = (List<?>) data;
+                
                 if (flights.isEmpty()) {
-                    return "No encontré vuelos disponibles para tu búsqueda. 😔\n\n" +
-                           "Intenta con:\n" +
-                           "• Otras fechas cercanas\n" +
-                           "• Ciudades alternativas\n" +
-                           "• Verificar que las ciudades estén disponibles\n\n" +
-                           "¿Quieres intentar otra búsqueda?";
+                    if (searchInfoObj != null) {
+                        FlightSearchInfo info = (FlightSearchInfo) searchInfoObj;
+                        return String.format("No encontré vuelos disponibles de %s a %s para %s. 😔\n\n" +
+                               "Te sugiero:\n" +
+                               "• Intentar con fechas cercanas\n" +
+                               "• Verificar otras rutas disponibles\n" +
+                               "• Consultar vuelos para la próxima semana\n\n" +
+                               "¿Quieres que busque en otras fechas?",
+                               getCityName(info.origin), getCityName(info.destination), 
+                               formatDate(info.date));
+                    }
+                    return "No encontré vuelos para tu búsqueda. Intenta con otras ciudades o fechas. 😔";
                 }
-                return String.format("¡Excelente! Encontré %d vuelo(s) disponible(s) para ti. 🎫\n\n" +
-                                   "Puedes verlos en la lista de abajo. Haz clic en 'Reservar' en el vuelo que prefieras para continuar con tu reserva.", 
-                                   flights.size());
+                
+                if (searchInfoObj != null) {
+                    FlightSearchInfo info = (FlightSearchInfo) searchInfoObj;
+                    return String.format("¡Perfecto! Encontré %d vuelo(s) de %s a %s para %s. 🎫\n\n" +
+                           "Los vuelos están listos abajo. Haz clic en 'Reservar' en tu favorito para continuar.\n\n" +
+                           "💡 Tip: Los precios varían según la aerolínea y horario.",
+                           flights.size(), getCityName(info.origin), getCityName(info.destination), 
+                           formatDate(info.date));
+                }
+                
+                return String.format("¡Excelente! Encontré %d vuelo(s) disponible(s). 🎫\n\n" +
+                       "Revisa las opciones abajo y selecciona el que más te convenga.", flights.size());
             }
-        } else if ("reservations".equals(action)) {
+        }
+        
+        // GESTIÓN DE RESERVAS
+        else if ("reservations".equals(action)) {
             Object data = context.get("data");
             if (data instanceof List) {
                 List<?> reservations = (List<?>) data;
                 if (reservations.isEmpty()) {
                     return "No tienes reservas activas en este momento. 📋\n\n" +
-                           "¿Te gustaría buscar un vuelo? Dime origen, destino y fecha. ✈️";
+                           "¿Quieres buscar un vuelo? Dime:\n" +
+                           "• 'Buscar vuelos de Bogotá a Cali'\n" +
+                           "• 'Quiero volar a Cartagena mañana'\n" +
+                           "• 'Vuelos para el fin de semana'";
                 }
-                return String.format("Tienes %d reserva(s) en total. Te estoy redirigiendo a 'Mis Reservas' donde puedes:\n\n" +
-                                   "• Ver detalles de cada vuelo\n" +
-                                   "• Pagar reservas pendientes\n" +
-                                   "• Cancelar si es necesario", 
-                                   reservations.size());
+                return String.format("Tienes %d reserva(s). Te redirijo a 'Mis Reservas' donde puedes:\n\n" +
+                       "✅ Ver detalles completos\n" +
+                       "💳 Pagar reservas pendientes\n" +
+                       "❌ Cancelar si cambias de planes\n" +
+                       "📧 Recibir confirmación por email", reservations.size());
             }
-        } else if ("help".equals(action)) {
-            return "¡Hola! Soy AeroBot, tu asistente personal de vuelos. 👋\n\n" +
-                   "Puedo ayudarte con:\n\n" +
-                   "✈️ Buscar vuelos entre ciudades colombianas\n" +
-                   "🎫 Ver y gestionar tus reservas\n" +
-                   "💺 Información sobre asientos y precios\n" +
-                   "📍 Detalles de aeropuertos y rutas\n\n" +
-                   "Ejemplo: 'Quiero volar de Bogotá a Cartagena mañana'\n\n" +
-                   "¿Qué necesitas hoy?";
         }
         
-        // Respuesta por defecto mejorada
-        if (lowerMessage.contains("hola") || lowerMessage.contains("buenos") || lowerMessage.contains("buenas")) {
-            return "¡Hola! Bienvenido a AeroTickets. 👋✈️\n\n" +
-                   "Estoy aquí para ayudarte a encontrar el vuelo perfecto.\n\n" +
+        // AYUDA GENERAL
+        else if ("help".equals(action)) {
+            return "¡Hola! Soy AeroBot, tu asistente inteligente de vuelos. 🤖✈️\n\n" +
+                   "Puedo ayudarte con:\n\n" +
+                   "🔍 Buscar vuelos: 'Quiero volar de Bogotá a Medellín mañana'\n" +
+                   "🎫 Ver reservas: 'Muéstrame mis vuelos'\n" +
+                   "❌ Cancelar: 'Cancelar mi reserva'\n" +
+                   "💰 Precios: '¿Cuánto cuesta volar a Cartagena?'\n" +
+                   "📍 Aeropuertos: '¿Qué ciudades están disponibles?'\n" +
+                   "💺 Asientos: 'Información sobre asientos'\n\n" +
+                   "¿Qué necesitas?";
+        }
+        
+        // PREGUNTAS SOBRE PRECIOS
+        if (lowerMessage.contains("cuánto") || lowerMessage.contains("cuanto") || 
+            lowerMessage.contains("precio") || lowerMessage.contains("cuesta") || lowerMessage.contains("costo")) {
+            return "Los precios de los vuelos varían según:\n\n" +
+                   "📅 Fecha del viaje\n" +
+                   "✈️ Aerolínea seleccionada\n" +
+                   "⏰ Horario del vuelo\n" +
+                   "🎫 Disponibilidad de asientos\n\n" +
+                   "Para ver precios exactos, busca tu vuelo con origen, destino y fecha.\n\n" +
+                   "Ejemplo: 'Buscar vuelos de Bogotá a Cali para mañana'";
+        }
+        
+        // PREGUNTAS SOBRE CIUDADES/AEROPUERTOS
+        if (lowerMessage.contains("ciudades") || lowerMessage.contains("aeropuertos") || 
+            lowerMessage.contains("destinos") || lowerMessage.contains("dónde") || lowerMessage.contains("donde")) {
+            return "Operamos en 10 ciudades principales de Colombia: 🇨🇴\n\n" +
+                   "🏙️ Bogotá (BOG)\n" +
+                   "🌆 Medellín (MDE)\n" +
+                   "🌴 Cali (CLO)\n" +
+                   "🏖️ Cartagena (CTG)\n" +
+                   "🌊 Barranquilla (BAQ)\n" +
+                   "☕ Pereira (PEI)\n" +
+                   "🏔️ Bucaramanga (BGA)\n" +
+                   "🌅 Santa Marta (SMR)\n" +
+                   "🌄 Cúcuta (CUC)\n" +
+                   "⛰️ Pasto (PSO)\n\n" +
                    "¿A dónde quieres viajar?";
         }
         
-        if (lowerMessage.contains("gracias")) {
-            return "¡De nada! Estoy aquí para ayudarte. 😊\n\n" +
-                   "¿Necesitas algo más?";
+        // PREGUNTAS SOBRE ASIENTOS
+        if (lowerMessage.contains("asiento") || lowerMessage.contains("asientos") || lowerMessage.contains("sentar")) {
+            return "Sobre los asientos en AeroTickets: 💺\n\n" +
+                   "✅ Puedes elegir tu asiento al reservar (ej: 1A, 12F)\n" +
+                   "🎲 O dejar que se asigne automáticamente\n" +
+                   "📋 Formato: Número + Letra (1-30, A-F)\n" +
+                   "🚫 No puedes reservar asientos ya ocupados\n\n" +
+                   "Al reservar, verás un mapa de asientos disponibles.";
         }
         
-        return "Soy AeroBot, tu asistente de vuelos en AeroTickets. ✈️\n\n" +
-               "Puedo ayudarte a buscar vuelos, gestionar reservas y responder preguntas sobre la plataforma.\n\n" +
-               "¿Qué necesitas?";
+        // PREGUNTAS SOBRE CANCELACIÓN
+        if (lowerMessage.contains("cancelar") || lowerMessage.contains("cancelación") || lowerMessage.contains("devol")) {
+            return "Sobre cancelaciones: ❌\n\n" +
+                   "✅ Puedes cancelar reservas activas antes del vuelo\n" +
+                   "📱 Ve a 'Mis Reservas' y haz clic en 'Cancelar'\n" +
+                   "⚠️ La cancelación es irreversible\n" +
+                   "💰 Consulta políticas de reembolso con tu aerolínea\n\n" +
+                   "¿Necesitas cancelar una reserva ahora?";
+        }
+        
+        // PREGUNTAS SOBRE PAGO
+        if (lowerMessage.contains("pagar") || lowerMessage.contains("pago") || lowerMessage.contains("tarjeta") || lowerMessage.contains("stripe")) {
+            return "Sobre pagos en AeroTickets: 💳\n\n" +
+                   "🔒 Pagos 100% seguros con Stripe\n" +
+                   "💳 Aceptamos tarjetas de crédito/débito\n" +
+                   "✅ Puedes reservar primero y pagar después\n" +
+                   "📧 Recibirás confirmación por email\n" +
+                   "🔐 Tus datos están protegidos\n\n" +
+                   "Para pagar, ve a 'Mis Reservas' y haz clic en 'Pagar'.";
+        }
+        
+        // SALUDOS
+        if (lowerMessage.contains("hola") || lowerMessage.contains("buenos") || lowerMessage.contains("buenas") || 
+            lowerMessage.contains("hey") || lowerMessage.contains("saludos")) {
+            return "¡Hola! Bienvenido a AeroTickets. 👋✈️\n\n" +
+                   "Soy AeroBot, tu asistente inteligente de vuelos.\n\n" +
+                   "Puedo ayudarte a:\n" +
+                   "• Buscar y reservar vuelos\n" +
+                   "• Gestionar tus reservas\n" +
+                   "• Responder preguntas sobre viajes\n\n" +
+                   "¿A dónde quieres viajar hoy?";
+        }
+        
+        // DESPEDIDAS
+        if (lowerMessage.contains("gracias") || lowerMessage.contains("perfecto") || lowerMessage.contains("excelente")) {
+            return "¡De nada! Fue un placer ayudarte. 😊✈️\n\n" +
+                   "Si necesitas algo más, aquí estaré.\n\n" +
+                   "¡Buen viaje! 🌍";
+        }
+        
+        if (lowerMessage.contains("adiós") || lowerMessage.contains("adios") || lowerMessage.contains("chao") || lowerMessage.contains("hasta")) {
+            return "¡Hasta pronto! Que tengas un excelente viaje. ✈️😊\n\n" +
+                   "Vuelve cuando necesites ayuda con tus vuelos.";
+        }
+        
+        // RESPUESTA POR DEFECTO INTELIGENTE
+        return "Soy AeroBot, tu asistente inteligente de vuelos. 🤖✈️\n\n" +
+               "Puedo ayudarte con:\n" +
+               "• Buscar vuelos: 'Quiero volar a Cartagena'\n" +
+               "• Ver reservas: 'Mis vuelos'\n" +
+               "• Info de precios, ciudades, asientos y más\n\n" +
+               "¿Qué necesitas saber?";
+    }
+    
+    private String getCityName(String code) {
+        Map<String, String> cities = Map.of(
+            "BOG", "Bogotá", "MDE", "Medellín", "CLO", "Cali",
+            "CTG", "Cartagena", "BAQ", "Barranquilla", "PEI", "Pereira",
+            "BGA", "Bucaramanga", "SMR", "Santa Marta", "CUC", "Cúcuta", "PSO", "Pasto"
+        );
+        return cities.getOrDefault(code, code);
+    }
+    
+    private String formatDate(LocalDate date) {
+        if (date == null) return "hoy";
+        LocalDate today = LocalDate.now();
+        if (date.equals(today)) return "hoy";
+        if (date.equals(today.plusDays(1))) return "mañana";
+        if (date.equals(today.plusDays(2))) return "pasado mañana";
+        
+        String[] months = {"enero", "febrero", "marzo", "abril", "mayo", "junio",
+                          "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"};
+        return date.getDayOfMonth() + " de " + months[date.getMonthValue() - 1];
     }
 
     private static class FlightSearchInfo {
