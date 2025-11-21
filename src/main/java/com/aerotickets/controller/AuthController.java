@@ -32,7 +32,7 @@ public class AuthController {
         if (userRepository.findByEmail(req.getEmail()).isPresent()) {
             return ResponseEntity
                     .badRequest()
-                    .body(AuthConstants.MSG_EMAIL_ALREADY_REGISTERED);
+                    .body(java.util.Map.of("message", AuthConstants.MSG_EMAIL_ALREADY_REGISTERED));
         }
 
         User user = new User();
@@ -41,7 +41,7 @@ public class AuthController {
         user.setPasswordHash(passwordEncoder.encode(req.getPassword()));
         userRepository.save(user);
 
-        return ResponseEntity.ok(AuthConstants.MSG_USER_REGISTERED_SUCCESS);
+        return ResponseEntity.ok(java.util.Map.of("message", AuthConstants.MSG_USER_REGISTERED_SUCCESS));
     }
 
     @PostMapping(AuthConstants.LOGIN_PATH)
