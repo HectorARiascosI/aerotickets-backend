@@ -64,4 +64,14 @@ public class ReservationController {
     public ResponseEntity<List<String>> getOccupiedSeats(@PathVariable Long flightId) {
         return ResponseEntity.ok(service.getOccupiedSeats(flightId));
     }
+
+    @DeleteMapping("/clear-history")
+    public ResponseEntity<Integer> clearHistory(Authentication auth) {
+        String email = (auth != null) ? auth.getName() : null;
+        if (email == null || email.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        int deletedCount = service.deleteOldReservations(email);
+        return ResponseEntity.ok(deletedCount);
+    }
 }

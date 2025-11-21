@@ -256,6 +256,35 @@ public class ReservationService {
         reservationRepository.saveAll(reservations);
     }
 
+    @Transactional
+    public int deleteOldReservations(String userEmail) {
+        if (userEmail == null || userEmail.isBlank()) {
+            throw new IllegalArgumentException(ReservationServiceConstants.ERR_USER_EMAIL_REQUIRED);
+        }
+        
+        List<Reservation> allReservations = reservationRepository
+                .findByUser_EmailOrderByCreatedAtDesc(userEmail);
+        
+        List<Reservation> toDelete = new ArrayList<>();
+        
+        for (Reservation r : allReservations) {
+            // Eliminar si está cancelada O si el vuelo ya pasó
+            if (r.getStatus() == ReservationStatus.CANCELLED) {
+                toDelete.add(r);
+            } else if (r.getFlight() != null && r.getFlight().getDepartureAt() != null) {
+                if (r.getFlight().getDepartureAt().isBefore(java.time.LocalDateTime.now())) {
+                    toDelete.add(r);
+                }
+            }
+        }
+        
+        if (!toDelete.isEmpty()) {
+            reservationRepository.deleteAll(toDelete);
+        }
+        
+        return toDelete.size();
+    }
+
     private ReservationResponseDTO toDto(Reservation r) {
         ReservationResponseDTO dto = new ReservationResponseDTO();
         dto.setId(r.getId());

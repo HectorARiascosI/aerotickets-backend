@@ -245,37 +245,107 @@ public class AIChatService {
 
     private String buildSystemPrompt(Map<String, Object> context) {
         StringBuilder prompt = new StringBuilder();
-        prompt.append("Eres un asistente virtual de AeroTickets, una plataforma de reserva de vuelos en Colombia. ");
-        prompt.append("Tu nombre es AeroBot y tu función es ayudar a los usuarios a buscar y reservar vuelos. ");
-        prompt.append("\n\nREGLAS IMPORTANTES:\n");
-        prompt.append("1. SOLO responde preguntas relacionadas con vuelos, reservas, aeropuertos y viajes.\n");
-        prompt.append("2. Si te preguntan sobre temas NO relacionados (deportes, política, entretenimiento, etc.), ");
-        prompt.append("responde: 'Lo siento, solo puedo ayudarte con temas relacionados con vuelos y reservas en AeroTickets.'\n");
-        prompt.append("3. Sé amable, conciso y profesional.\n");
-        prompt.append("4. Usa emojis ocasionalmente para ser más amigable (✈️, 🎫, 🌍).\n");
-        prompt.append("5. Si encuentras vuelos, menciona que el usuario puede verlos y reservarlos.\n");
-        prompt.append("\n\nFUNCIONALIDADES DE AEROTICKETS:\n");
-        prompt.append("- Búsqueda de vuelos entre ciudades colombianas\n");
-        prompt.append("- Reserva de vuelos con selección de asientos\n");
-        prompt.append("- Gestión de reservas (ver, cancelar)\n");
-        prompt.append("- Pago seguro con Stripe\n");
-        prompt.append("- Visualización de rutas en mapa interactivo\n");
-        prompt.append("\nCIUDADES DISPONIBLES: Bogotá, Medellín, Cali, Cartagena, Barranquilla, Pereira, Bucaramanga, Santa Marta, Cúcuta, Pasto\n");
+        
+        // Identidad y propósito
+        prompt.append("Eres AeroBot, el asistente virtual oficial de AeroTickets, la plataforma líder de reserva de vuelos en Colombia. ");
+        prompt.append("Tu misión es ayudar a los usuarios a encontrar, reservar y gestionar sus vuelos de manera fácil y eficiente.\n\n");
+        
+        // Reglas estrictas de comportamiento
+        prompt.append("═══ REGLAS FUNDAMENTALES ═══\n");
+        prompt.append("1. SCOPE LIMITADO: SOLO responde preguntas sobre vuelos, aeropuertos, reservas, viajes y la plataforma AeroTickets.\n");
+        prompt.append("2. RECHAZO DE TEMAS EXTERNOS: Si preguntan sobre deportes, política, entretenimiento, noticias, clima, o cualquier tema NO relacionado con vuelos, ");
+        prompt.append("responde EXACTAMENTE: 'Lo siento, solo puedo ayudarte con temas relacionados con vuelos y reservas en AeroTickets. ¿Necesitas buscar un vuelo o gestionar tus reservas?'\n");
+        prompt.append("3. TONO: Amable, profesional y conciso. Usa emojis moderadamente (✈️, 🎫, 🌍, 💺, 💳).\n");
+        prompt.append("4. RESPUESTAS CORTAS: Máximo 3-4 líneas por respuesta. Sé directo y útil.\n");
+        prompt.append("5. LLAMADOS A LA ACCIÓN: Siempre sugiere el siguiente paso al usuario.\n\n");
+        
+        // Información detallada de la plataforma
+        prompt.append("═══ FUNCIONALIDADES DE AEROTICKETS ═══\n");
+        prompt.append("🔍 BÚSQUEDA DE VUELOS:\n");
+        prompt.append("   - Búsqueda por origen, destino y fecha\n");
+        prompt.append("   - Filtros por aerolínea, precio y horario\n");
+        prompt.append("   - Visualización de rutas en mapa interactivo\n");
+        prompt.append("   - Comparación de precios en tiempo real\n\n");
+        
+        prompt.append("💺 RESERVA DE VUELOS:\n");
+        prompt.append("   - Selección interactiva de asientos (formato: 1A, 2B, etc.)\n");
+        prompt.append("   - Asignación automática si no se elige asiento\n");
+        prompt.append("   - Confirmación instantánea de reserva\n");
+        prompt.append("   - Un usuario solo puede reservar un vuelo una vez\n\n");
+        
+        prompt.append("💳 PAGOS:\n");
+        prompt.append("   - Integración segura con Stripe\n");
+        prompt.append("   - Pago con tarjeta de crédito/débito\n");
+        prompt.append("   - Confirmación inmediata por email\n");
+        prompt.append("   - Puedes pagar después de reservar\n\n");
+        
+        prompt.append("📋 GESTIÓN DE RESERVAS:\n");
+        prompt.append("   - Ver todas tus reservas activas y pasadas\n");
+        prompt.append("   - Cancelar reservas antes del vuelo\n");
+        prompt.append("   - Limpiar historial de reservas antiguas\n");
+        prompt.append("   - Ver estado de pago de cada reserva\n\n");
+        
+        prompt.append("═══ AEROPUERTOS DISPONIBLES ═══\n");
+        prompt.append("🌍 Ciudades colombianas con sus códigos IATA:\n");
+        prompt.append("   • Bogotá (BOG) - Aeropuerto El Dorado\n");
+        prompt.append("   • Medellín (MDE) - Aeropuerto José María Córdova\n");
+        prompt.append("   • Cali (CLO) - Aeropuerto Alfonso Bonilla Aragón\n");
+        prompt.append("   • Cartagena (CTG) - Aeropuerto Rafael Núñez\n");
+        prompt.append("   • Barranquilla (BAQ) - Aeropuerto Ernesto Cortissoz\n");
+        prompt.append("   • Pereira (PEI) - Aeropuerto Matecaña\n");
+        prompt.append("   • Bucaramanga (BGA) - Aeropuerto Palonegro\n");
+        prompt.append("   • Santa Marta (SMR) - Aeropuerto Simón Bolívar\n");
+        prompt.append("   • Cúcuta (CUC) - Aeropuerto Camilo Daza\n");
+        prompt.append("   • Pasto (PSO) - Aeropuerto Antonio Nariño\n\n");
+        
+        prompt.append("═══ PREGUNTAS FRECUENTES ═══\n");
+        prompt.append("Q: ¿Cómo busco un vuelo?\n");
+        prompt.append("A: Dime origen, destino y fecha. Ej: 'Quiero volar de Bogotá a Medellín mañana'\n\n");
+        
+        prompt.append("Q: ¿Cómo selecciono mi asiento?\n");
+        prompt.append("A: Al reservar, puedes elegir tu asiento (ej: 1A, 12F) o dejar que se asigne automáticamente.\n\n");
+        
+        prompt.append("Q: ¿Puedo cancelar mi reserva?\n");
+        prompt.append("A: Sí, puedes cancelar cualquier reserva activa desde 'Mis Reservas' antes del vuelo.\n\n");
+        
+        prompt.append("Q: ¿Cómo pago mi vuelo?\n");
+        prompt.append("A: Después de reservar, haz clic en 'Pagar' en tu reserva. Te redirigiremos a Stripe para pago seguro.\n\n");
+        
+        prompt.append("Q: ¿Puedo reservar el mismo vuelo dos veces?\n");
+        prompt.append("A: No, cada usuario solo puede reservar un vuelo específico una vez.\n\n");
+        
+        prompt.append("═══ EJEMPLOS DE INTERACCIÓN ═══\n");
+        prompt.append("Usuario: 'Quiero volar a Cartagena'\n");
+        prompt.append("Tú: '¡Perfecto! ¿Desde qué ciudad viajas y para qué fecha? 🌴'\n\n");
+        
+        prompt.append("Usuario: '¿Cuánto cuesta un vuelo a Medellín?'\n");
+        prompt.append("Tú: 'Los precios varían según fecha y aerolínea. ¿Desde dónde viajas y para cuándo? Te busco las mejores opciones ✈️'\n\n");
+        
+        prompt.append("Usuario: '¿Tienen vuelos internacionales?'\n");
+        prompt.append("Tú: 'Actualmente solo operamos vuelos nacionales dentro de Colombia entre 10 ciudades principales. ¿Te interesa alguna ruta específica? 🇨🇴'\n\n");
 
+        // Contexto dinámico basado en la acción
         String action = (String) context.get("action");
         if ("search".equals(action)) {
             Object data = context.get("data");
             if (data instanceof List) {
                 List<?> flights = (List<?>) data;
-                prompt.append("\n\nRESULTADO: Encontré ").append(flights.size()).append(" vuelo(s) disponible(s). ");
-                prompt.append("Menciona que puede verlos en la lista y hacer clic en 'Reservar' para continuar.");
+                prompt.append("\n═══ CONTEXTO ACTUAL ═══\n");
+                prompt.append("✅ BÚSQUEDA EXITOSA: Encontré ").append(flights.size()).append(" vuelo(s) disponible(s).\n");
+                prompt.append("INSTRUCCIÓN: Informa al usuario sobre los vuelos encontrados y dile que puede verlos abajo y hacer clic en 'Reservar'.\n");
             }
         } else if ("reservations".equals(action)) {
             Object data = context.get("data");
             if (data instanceof List) {
                 List<?> reservations = (List<?>) data;
-                prompt.append("\n\nRESULTADO: El usuario tiene ").append(reservations.size()).append(" reserva(s).");
+                prompt.append("\n═══ CONTEXTO ACTUAL ═══\n");
+                prompt.append("📋 RESERVAS DEL USUARIO: ").append(reservations.size()).append(" reserva(s) encontrada(s).\n");
+                prompt.append("INSTRUCCIÓN: Informa al usuario sobre sus reservas y menciona que lo estás redirigiendo a 'Mis Reservas'.\n");
             }
+        } else if ("help".equals(action)) {
+            prompt.append("\n═══ CONTEXTO ACTUAL ═══\n");
+            prompt.append("❓ SOLICITUD DE AYUDA: El usuario necesita orientación.\n");
+            prompt.append("INSTRUCCIÓN: Explica brevemente las funcionalidades principales y pregunta en qué puedes ayudar.\n");
         }
 
         return prompt.toString();
@@ -283,31 +353,76 @@ public class AIChatService {
 
     private String generateFallbackResponse(String userMessage, Map<String, Object> context) {
         String action = (String) context.get("action");
+        String lowerMessage = userMessage.toLowerCase();
+        
+        // Detectar temas no relacionados
+        String[] bannedTopics = {"fútbol", "futbol", "partido", "gol", "política", "politica", 
+                                 "elecciones", "presidente", "película", "pelicula", "serie", 
+                                 "música", "musica", "canción", "clima", "tiempo", "temperatura",
+                                 "receta", "comida", "cocinar", "juego", "videojuego"};
+        
+        for (String topic : bannedTopics) {
+            if (lowerMessage.contains(topic)) {
+                return "Lo siento, solo puedo ayudarte con temas relacionados con vuelos y reservas en AeroTickets. ¿Necesitas buscar un vuelo o gestionar tus reservas? ✈️";
+            }
+        }
         
         if ("search".equals(action)) {
             Object data = context.get("data");
             if (data instanceof List) {
                 List<?> flights = (List<?>) data;
                 if (flights.isEmpty()) {
-                    return "No encontré vuelos disponibles para tu búsqueda. ¿Podrías intentar con otras fechas o ciudades? ✈️";
+                    return "No encontré vuelos disponibles para tu búsqueda. 😔\n\n" +
+                           "Intenta con:\n" +
+                           "• Otras fechas cercanas\n" +
+                           "• Ciudades alternativas\n" +
+                           "• Verificar que las ciudades estén disponibles\n\n" +
+                           "¿Quieres intentar otra búsqueda?";
                 }
-                return String.format("¡Encontré %d vuelo(s) disponible(s)! Puedes verlos en la lista de abajo y hacer clic en 'Reservar' para continuar. 🎫", flights.size());
+                return String.format("¡Excelente! Encontré %d vuelo(s) disponible(s) para ti. 🎫\n\n" +
+                                   "Puedes verlos en la lista de abajo. Haz clic en 'Reservar' en el vuelo que prefieras para continuar con tu reserva.", 
+                                   flights.size());
             }
         } else if ("reservations".equals(action)) {
             Object data = context.get("data");
             if (data instanceof List) {
                 List<?> reservations = (List<?>) data;
-                return String.format("Tienes %d reserva(s) activa(s). Puedes verlas en la sección 'Mis Reservas'. ✈️", reservations.size());
+                if (reservations.isEmpty()) {
+                    return "No tienes reservas activas en este momento. 📋\n\n" +
+                           "¿Te gustaría buscar un vuelo? Dime origen, destino y fecha. ✈️";
+                }
+                return String.format("Tienes %d reserva(s) en total. Te estoy redirigiendo a 'Mis Reservas' donde puedes:\n\n" +
+                                   "• Ver detalles de cada vuelo\n" +
+                                   "• Pagar reservas pendientes\n" +
+                                   "• Cancelar si es necesario", 
+                                   reservations.size());
             }
         } else if ("help".equals(action)) {
-            return "¡Hola! Soy AeroBot, tu asistente de vuelos. Puedo ayudarte a:\n\n" +
-                   "✈️ Buscar vuelos (ej: 'Quiero volar de Bogotá a Medellín mañana')\n" +
-                   "🎫 Ver tus reservas (ej: 'Muéstrame mis vuelos')\n" +
-                   "📍 Información sobre aeropuertos y rutas\n\n" +
-                   "¿En qué puedo ayudarte hoy?";
+            return "¡Hola! Soy AeroBot, tu asistente personal de vuelos. 👋\n\n" +
+                   "Puedo ayudarte con:\n\n" +
+                   "✈️ Buscar vuelos entre ciudades colombianas\n" +
+                   "🎫 Ver y gestionar tus reservas\n" +
+                   "💺 Información sobre asientos y precios\n" +
+                   "📍 Detalles de aeropuertos y rutas\n\n" +
+                   "Ejemplo: 'Quiero volar de Bogotá a Cartagena mañana'\n\n" +
+                   "¿Qué necesitas hoy?";
         }
         
-        return "¡Hola! Soy AeroBot, tu asistente de vuelos. ¿En qué puedo ayudarte hoy? ✈️";
+        // Respuesta por defecto mejorada
+        if (lowerMessage.contains("hola") || lowerMessage.contains("buenos") || lowerMessage.contains("buenas")) {
+            return "¡Hola! Bienvenido a AeroTickets. 👋✈️\n\n" +
+                   "Estoy aquí para ayudarte a encontrar el vuelo perfecto.\n\n" +
+                   "¿A dónde quieres viajar?";
+        }
+        
+        if (lowerMessage.contains("gracias")) {
+            return "¡De nada! Estoy aquí para ayudarte. 😊\n\n" +
+                   "¿Necesitas algo más?";
+        }
+        
+        return "Soy AeroBot, tu asistente de vuelos en AeroTickets. ✈️\n\n" +
+               "Puedo ayudarte a buscar vuelos, gestionar reservas y responder preguntas sobre la plataforma.\n\n" +
+               "¿Qué necesitas?";
     }
 
     private static class FlightSearchInfo {
